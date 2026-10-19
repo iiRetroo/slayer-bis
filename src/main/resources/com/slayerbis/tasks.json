@@ -1,0 +1,180 @@
+{
+  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings.",
+
+  "tasks": {
+    "aberrant spectres": {
+      "required": {"head": ["Nose peg", "Slayer helmet", "Slayer helmet (i)"]},
+      "locations": ["Slayer Tower", "Stronghold Slayer Cave", "Catacombs of Kourend"]
+    },
+    "abyssal demons": {"locations": ["Slayer Tower", "Catacombs of Kourend"]},
+    "adamant dragons": {"dragonfire": "dragon", "locations": ["Lithkren Vault"]},
+    "araxytes": {"venom": true},
+    "araxxor": {"venom": true},
+    "banshees": {
+      "required": {"head": ["Earmuffs", "Slayer helmet", "Slayer helmet (i)"]},
+      "locations": ["Slayer Tower"]
+    },
+    "basilisks": {
+      "required": {"shield": ["Mirror shield", "V's shield"]},
+      "locations": ["Fremennik Slayer Dungeon"]
+    },
+    "black demons": {"locations": ["Taverley Dungeon", "Catacombs of Kourend"]},
+    "black dragons": {"dragonfire": "dragon", "locations": ["Taverley Dungeon"]},
+    "bloodveld": {"locations": ["Slayer Tower", "Stronghold Slayer Cave", "Catacombs of Kourend"]},
+    "blue dragons": {"dragonfire": "dragon", "locations": ["Taverley Dungeon"]},
+    "bronze dragons": {"dragonfire": "dragon"},
+    "cave crawlers": {"locations": ["Fremennik Slayer Dungeon"]},
+    "cave horrors": {
+      "required": {"neck": ["Witchwood icon"]},
+      "locations": ["Mos Le'Harmless Caves"]
+    },
+    "cave kraken": {"locations": ["Kraken Cove"]},
+    "cockatrice": {
+      "required": {"shield": ["Mirror shield", "V's shield"]},
+      "locations": ["Fremennik Slayer Dungeon"]
+    },
+    "crawling hands": {"locations": ["Slayer Tower"]},
+    "dagannoth": {"locations": ["Lighthouse", "Waterbirth Island"]},
+    "dark beasts": {"locations": ["Mourner Tunnels"]},
+    "drakes": {
+      "required": {"feet": ["Boots of stone", "Boots of brimstone", "Granite boots"]},
+      "locations": ["Karuulm Slayer Dungeon"]
+    },
+    "dust devils": {
+      "required": {"head": ["Facemask", "Slayer helmet", "Slayer helmet (i)"]},
+      "locations": ["Catacombs of Kourend"]
+    },
+    "fever spiders": {"required": {"hands": ["Slayer gloves"]}},
+    "fire giants": {"locations": ["Stronghold Slayer Cave", "Catacombs of Kourend"]},
+    "fossil island wyverns": {"dragonfire": "wyvern", "locations": ["Fossil Island"]},
+    "gargoyles": {
+      "inventory": [{"names": ["Rock hammer", "Rock thrownhammer", "Granite hammer"], "note": "to finish gargoyles"}],
+      "locations": ["Slayer Tower"]
+    },
+    "green dragons": {"dragonfire": "dragon"},
+    "harpie bug swarms": {"required": {"shield": ["Bug lantern"]}},
+    "hellhounds": {"locations": ["Stronghold Slayer Cave", "Taverley Dungeon", "Catacombs of Kourend"]},
+    "hydras": {
+      "required": {"feet": ["Boots of stone", "Boots of brimstone", "Granite boots"]},
+      "locations": ["Karuulm Slayer Dungeon"]
+    },
+    "infernal mages": {"locations": ["Slayer Tower"]},
+    "iron dragons": {"dragonfire": "dragon"},
+    "jellies": {"locations": ["Fremennik Slayer Dungeon"]},
+    "kalphites": {"locations": ["Kalphite Lair"]},
+    "killerwatts": {"required": {"feet": ["Insulated boots"]}},
+    "kurask": {"locations": ["Fremennik Slayer Dungeon"]},
+    "lava dragons": {"dragonfire": "dragon"},
+    "lizards": {"inventory": [{"names": ["Ice cooler"], "note": "to finish desert lizards"}]},
+    "metal dragons": {"dragonfire": "dragon"},
+    "mithril dragons": {"dragonfire": "dragon", "locations": ["Ancient Cavern"]},
+    "mogres": {"inventory": [{"names": ["Fishing explosive", "Super fishing explosive"], "note": "to lure mogres"}]},
+    "molanisks": {"inventory": [{"names": ["Slayer bell"], "note": "to lure molanisks"}]},
+    "mutated zygomites": {"inventory": [{"names": ["Fungicide spray"], "note": "to finish zygomites"}]},
+    "nechryael": {"locations": ["Slayer Tower", "Catacombs of Kourend"]},
+    "pyrefiends": {"locations": ["Fremennik Slayer Dungeon"]},
+    "red dragons": {"dragonfire": "dragon"},
+    "rockslugs": {
+      "inventory": [{"names": ["Bag of salt"], "note": "to finish rockslugs"}],
+      "locations": ["Fremennik Slayer Dungeon"]
+    },
+    "rune dragons": {"dragonfire": "dragon", "locations": ["Lithkren Vault"]},
+    "skeletal wyverns": {"dragonfire": "wyvern", "locations": ["Asgarnian Ice Dungeon"]},
+    "smoke devils": {
+      "required": {"head": ["Facemask", "Slayer helmet", "Slayer helmet (i)"]},
+      "locations": ["Smoke Devil Dungeon"]
+    },
+    "sourhogs": {"required": {"head": ["Reinforced goggles", "Slayer helmet", "Slayer helmet (i)"]}},
+    "spiritual creatures": {"locations": ["God Wars Dungeon"]},
+    "steel dragons": {"dragonfire": "dragon"},
+    "the alchemical hydra": {
+      "required": {"feet": ["Boots of stone", "Boots of brimstone", "Granite boots"]},
+      "locations": ["Karuulm Slayer Dungeon"]
+    },
+    "the king black dragon": {"dragonfire": "dragon"},
+    "the thermonuclear smoke devil": {
+      "required": {"head": ["Facemask", "Slayer helmet", "Slayer helmet (i)"]},
+      "locations": ["Smoke Devil Dungeon"]
+    },
+    "trolls": {"locations": ["Troll Stronghold"]},
+    "turoth": {"locations": ["Fremennik Slayer Dungeon"]},
+    "vorkath": {"dragonfire": "dragon"},
+    "wall beasts": {"required": {"head": ["Spiny helmet", "Slayer helmet", "Slayer helmet (i)"]}},
+    "waterfiends": {"locations": ["Ancient Cavern"]},
+    "wyrms": {
+      "required": {"feet": ["Boots of stone", "Boots of brimstone", "Granite boots"]},
+      "locations": ["Karuulm Slayer Dungeon"]
+    },
+    "zulrah": {"venom": true}
+  },
+
+  "locations": {
+    "Slayer Tower": [
+      {"text": "Slayer ring: Slayer Tower", "items": ["Slayer ring"]},
+      {"text": "Fairy ring CKS"}
+    ],
+    "Stronghold Slayer Cave": [
+      {"text": "Slayer ring: Stronghold Slayer Cave", "items": ["Slayer ring"]}
+    ],
+    "Fremennik Slayer Dungeon": [
+      {"text": "Slayer ring: Fremennik Slayer Dungeon", "items": ["Slayer ring"]},
+      {"text": "Fairy ring AJR"}
+    ],
+    "Catacombs of Kourend": [
+      {"text": "Kourend Castle Teleport (standard spellbook)"}
+    ],
+    "Karuulm Slayer Dungeon": [
+      {"text": "Fairy ring CIR"},
+      {"text": "Rada's blessing: Mount Karuulm", "items": ["Rada's blessing 3", "Rada's blessing 4"]}
+    ],
+    "Kraken Cove": [
+      {"text": "Fairy ring AKQ"}
+    ],
+    "Kalphite Lair": [
+      {"text": "Fairy ring BIQ"}
+    ],
+    "Asgarnian Ice Dungeon": [
+      {"text": "Fairy ring AIQ"}
+    ],
+    "Smoke Devil Dungeon": [
+      {"text": "Ring of dueling: Castle Wars", "items": ["Ring of dueling"]}
+    ],
+    "Ancient Cavern": [
+      {"text": "Games necklace: Barbarian Outpost", "items": ["Games necklace"]}
+    ],
+    "Mourner Tunnels": [
+      {"text": "Slayer ring: Dark Beasts", "items": ["Slayer ring"]}
+    ],
+    "Troll Stronghold": [
+      {"text": "Trollheim Teleport (standard spellbook)"}
+    ],
+    "God Wars Dungeon": [
+      {"text": "Trollheim Teleport (standard spellbook)"},
+      {"text": "Ghommal's hilt: God Wars Dungeon", "items": ["Ghommal's hilt"]}
+    ],
+    "Fossil Island": [
+      {"text": "Digsite pendant: Fossil Island", "items": ["Digsite pendant"]}
+    ],
+    "Lithkren Vault": [
+      {"text": "Digsite pendant: Lithkren", "items": ["Digsite pendant"]}
+    ],
+    "Lighthouse": [
+      {"text": "Fairy ring ALP"}
+    ],
+    "Waterbirth Island": [
+      {"text": "Enchanted lyre: Rellekka, then the boat", "items": ["Enchanted lyre"]}
+    ],
+    "Iorwerth Dungeon": [
+      {"text": "Teleport crystal: Prifddinas", "items": ["Teleport crystal", "Eternal teleport crystal"]}
+    ],
+    "Meiyerditch Laboratories": [
+      {"text": "Drakan's medallion", "items": ["Drakan's medallion"]}
+    ],
+    "Taverley Dungeon": [
+      {"text": "Falador Teleport (standard spellbook), then walk west"}
+    ],
+    "Mos Le'Harmless Caves": [
+      {"text": "Mos Le'Harmless teleport scroll", "items": ["Mos le'harmless teleport"]}
+    ]
+  }
+}

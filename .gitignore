@@ -1,0 +1,17 @@
+.gradle
+build
+.idea/
+.project
+.settings/
+.classpath
+nbactions.xml
+nb-configuration.xml
+nbproject/
+*.class
+*.iml
+*.ipr
+*.iws
+out/
+.vscode/
+.DS_Store
+Thumbs.db

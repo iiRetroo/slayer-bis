@@ -1,0 +1,169 @@
+package com.slayerbis.prep;
+
+import com.google.gson.Gson;
+import com.slayerbis.data.AttackType;
+import com.slayerbis.data.EquipmentSlot;
+import com.slayerbis.data.GameData;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Offline checks of the task preparation data and suggestions. No game client involved.
+ */
+public class PrepPlannerTest
+{
+	private static PrepData data;
+	private static PrepPlanner planner;
+	private static GameData gameData;
+
+	@BeforeClass
+	public static void load() throws Exception
+	{
+		data = PrepData.load(new Gson());
+		planner = new PrepPlanner(data);
+		gameData = GameData.load(new Gson());
+	}
+
+	private static OwnedItems owned(Object... nameQty)
+	{
+		Map<String, Integer> q = new HashMap<>();
+		Map<String, Set<Integer>> ids = new HashMap<>();
+		for (int i = 0; i < nameQty.length; i += 2)
+		{
+			q.put((String) nameQty[i], (Integer) nameQty[i + 1]);
+			ids.put((String) nameQty[i], new HashSet<>(Collections.singletonList(1000 + i)));
+		}
+		return OwnedItems.of(q, ids);
+	}
+
+	@Test
+	public void namesMatchDosesAndCharges()
+	{
+		assertTrue(OwnedItems.matches("Prayer potion(3)", "Prayer potion"));
+		assertTrue(OwnedItems.matches("Slayer ring (8)", "Slayer ring"));
+		assertTrue(OwnedItems.matches("Fungicide spray 10", "Fungicide spray"));
+		assertFalse(OwnedItems.matches("Magic potion(4)", "Divine magic potion"));
+		assertFalse(OwnedItems.matches("Anti-venom+(4)", "Anti-venom"));
+	}
+
+	@Test
+	public void basilisksNeedAMirrorShield()
+	{
+		List<PrepPlan.Requirement> without = planner.requirements("Basilisks", owned(), Collections.emptySet());
+		assertEquals(1, without.size());
+		assertEquals(EquipmentSlot.SHIELD, without.get(0).getSlot());
+		assertFalse(without.get(0).isOwned());
+
+		List<PrepPlan.Requirement> with = planner.requirements("Basilisks", owned("Mirror shield", 1), Collections.emptySet());
+		assertTrue(with.get(0).isOwned());
+
+		PrepPlan plan = planner.plan("Basilisks", null, AttackType.SLASH, without, owned(), 4, 1, true);
+		assertTrue(plan.getNotes().get(0).contains("Mirror shield"));
+	}
+
+	@Test
+	public void slayerHelmetCountsByCanonicalName()
+	{
+		// "Black slayer helmet (i)" reaches the planner as its canonical gear name
+		Set<String> gear = new HashSet<>(Collections.singletonList("Slayer helmet (i)"));
+		assertTrue(planner.requirements("Aberrant spectres", owned(), gear).get(0).isOwned());
+	}
+
+	@Test
+	public void superAntifireRemovesTheShieldRequirement()
+	{
+		assertEquals(1, planner.requirements("Blue dragons", owned(), Collections.emptySet()).size());
+		assertEquals(0, planner.requirements("Blue dragons", owned("Extended super antifire(4)", 3),
+			Collections.emptySet()).size());
+		// wyverns need a shield whatever potions you have
+		assertEquals(1, planner.requirements("Skeletal wyverns", owned("Extended super antifire(4)", 3),
+			Collections.emptySet()).size());
+	}
+
+	@Test
+	public void inventoryHasTaskItemsPotionsAndFood()
+	{
+		OwnedItems bank = owned("Rock hammer", 1, "Super combat potion(4)", 5, "Prayer potion(4)", 20,
+			"Shark", 100, "Lobster", 50);
+		PrepPlan plan = planner.plan("Gargoyles", "Slayer Tower", AttackType.CRUSH,
+			Collections.emptyList(), bank, 4, 1, true);
+		assertEquals("Rock hammer", plan.getInventory().get(0).getName());
+		assertEquals(PrepPlanner.INVENTORY_SLOTS, plan.getSlotsUsed());
+		PrepPlan.InventoryLine food = plan.getInventory().get(plan.getInventory().size() - 1);
+		assertEquals("Shark", food.getName());
+		assertEquals(PrepPlanner.INVENTORY_SLOTS - 1 - 1 - 4, food.getQuantity());
+		assertFalse(plan.getSupplyBankIds().isEmpty());
+	}
+
+	@Test
+	public void missingTaskItemIsFlagged()
+	{
+		PrepPlan plan = planner.plan("Gargoyles", null, AttackType.CRUSH, Collections.emptyList(), owned(), 4, 1, true);
+		assertTrue(plan.getNotes().stream().anyMatch(n -> n.contains("Rock hammer")));
+	}
+
+	@Test
+	public void teleportsFollowTheReportedLocation()
+	{
+		PrepPlan plan = planner.plan("Abyssal demons", "Slayer Tower", AttackType.SLASH, Collections.emptyList(),
+			owned("Slayer ring (8)", 1), 0, 0, false);
+		assertTrue(plan.getTeleports().stream().allMatch(t -> t.getLocation().equals("Slayer Tower")));
+		assertEquals(Boolean.TRUE, plan.getTeleports().get(0).getOwned());
+	}
+
+	@Test
+	public void requiredItemNamesExistInTheItemData()
+	{
+		for (Map.Entry<String, PrepData.TaskInfo> task : data.allTasks().entrySet())
+		{
+			if (task.getValue().required == null)
+			{
+				continue;
+			}
+			for (List<String> names : task.getValue().required.values())
+			{
+				for (String n : names)
+				{
+					if (!n.equals("Boots of brimstone"))
+					{
+						assertNotNull(task.getKey() + ": unknown item " + n, gameData.findItem(n));
+					}
+				}
+			}
+		}
+		for (String n : data.supplies().wyvernShields)
+		{
+			assertNotNull("unknown shield " + n, gameData.findItem(n));
+		}
+		for (String n : data.supplies().dragonfireShields)
+		{
+			assertNotNull("unknown shield " + n, gameData.findItem(n));
+		}
+	}
+
+	@Test
+	public void taskLocationsHaveTeleports()
+	{
+		for (Map.Entry<String, PrepData.TaskInfo> task : data.allTasks().entrySet())
+		{
+			if (task.getValue().locations == null)
+			{
+				continue;
+			}
+			for (String location : task.getValue().locations)
+			{
+				assertNotNull(task.getKey() + " lists unknown location " + location, data.locations().get(location));
+			}
+		}
+	}
+}

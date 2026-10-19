@@ -1,0 +1,32 @@
+{
+  "_comment": "Hand-maintained supply catalogue. Lists are in order of preference. Food names must match exactly; other names match the item name exactly or followed by '(' or a space, so 'Prayer potion' matches 'Prayer potion(3)'.",
+
+  "food": [
+    {"name": "Anglerfish", "heal": 22},
+    {"name": "Manta ray", "heal": 22},
+    {"name": "Dark crab", "heal": 22},
+    {"name": "Tuna potato", "heal": 22},
+    {"name": "Sea turtle", "heal": 21},
+    {"name": "Shark", "heal": 20},
+    {"name": "Cooked karambwan", "heal": 18},
+    {"name": "Monkfish", "heal": 16},
+    {"name": "Swordfish", "heal": 14},
+    {"name": "Bass", "heal": 13},
+    {"name": "Lobster", "heal": 12},
+    {"name": "Tuna", "heal": 10},
+    {"name": "Salmon", "heal": 9},
+    {"name": "Trout", "heal": 7}
+  ],
+
+  "meleePotions": ["Divine super combat potion", "Super combat potion", "Combat potion"],
+  "rangedPotions": ["Divine ranging potion", "Ranging potion", "Divine bastion potion", "Bastion potion"],
+  "magicPotions": ["Divine magic potion", "Magic potion", "Divine battlemage potion", "Battlemage potion"],
+  "magicBoostItems": ["Saturated heart", "Imbued heart"],
+  "prayerPotions": ["Prayer potion", "Super restore"],
+  "superAntifire": ["Extended super antifire", "Super antifire potion"],
+  "antifire": ["Extended antifire", "Antifire potion"],
+  "antivenom": ["Anti-venom+", "Anti-venom", "Antidote++", "Antidote+"],
+
+  "dragonfireShields": ["Dragonfire shield", "Dragonfire ward", "Ancient wyvern shield", "Anti-dragon shield"],
+  "wyvernShields": ["Ancient wyvern shield", "Dragonfire shield", "Dragonfire ward", "Elemental shield", "Mind shield"]
+}

@@ -1,0 +1,94 @@
+# SlayerBIS
+
+**Open your bank. Your best Slayer setup is already there.**
+
+SlayerBIS is built for one moment: you've just got a Slayer task and you're standing at the bank. There's nothing to search for and no button to press. It already knows your task, so the moment your bank opens it has the answer:
+
+- **Your best gear for this task, outlined in your bank.** It's picked from everything you own, and it already includes the gear the task needs (a mirror shield for basilisks, boots of stone for Karuulm, a nose peg or Slayer helmet for aberrant spectres).
+- **What to bring.** Task items like a rock hammer or bag of salt, antifire where dragons breathe fire, a potion for your best style, prayer potions and your best food. Supplies get their own highlight colour.
+- **How to get there.** Teleports to the task location, ticked off when you own the item.
+- **How much better it is** than what you're wearing right now.
+
+### Why trust the numbers
+
+- **Real DPS maths, not a ranked list.** Every style is compared, with stab, slash and crush kept separate, using the OSRS Wiki DPS calculator's formulas.
+- **Every combination is checked.** Outclassed items are set aside first, then every remaining combination of your gear is evaluated, including complete armour sets and two-handed weapons.
+- **Checked against the wiki.** The tests include loadouts whose max hit, accuracy and DPS match the live OSRS Wiki DPS calculator exactly.
+
+### Small and safe
+
+- **Read-only.** It never equips, withdraws or moves items, adds no menu options, and never suggests prayers.
+- **Offline.** It makes no network requests. All data is bundled.
+- **Light.** The search runs in the background at low priority, and eating or drinking mid-fight doesn't restart it.
+
+## What the panel shows
+
+When you open your bank, the plugin reads your banked items (plus, optionally, what you are wearing and carrying). It looks up your task from the RuneLite Slayer plugin and works out, for every combat style (stab, slash, crush, ranged and magic), which combination of your gear deals the most damage per second. The side panel shows:
+
+- the best combat style, with the stance or spell to use, and how much better it is than what you are wearing
+- the best set for each style, with its DPS, max hit, accuracy and attack speed
+- the best set with each of your other strong weapons, in case you would rather use one of those
+- gear the task requires, such as a mirror shield for basilisks or boots of stone for Karuulm, which is kept in every suggested set
+- a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, a boosting potion for your best style, prayer potions, and your best food
+- teleports to the task location, ticked off when you own the item
+- what was assumed (levels, prayers, potions, spellbook)
+
+The chosen gear is outlined in your bank in one colour and the suggested supplies in another. Use the selectors in the panel to pick which monster to calculate against (some tasks cover several) and which style's set to show.
+
+## How the search works
+
+1. **Outclassed gear is removed.** For each style, an item is dropped if another item in the same slot (or leaving the slot empty) is at least as good on every stat that matters for that style. For melee that is the style's attack bonus and melee strength; for ranged, ranged attack and ranged strength; for magic, magic attack and magic damage. Weapons are only compared with weapons of the same type, handedness, attack speed or faster, and ammo use. Items with a special effect that could apply to your target are never dropped this way. Examples are slayer helmets on task, salve amulets against undead, demonbane weapons against demons, and enchanted bolts.
+2. **Armour sets count as one candidate.** Complete Void, Elite Void, Obsidian, Inquisitor's, Crystal, Verac's, Karil's, Ahrim's and Virtus sets that you own are tried as single candidates filling all their slots.
+3. **Every remaining combination is evaluated.** Two-handed weapons always leave the shield slot empty. Ranged weapons are only paired with ammo they can fire. Items without special effects only affect DPS through their summed stats, and DPS never falls when those sums rise. So among those items, any combination beaten on both summed stats by another combination is skipped. The answer is the same as checking them all, but much faster.
+
+## Task preparation
+
+Task requirements, task items and teleports live in `src/main/resources/com/slayerbis/tasks.json`, and food and potions in `supplies.json`. Both are plain data files with a short format note at the top, so adding a task or fixing a teleport needs no code changes. Supplies are matched by item name, so every potion dose counts.
+
+The inventory plan fills 28 slots: required task items first, then antifire or anti-venom where the task calls for it, a boosting potion for your best style, prayer potions (4 by default), and your best food for the rest. The counts are settings. Moving items between bank and inventory does not change the plan, so it stays put while you withdraw.
+
+Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
+
+## Target monster
+
+The monster's stats come from, in order:
+
+1. the monster you pick in the panel
+2. the **Target override** setting, if you fill it in
+3. a task monster currently near you, as reported by the Slayer plugin
+4. a match on your Slayer task's name, for example "Abyssal demons" becomes Abyssal demon
+
+The Slayer plugin must be enabled. It is a RuneLite core plugin.
+
+## Assumptions and limits
+
+- Prayers and potion boosts are **assumptions you set** in the plugin settings, and default to none. They are inputs to the calculation, not recommendations.
+- Your real (unboosted) levels are used, plus the configured boosts.
+- Special attacks, wilderness and raid scaling, boss phases, and other situational effects are not modelled.
+- Uncharged, empty, inactive and broken items are left out because they cannot be used as they are. If charging or repairing one would raise a style's DPS, the panel says which item and by how much.
+- Blowpipes are assumed to hold the dart type chosen in the settings.
+- Autocast uses the best standard spell for your Magic level, or ancients when on the Ancient spellbook with a staff that can cast them.
+
+## Building and testing
+
+```
+./gradlew build
+```
+
+The unit tests in `src/test` run the DPS maths and the optimiser against bundled data only. They never start the game client or touch a RuneScape account. `WikiReferenceTest` holds loadouts whose max hit, accuracy and DPS were checked against the live OSRS Wiki DPS calculator; each case lists the calculator settings used, so you can re-check them yourself.
+
+## Updating the item and monster data
+
+New items and monsters appear in the game regularly. To refresh the bundled stats from the wiki calculator:
+
+```
+python scripts/refresh_data.py
+./gradlew build
+```
+
+The script downloads the calculator's data from GitHub, rewrites the two JSON files and records the source commit in `DATA-NOTICE.txt`. Only the script downloads anything: the plugin itself makes no network requests. If the tests still pass, commit the new files and submit an update to the Plugin Hub.
+
+## Credits
+
+- DPS formulas follow the [OSRS Wiki DPS calculator](https://tools.runescape.wiki/osrs-dps/) ([source](https://github.com/weirdgloop/osrs-dps-calc)). The formulas are reimplemented in Java here; no calculator code is included.
+- Equipment and monster stats in `src/main/resources` come from the same calculator's data, which is sourced from the [Old School RuneScape Wiki](https://oldschool.runescape.wiki/). Those data files are under CC BY-NC-SA 3.0, not this project's BSD licence; see `src/main/resources/com/slayerbis/DATA-NOTICE.txt`.
