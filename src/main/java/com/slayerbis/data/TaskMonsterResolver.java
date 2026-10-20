@@ -52,6 +52,7 @@ public class TaskMonsterResolver
 		.put("barrows brothers", ImmutableList.of("Ahrim the Blighted", "Dharok the Wretched", "Guthan the Infested",
 			"Karil the Tainted", "Torag the Corrupted", "Verac the Defiled"))
 		.put("warped creatures", ImmutableList.of("Warped Terrorbird", "Warped Tortoise"))
+		.put("greater demons", ImmutableList.of("Greater demon", "Tormented Demon"))
 		.build();
 
 	/**
@@ -68,8 +69,10 @@ public class TaskMonsterResolver
 		.put("kalphites", ImmutableList.of("Kalphite Queen"))
 		.put("black dragons", ImmutableList.of("King Black Dragon"))
 		.put("dagannoth", ImmutableList.of("Dagannoth Rex", "Dagannoth Prime", "Dagannoth Supreme"))
-		.put("greater demons", ImmutableList.of("K'ril Tsutsaroth"))
-		.put("black demons", ImmutableList.of("Skotizo"))
+		.put("greater demons", ImmutableList.of("K'ril Tsutsaroth", "Skotizo"))
+		.put("blue dragons", ImmutableList.of("Vorkath"))
+		.put("zombies", ImmutableList.of("Vorkath"))
+		.put("rats", ImmutableList.of("Scurrius"))
 		.put("bears", ImmutableList.of("Callisto", "Artio"))
 		.put("spiders", ImmutableList.of("Sarachnis", "Venenatis", "Spindel"))
 		.put("scorpions", ImmutableList.of("Scorpia"))
@@ -103,6 +106,7 @@ public class TaskMonsterResolver
 		.put("calvar'ion", "vet'ion")
 		.put("araxxor", "araxxor")
 		.put("kree'arra", "kree'arra")
+		.put("vorkath", "vorkath")
 		.build();
 
 	private static final int MAX_CANDIDATES = 40;

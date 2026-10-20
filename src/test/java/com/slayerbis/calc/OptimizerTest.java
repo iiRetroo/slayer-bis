@@ -285,10 +285,14 @@ public class OptimizerTest
 		assertTrue(TaskMonsterResolver.isTaskBoss("Cerberus"));
 		assertEquals("cerberus", TaskMonsterResolver.bossTask("Cerberus"));
 		assertEquals(null, TaskMonsterResolver.bossTask("Hellhound"));
+		// tormented demons count for greater demons too, as a normal choice
+		assertTrue(resolver.candidates("Greater demons").stream().anyMatch(m -> m.getName().equals("Tormented Demon")));
+		assertTrue(resolver.candidates("Greater demons").stream().anyMatch(m -> m.getName().equals("Skotizo")));
+		assertTrue(resolver.candidates("Black demons").stream().noneMatch(m -> m.getName().equals("Skotizo")));
 		// every listed boss exists in the monster data
 		for (String task : new String[]{"Abyssal demons", "Smoke devils", "Cave kraken", "Hydras", "Gargoyles", "Kalphites",
-			"Black dragons", "Dagannoth", "Greater demons", "Black demons", "Bears", "Spiders", "Scorpions", "Skeletons",
-			"Araxytes", "Aviansies"})
+			"Black dragons", "Dagannoth", "Greater demons", "Bears", "Spiders", "Scorpions", "Skeletons",
+			"Araxytes", "Aviansies", "Blue dragons", "Zombies", "Rats"})
 		{
 			assertTrue(task, resolver.candidates(task).stream().anyMatch(m -> TaskMonsterResolver.isTaskBoss(m.getName())));
 		}

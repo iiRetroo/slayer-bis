@@ -1080,6 +1080,15 @@
         "Uzer Mastaba"
       ]
     },
+    "scorpia": {
+      "locations": [
+        "Scorpion Pit (Wilderness)"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose.",
+        "Bring a knife or a slash weapon for the web if you use the lever."
+      ]
+    },
     "scorpions": {
       "locations": [
         "Al Kharid mine"
@@ -2455,6 +2464,14 @@
       },
       {
         "text": "Charter ship to Port Tyras, then walk south"
+      }
+    ],
+    "Scorpion Pit (Wilderness)": [
+      {
+        "text": "Ardougne or Edgeville lever to the Deserted Keep, then walk north (slash the web) and east"
+      },
+      {
+        "text": "Wilderness obelisk to level 50, then walk west past Rogues' Castle"
       }
     ]
   },
