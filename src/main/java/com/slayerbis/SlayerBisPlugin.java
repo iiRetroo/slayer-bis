@@ -1103,7 +1103,7 @@ public class SlayerBisPlugin extends Plugin
 			{
 				ownedGearNames.add(c.getItem().getName());
 			}
-			List<PrepPlan.Requirement> requirements = prep.requirements(task, owned, ownedGearNames);
+			List<PrepPlan.Requirement> requirements = prep.requirements(task, location, owned, ownedGearNames);
 			Map<EquipmentSlot, Set<String>> required = new EnumMap<>(EquipmentSlot.class);
 			for (PrepPlan.Requirement r : requirements)
 			{

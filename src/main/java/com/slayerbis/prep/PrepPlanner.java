@@ -54,12 +54,22 @@ public final class PrepPlanner
 	 */
 	public List<PrepPlan.Requirement> requirements(String task, OwnedItems owned, Collection<String> ownedGearNames)
 	{
+		return requirements(task, null, owned, ownedGearNames);
+	}
+
+	/**
+	 * @param location where the Slayer plugin says the task is, or null
+	 */
+	public List<PrepPlan.Requirement> requirements(String task, String location, OwnedItems owned,
+		Collection<String> ownedGearNames)
+	{
 		PrepData.TaskInfo info = data.task(task);
 		if (info == null)
 		{
 			return Collections.emptyList();
 		}
 		List<PrepPlan.Requirement> out = new ArrayList<>();
+		Set<EquipmentSlot> taken = new HashSet<>();
 		if (info.required != null)
 		{
 			for (Map.Entry<String, List<String>> e : info.required.entrySet())
@@ -68,6 +78,24 @@ public final class PrepPlanner
 				if (slot != null)
 				{
 					out.add(new PrepPlan.Requirement(slot, e.getValue(), "needed for " + task,
+						ownsAny(e.getValue(), owned, ownedGearNames)));
+					taken.add(slot);
+				}
+			}
+		}
+		for (String key : neededLocations(info, location))
+		{
+			PrepData.LocationNeeds needs = data.locationNeeds().get(key);
+			if (needs.required == null)
+			{
+				continue;
+			}
+			for (Map.Entry<String, List<String>> e : needs.required.entrySet())
+			{
+				EquipmentSlot slot = EquipmentSlot.fromKey(e.getKey());
+				if (slot != null && taken.add(slot))
+				{
+					out.add(new PrepPlan.Requirement(slot, e.getValue(), "needed in " + key,
 						ownsAny(e.getValue(), owned, ownedGearNames)));
 				}
 			}
@@ -158,22 +186,64 @@ public final class PrepPlanner
 		Set<Integer> ids = new HashSet<>();
 		int slots = 0;
 
+		List<PrepData.InventoryItem> carried = new ArrayList<>();
 		if (info != null && info.inventory != null)
 		{
-			for (PrepData.InventoryItem item : info.inventory)
+			carried.addAll(info.inventory);
+		}
+		List<String> locationTips = new ArrayList<>();
+		List<String> taskLocations = locationKeys(info, request.getLocation());
+		List<String> needed = neededLocations(info, request.getLocation());
+		for (String key : taskLocations)
+		{
+			PrepData.LocationNeeds needs = data.locationNeeds().get(key);
+			if (needs == null)
 			{
-				String name = firstOwned(item.names, owned);
-				int have = name != null ? owned.count(name, false) : 0;
-				int need = item.perKill && request.getTaskRemaining() > 0 ? request.getTaskRemaining() : 1;
-				String note = item.note + (item.perKill ? " (one per kill)" : "");
-				lines.add(new PrepPlan.InventoryLine(name != null ? name : item.names.get(0), need, have, note, true,
-					name != null ? owned.anyId(name, false) : -1, item.stackable));
-				collect(name, false, owned, ids);
-				slots += item.stackable ? 1 : need;
-				if (item.perKill && have > 0 && have < need)
+				continue;
+			}
+			if (needed.contains(key))
+			{
+				if (needs.inventory != null)
 				{
-					notes.add("You need " + need + " " + name + " for " + need + " kills but have " + have + ".");
+					carried.addAll(needs.inventory);
 				}
+				if (needs.tips != null)
+				{
+					locationTips.addAll(needs.tips);
+				}
+			}
+			else if (needs.summary != null)
+			{
+				locationTips.add("If you go to " + key + ": " + needs.summary + ".");
+			}
+		}
+		for (PrepData.InventoryItem item : carried)
+		{
+			String name = item.exact ? firstOwnedExact(item.names, owned) : firstOwned(item.names, owned);
+			if (name == null && item.optional)
+			{
+				continue;
+			}
+			int have = name != null ? owned.count(name, item.exact) : 0;
+			int kills = request.getTaskRemaining();
+			int need = 1;
+			if (item.perKill && kills > 0)
+			{
+				int each = Math.max(1, item.killsEach);
+				need = (kills + each - 1) / each;
+				if (item.maxCount > 0)
+				{
+					need = Math.min(need, item.maxCount);
+				}
+			}
+			String note = item.note + (item.perKill && item.killsEach <= 1 ? " (one per kill)" : "");
+			lines.add(new PrepPlan.InventoryLine(name != null ? name : item.names.get(0), need, have, note,
+				!item.optional, name != null ? owned.anyId(name, item.exact) : -1, item.stackable));
+			collect(name, item.exact, owned, ids);
+			slots += item.stackable ? 1 : need;
+			if (item.perKill && item.killsEach <= 1 && have > 0 && have < need)
+			{
+				notes.add("You need " + need + " " + name + " for " + need + " kills but have " + have + ".");
 			}
 		}
 
@@ -254,7 +324,11 @@ public final class PrepPlanner
 			slots += addLootTools(lines, ids, owned, monsterName, lootMaxKills);
 		}
 
-		List<String> tips = new ArrayList<>();
+		List<String> tips = new ArrayList<>(locationTips);
+		if (info != null && info.tips != null)
+		{
+			tips.addAll(info.tips);
+		}
 		if (info != null && info.cannon)
 		{
 			tips.add("This task is often cannoned; check your spot allows a cannon.");
@@ -572,6 +646,26 @@ public final class PrepPlanner
 		return out;
 	}
 
+	/**
+	 * Locations whose own needs apply for sure: the reported one, or the task's only location.
+	 */
+	private List<String> neededLocations(PrepData.TaskInfo info, String location)
+	{
+		List<String> keys = locationKeys(info, location);
+		List<String> out = new ArrayList<>();
+		if (locationKnown(location, keys) || keys.size() == 1)
+		{
+			for (String key : keys)
+			{
+				if (data.locationNeeds().containsKey(key))
+				{
+					out.add(key);
+				}
+			}
+		}
+		return out;
+	}
+
 	private static boolean locationKnown(String location, List<String> keys)
 	{
 		return location != null && !location.trim().isEmpty() && !keys.isEmpty();
@@ -716,6 +810,18 @@ public final class PrepPlanner
 		{
 			owned.collectBankIds(name, exact, ids);
 		}
+	}
+
+	private static String firstOwnedExact(List<String> names, OwnedItems owned)
+	{
+		for (String n : names)
+		{
+			if (owned.count(n, true) > 0)
+			{
+				return n;
+			}
+		}
+		return null;
 	}
 
 	static String firstOwned(List<String> names, OwnedItems owned)

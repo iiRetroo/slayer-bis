@@ -486,4 +486,62 @@ public class PrepPlannerTest
 			.owned(owned("Ring of wealth", 1, "Crystal chime", 1)).build());
 		assertTrue(uncharged.getInventory().stream().noneMatch(l -> l.getName().equals("Ring of wealth")));
 	}
+
+	@Test
+	public void karuulmNeedsBootsForAnyTask()
+	{
+		List<PrepPlan.Requirement> konar = planner.requirements("Fire giants", "Karuulm Slayer Dungeon", owned(),
+			Collections.emptySet());
+		assertEquals(1, konar.size());
+		assertEquals(EquipmentSlot.FEET, konar.get(0).getSlot());
+		assertFalse(konar.get(0).isOwned());
+		assertTrue(planner.requirements("Fire giants", null, owned(), Collections.emptySet()).isEmpty());
+		// drakes already need boots: not asked for twice
+		assertEquals(1, planner.requirements("Drakes", "Karuulm Slayer Dungeon", owned(), Collections.emptySet()).size());
+	}
+
+	@Test
+	public void darkCavesNeedALight()
+	{
+		// cave horrors are only in Mos Le'Harmless, so the light is needed without a reported location
+		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Cave horrors").bestType(AttackType.RANGED)
+			.owned(owned()).build());
+		assertTrue(none.getNotes().stream().anyMatch(n -> n.startsWith("Missing Bullseye lantern")));
+		PrepPlan lit = planner.plan(PrepPlanner.Request.builder().task("Cave horrors").bestType(AttackType.RANGED)
+			.owned(owned("Oil lantern", 1)).build());
+		assertTrue(lit.getInventory().stream().anyMatch(l -> l.getName().equals("Oil lantern") && l.isRequired()));
+	}
+
+	@Test
+	public void brimhavenNeedsAnAxeAndCoins()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Red dragons").location("Brimhaven Dungeon")
+			.bestType(AttackType.SLASH).owned(owned("Rune axe", 1)).build());
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Rune axe")));
+		assertTrue(plan.getTips().stream().anyMatch(t -> t.contains("875 coins")));
+	}
+
+	@Test
+	public void fungicideRefillsAreCappedAndOptional()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Mutated zygomites").bestType(AttackType.SLASH)
+			.owned(owned("Fungicide spray 10", 1, "Fungicide", 30)).taskRemaining(150).build());
+		PrepPlan.InventoryLine refills = plan.getInventory().stream().filter(l -> l.getName().equals("Fungicide"))
+			.findFirst().orElse(null);
+		assertNotNull(refills);
+		assertEquals(4, refills.getQuantity());
+		assertFalse(refills.isRequired());
+		PrepPlan without = planner.plan(PrepPlanner.Request.builder().task("Mutated zygomites").bestType(AttackType.SLASH)
+			.owned(owned("Fungicide spray 10", 1)).taskRemaining(150).build());
+		assertTrue(without.getInventory().stream().noneMatch(l -> l.getName().equals("Fungicide")));
+		assertTrue(without.getNotes().stream().noneMatch(n -> n.contains("Fungicide")));
+	}
+
+	@Test
+	public void taskTipsAreShown()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Rune dragons").bestType(AttackType.STAB)
+			.owned(owned()).build());
+		assertTrue(plan.getTips().stream().anyMatch(t -> t.contains("Insulated boots")));
+	}
 }

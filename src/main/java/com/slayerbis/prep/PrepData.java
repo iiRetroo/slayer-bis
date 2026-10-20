@@ -32,6 +32,7 @@ public final class PrepData
 		boolean stacks;
 		/** Monsters hit hard enough that combo eating helps. */
 		boolean comboEat;
+		List<String> tips;
 		List<String> locations;
 		List<Safespot> safespots;
 	}
@@ -44,6 +45,24 @@ public final class PrepData
 		boolean perKill;
 		/** Fits in one inventory slot however many there are. */
 		boolean stackable;
+		/** With perKill: one item covers this many kills (0 means one). */
+		int killsEach;
+		/** With perKill: never suggest more than this many (0 means no limit). */
+		int maxCount;
+		/** Useful but not needed, so not flagged when missing. */
+		boolean optional;
+		/** Match names exactly ("Fungicide" must not match "Fungicide spray"). */
+		boolean exact;
+	}
+
+	/** What a location needs whatever the task. */
+	static final class LocationNeeds
+	{
+		Map<String, List<String>> required;
+		List<InventoryItem> inventory;
+		List<String> tips;
+		/** Shown as a tip when the task may or may not be done here. */
+		String summary;
 	}
 
 	static final class SpecWeapon
@@ -112,18 +131,22 @@ public final class PrepData
 		Map<String, TaskInfo> tasks;
 		Map<String, List<Teleport>> locations;
 		Map<String, List<Teleport>> masters;
+		Map<String, LocationNeeds> locationNeeds;
 	}
 
 	private final Map<String, TaskInfo> tasks;
 	private final Map<String, List<Teleport>> locations;
 	private final Map<String, List<Teleport>> masters;
+	private final Map<String, LocationNeeds> locationNeeds;
 	private final Supplies supplies;
 	/** Lower-case monster name to loot type to average kills per item of that type. */
 	private final Map<String, Map<String, Integer>> drops;
 
 	private PrepData(Map<String, TaskInfo> tasks, Map<String, List<Teleport>> locations,
-		Map<String, List<Teleport>> masters, Supplies supplies, Map<String, Map<String, Integer>> drops)
+		Map<String, List<Teleport>> masters, Map<String, LocationNeeds> locationNeeds, Supplies supplies,
+		Map<String, Map<String, Integer>> drops)
 	{
+		this.locationNeeds = locationNeeds;
 		this.tasks = tasks;
 		this.locations = locations;
 		this.masters = masters;
@@ -161,6 +184,7 @@ public final class PrepData
 			tasksFile.tasks == null ? Collections.emptyMap() : tasksFile.tasks,
 			tasksFile.locations == null ? Collections.emptyMap() : tasksFile.locations,
 			tasksFile.masters == null ? Collections.emptyMap() : tasksFile.masters,
+			tasksFile.locationNeeds == null ? Collections.emptyMap() : tasksFile.locationNeeds,
 			supplies, drops);
 	}
 
@@ -182,6 +206,11 @@ public final class PrepData
 	Map<String, List<Teleport>> locations()
 	{
 		return locations;
+	}
+
+	Map<String, LocationNeeds> locationNeeds()
+	{
+		return locationNeeds;
 	}
 
 	Map<String, List<Teleport>> masters()

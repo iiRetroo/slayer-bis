@@ -81,6 +81,8 @@ The **Loot tools** setting chooses between all drops (the default), common drops
 
 **Safespots** are short text descriptions, summarised from the OSRS Wiki, for the location the Slayer plugin reports, or for every listed location when it doesn't. They're text only: no tiles are drawn or highlighted, and bosses, Slayer bosses and demi-bosses are left out, as RuneLite's rules require.
 
+**Location needs** apply whatever the task: boots of stone anywhere in the Karuulm Slayer Dungeon (so a Konar fire giant task there asks for them too), a light source in the Lumbridge Swamp Caves and Mos Le'Harmless Caves, and an axe plus the 875-coin entry fee for Brimhaven Dungeon. They're enforced when the Slayer plugin reports that location, or when the task is only found there; otherwise they're a tip. Some tasks also get short tips, such as insulated boots for rune dragons, and Fungicide refills are suggested for mutated zygomites (up to 4).
+
 Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
 
 ## Other conveniences
