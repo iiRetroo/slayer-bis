@@ -741,7 +741,8 @@ public class SlayerBisPlugin extends Plugin
 	}
 
 	/**
-	 * Canonical item id to quantity. Runs on the client thread; also caches item names.
+	 * Canonical item id to quantity, leaving out bank placeholders. Runs on the client thread; also
+	 * caches item names.
 	 */
 	private Map<Integer, Integer> readItems(ItemContainer container)
 	{
@@ -752,7 +753,9 @@ public class SlayerBisPlugin extends Plugin
 		}
 		for (Item item : container.getItems())
 		{
-			if (item.getId() > 0 && item.getQuantity() > 0)
+			// bank placeholders aren't owned; canonicalize would turn them into the real item
+			if (item.getId() > 0 && item.getQuantity() > 0
+				&& itemManager.getItemComposition(item.getId()).getPlaceholderTemplateId() == -1)
 			{
 				int id = itemManager.canonicalize(item.getId());
 				items.merge(id, item.getQuantity(), Integer::sum);
