@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing.",
+  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting.",
   "tasks": {
     "aberrant spectres": {
       "required": {
@@ -647,6 +647,173 @@
         "text": "Mos Le'Harmless teleport scroll",
         "items": [
           "Mos le'harmless teleport"
+        ]
+      }
+    ]
+  },
+  "masters": {
+    "Turael": [
+      {
+        "text": "Games necklace: Burthorpe",
+        "items": [
+          "Games necklace"
+        ]
+      },
+      {
+        "text": "Combat bracelet: Warriors' Guild",
+        "items": [
+          "Combat bracelet"
+        ]
+      }
+    ],
+    "Spria": [
+      {
+        "text": "Amulet of glory: Draynor Village",
+        "items": [
+          "Amulet of glory"
+        ]
+      },
+      {
+        "text": "Explorer's ring: South Falador Farm",
+        "items": [
+          "Explorer's ring"
+        ]
+      },
+      {
+        "text": "Necklace of passage: Wizards' Tower",
+        "items": [
+          "Necklace of passage"
+        ]
+      },
+      {
+        "text": "Lumbridge Teleport (standard spellbook)"
+      }
+    ],
+    "Krystilia": [
+      {
+        "text": "Amulet of glory: Edgeville",
+        "items": [
+          "Amulet of glory"
+        ]
+      },
+      {
+        "text": "Fairy ring DKR"
+      },
+      {
+        "text": "Paddewwa Teleport (Ancient Magicks)"
+      }
+    ],
+    "Mazchna": [
+      {
+        "text": "Kharyrll Teleport (Ancient Magicks)"
+      },
+      {
+        "text": "Fairy ring CKS"
+      },
+      {
+        "text": "Salve Graveyard Teleport (Arceuus spellbook)"
+      },
+      {
+        "text": "Ectophial",
+        "items": [
+          "Ectophial"
+        ]
+      }
+    ],
+    "Vannaka": [
+      {
+        "text": "Amulet of glory: Edgeville",
+        "items": [
+          "Amulet of glory"
+        ]
+      },
+      {
+        "text": "Fairy ring DKR"
+      },
+      {
+        "text": "Paddewwa Teleport (Ancient Magicks)"
+      }
+    ],
+    "Chaeldar": [
+      {
+        "text": "Any fairy ring to Zanaris"
+      }
+    ],
+    "Konar": [
+      {
+        "text": "Rada's blessing: Mount Karuulm",
+        "items": [
+          "Rada's blessing 3",
+          "Rada's blessing 4"
+        ]
+      },
+      {
+        "text": "Fairy ring CIR"
+      },
+      {
+        "text": "Skills necklace: Farming Guild",
+        "items": [
+          "Skills necklace"
+        ]
+      },
+      {
+        "text": "Farming cape: Farming Guild",
+        "items": [
+          "Farming cape"
+        ]
+      }
+    ],
+    "Nieve": [
+      {
+        "text": "Slayer ring: Stronghold Slayer Cave",
+        "items": [
+          "Slayer ring"
+        ]
+      },
+      {
+        "text": "Necklace of passage: The Outpost",
+        "items": [
+          "Necklace of passage"
+        ]
+      },
+      {
+        "text": "Spirit tree: Tree Gnome Stronghold"
+      }
+    ],
+    "Duradel": [
+      {
+        "text": "Karamja gloves 4: straight to Duradel",
+        "items": [
+          "Karamja gloves 4"
+        ]
+      },
+      {
+        "text": "Fairy ring CKR"
+      },
+      {
+        "text": "Karamja gloves 3: Shilo Village mine",
+        "items": [
+          "Karamja gloves 3"
+        ]
+      }
+    ],
+    "Mortimer": [
+      {
+        "text": "Necklace of passage: Wyrmscraig",
+        "items": [
+          "Necklace of passage"
+        ]
+      },
+      {
+        "text": "Slayer ring: Wyrmscraig",
+        "items": [
+          "Slayer ring"
+        ]
+      },
+      {
+        "text": "Ardeaglais teleport",
+        "items": [
+          "Ardeaglais teleport"
         ]
       }
     ]

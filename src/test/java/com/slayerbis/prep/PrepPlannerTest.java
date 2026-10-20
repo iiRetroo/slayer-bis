@@ -379,4 +379,45 @@ public class PrepPlannerTest
 		assertTrue(potionsOnly.getInventory().stream().noneMatch(l -> l.getName().startsWith("Moonlight")));
 		assertTrue(potionsOnly.getNotes().stream().anyMatch(n -> n.contains("No prayer potions or super restores")));
 	}
+
+	@Test
+	public void everySlayerMasterHasTeleports()
+	{
+		for (SlayerMaster master : SlayerMaster.values())
+		{
+			if (master != SlayerMaster.NONE)
+			{
+				assertNotNull(master + " has no teleports", data.masters().get(master.getName()));
+			}
+		}
+	}
+
+	@Test
+	public void teleportBackToTheSlayerMaster()
+	{
+		PrepPlan mortimer = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Necklace of passage(5)", 3)).slayerMaster("Mortimer").build());
+		assertTrue(mortimer.getInventory().stream()
+			.anyMatch(l -> l.getName().equals("Necklace of passage") && l.getNote().contains("Mortimer")));
+		assertTrue(mortimer.getTeleports().stream().anyMatch(t -> t.getLocation().equals("Back to Mortimer")));
+
+		// the slayer ring already in the plan for the task also goes to Mortimer: no second item
+		PrepPlan ring = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Slayer ring (8)", 1, "Necklace of passage(5)", 3)).slayerMaster("Mortimer").build());
+		assertTrue(ring.getInventory().stream().anyMatch(l -> l.getName().equals("Slayer ring")));
+		assertTrue(ring.getInventory().stream().noneMatch(l -> l.getName().equals("Necklace of passage")));
+
+		// worn Karamja gloves need no slot; an uncharged glory can't teleport
+		PrepPlan duradel = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Karamja gloves 4", 1)).slayerMaster("Duradel").build());
+		assertTrue(duradel.getInventory().isEmpty());
+		assertTrue(duradel.getTips().stream().anyMatch(t -> t.contains("Karamja gloves 4")));
+		PrepPlan vannaka = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Amulet of glory", 1)).slayerMaster("Vannaka").build());
+		assertTrue(vannaka.getInventory().isEmpty());
+
+		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Necklace of passage(5)", 3)).build());
+		assertTrue(none.getInventory().isEmpty());
+	}
 }

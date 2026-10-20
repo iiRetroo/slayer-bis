@@ -79,6 +79,8 @@ public final class PrepData
 		List<String> wornTeleports;
 		/** Teleport items that stack in one slot. */
 		List<String> stackableTeleports;
+		/** Exact names of the uncharged versions of teleport jewellery, which can't teleport. */
+		List<String> unchargedTeleports;
 		List<String> superAntifire;
 		List<String> antifire;
 		List<String> antivenom;
@@ -99,19 +101,22 @@ public final class PrepData
 	{
 		Map<String, TaskInfo> tasks;
 		Map<String, List<Teleport>> locations;
+		Map<String, List<Teleport>> masters;
 	}
 
 	private final Map<String, TaskInfo> tasks;
 	private final Map<String, List<Teleport>> locations;
+	private final Map<String, List<Teleport>> masters;
 	private final Supplies supplies;
 	/** Lower-case monster name to loot type to average kills per item of that type. */
 	private final Map<String, Map<String, Integer>> drops;
 
-	private PrepData(Map<String, TaskInfo> tasks, Map<String, List<Teleport>> locations, Supplies supplies,
-		Map<String, Map<String, Integer>> drops)
+	private PrepData(Map<String, TaskInfo> tasks, Map<String, List<Teleport>> locations,
+		Map<String, List<Teleport>> masters, Supplies supplies, Map<String, Map<String, Integer>> drops)
 	{
 		this.tasks = tasks;
 		this.locations = locations;
+		this.masters = masters;
 		this.supplies = supplies;
 		this.drops = drops;
 	}
@@ -145,6 +150,7 @@ public final class PrepData
 		return new PrepData(
 			tasksFile.tasks == null ? Collections.emptyMap() : tasksFile.tasks,
 			tasksFile.locations == null ? Collections.emptyMap() : tasksFile.locations,
+			tasksFile.masters == null ? Collections.emptyMap() : tasksFile.masters,
 			supplies, drops);
 	}
 
@@ -166,6 +172,11 @@ public final class PrepData
 	Map<String, List<Teleport>> locations()
 	{
 		return locations;
+	}
+
+	Map<String, List<Teleport>> masters()
+	{
+		return masters;
 	}
 
 	Supplies supplies()

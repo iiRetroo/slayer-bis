@@ -116,6 +116,8 @@ public final class PrepPlanner
 		/** The weapon in the best set, so it is not suggested again as a spec weapon. */
 		String bestWeapon;
 		boolean suggestSpecWeapon;
+		/** The Slayer master to teleport back to, or null. */
+		String slayerMaster;
 	}
 
 	/**
@@ -268,6 +270,12 @@ public final class PrepPlanner
 
 		List<String> locationKeys = locationKeys(info, request.getLocation());
 		slots += addTeleports(lines, ids, owned, locationKeys, locationKnown(request.getLocation(), locationKeys), tips);
+		List<PrepData.Teleport> masterTeleports = request.getSlayerMaster() == null ? null
+			: data.masters().get(request.getSlayerMaster());
+		if (masterTeleports != null)
+		{
+			slots += addMasterTeleport(lines, ids, owned, request.getSlayerMaster(), masterTeleports, tips);
+		}
 
 		if (fillFood)
 		{
@@ -291,7 +299,12 @@ public final class PrepPlanner
 			}
 		}
 
-		return new PrepPlan(requirements, lines, teleports(locationKeys, owned), notes, tips, slots,
+		List<PrepPlan.TeleportOption> teleports = teleports(locationKeys, owned);
+		if (masterTeleports != null)
+		{
+			addOptions(teleports, "Back to " + request.getSlayerMaster(), masterTeleports, owned);
+		}
+		return new PrepPlan(requirements, lines, teleports, notes, tips, slots,
 			Collections.unmodifiableSet(ids));
 	}
 
@@ -406,7 +419,7 @@ public final class PrepPlanner
 			boolean added = false;
 			for (PrepData.Teleport t : list)
 			{
-				String name = firstOwned(t.items, owned);
+				String name = ownedTeleport(t.items, owned);
 				if (name == null)
 				{
 					continue;
@@ -538,13 +551,84 @@ public final class PrepPlanner
 			{
 				continue;
 			}
-			for (PrepData.Teleport t : list)
-			{
-				Boolean has = t.items == null || t.items.isEmpty() ? null : firstOwned(t.items, owned) != null;
-				out.add(new PrepPlan.TeleportOption(key, t.text, has));
-			}
+			addOptions(out, key, list, owned);
 		}
 		return out;
+	}
+
+	private void addOptions(List<PrepPlan.TeleportOption> out, String location, List<PrepData.Teleport> list,
+		OwnedItems owned)
+	{
+		for (PrepData.Teleport t : list)
+		{
+			Boolean has = t.items == null || t.items.isEmpty() ? null : ownedTeleport(t.items, owned) != null;
+			out.add(new PrepPlan.TeleportOption(location, t.text, has));
+		}
+	}
+
+	/**
+	 * The teleport back to the Slayer master: nothing extra when an item already in the plan
+	 * goes there (a slayer ring, say), otherwise the best one owned.
+	 */
+	private int addMasterTeleport(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned,
+		String master, List<PrepData.Teleport> list, List<String> tips)
+	{
+		PrepData.Supplies s = data.supplies();
+		String best = null;
+		for (PrepData.Teleport t : list)
+		{
+			String name = ownedTeleport(t.items, owned);
+			if (name == null)
+			{
+				continue;
+			}
+			if (listed(lines, name))
+			{
+				return 0;
+			}
+			if (best == null)
+			{
+				best = name;
+			}
+		}
+		if (best == null)
+		{
+			return 0;
+		}
+		if (matchesAny(best, s.wornTeleports))
+		{
+			tips.add("Wear your " + best + " to teleport back to " + master + ".");
+			return 0;
+		}
+		String note = "teleport back to " + master;
+		return matchesAny(best, s.stackableTeleports)
+			? addStack(lines, ids, owned, best, note)
+			: addLine(lines, ids, owned, best, 1, note, false);
+	}
+
+	/**
+	 * The first of these teleport items the player owns charged.
+	 */
+	private String ownedTeleport(List<String> names, OwnedItems owned)
+	{
+		if (names == null)
+		{
+			return null;
+		}
+		List<String> uncharged = data.supplies().unchargedTeleports;
+		for (String n : names)
+		{
+			int have = owned.count(n, false);
+			if (uncharged != null && uncharged.contains(n))
+			{
+				have -= owned.count(n, true);
+			}
+			if (have > 0)
+			{
+				return n;
+			}
+		}
+		return null;
 	}
 
 	private static boolean listed(List<PrepPlan.InventoryLine> lines, String name)

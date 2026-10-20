@@ -51,6 +51,7 @@ The inventory plan fills 28 slots: required task items first, then antifire or a
 - **Prayer:** the *Prayer restore* setting picks the order. *Prayer potions first* (the default) brings prayer potions or super restores and tops up with moonlight moth mixes. *Moth mixes first* saves your prayer potions by bringing mixes first. *Prayer potions only* never suggests mixes. Two mixes count as one potion, so 5 prayer potions become 10 mixes. If you have none at all, the panel says so, and the same goes for a missing style potion.
 - **Potion storage:** potions in your bank's potion storage (from Mastering Mixology) count as banked, read the same way RuneLite's Bank Tags plugin reads them.
 - **Teleports:** one teleport item you own for the task location, such as a slayer ring. Worn teleports (Rada's blessing, Ghommal's hilt) are a tip instead, since they need no inventory slot.
+- **Back to your Slayer master:** set *Slayer master* and the plan adds the best teleport you own back to them, such as a necklace of passage for Mortimer or a games necklace for Turael. If an item already in the plan goes there (a slayer ring for Nieve or Mortimer), nothing extra is added. Uncharged jewellery doesn't count.
 - **Combo eating:** for tasks that hit hard (metal dragons, wyverns, dark beasts, hydras, bosses and anything with 250+ HP), 4 karambwans to eat in the same tick as your main food.
 
 Loot tools come from the monster's drop table (`drops.json`, built from the OSRS Wiki):

@@ -18,6 +18,7 @@ import com.slayerbis.prep.PrayerRestore;
 import com.slayerbis.prep.PrepData;
 import com.slayerbis.prep.PrepPlan;
 import com.slayerbis.prep.PrepPlanner;
+import com.slayerbis.prep.SlayerMaster;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -920,7 +921,7 @@ public class SlayerBisPlugin extends Plugin
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
-			slayerPluginService.getRemainingAmount(), config.specWeapon());
+			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -976,6 +977,7 @@ public class SlayerBisPlugin extends Plugin
 		int lootMaxKills;
 		int taskRemaining;
 		boolean specWeapon;
+		SlayerMaster slayerMaster;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1144,6 +1146,7 @@ public class SlayerBisPlugin extends Plugin
 				.monsterHitpoints(monster.getHitpoints())
 				.bestWeapon(bestWeaponName(best))
 				.suggestSpecWeapon(settings.isSpecWeapon())
+				.slayerMaster(settings.getSlayerMaster() == SlayerMaster.NONE ? null : settings.getSlayerMaster().getName())
 				.build())
 				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of());
 
