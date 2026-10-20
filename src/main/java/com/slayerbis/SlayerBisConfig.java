@@ -1,5 +1,6 @@
 package com.slayerbis;
 
+import com.slayerbis.prep.PrepPlanner;
 import java.awt.Color;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -245,11 +246,25 @@ public interface SlayerBisConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "lootTools",
+		name = "Loot tools",
+		description = "Suggest items for what the monster drops: a herb sack for herbs, a rune pouch for "
+			+ "alchables, a bonecrusher for bones and so on. Common drops only counts loot that drops at "
+			+ "least once every " + 64 + " kills on average.",
+		section = prepSection,
+		position = 4
+	)
+	default LootTools lootTools()
+	{
+		return LootTools.COMMON;
+	}
+
+	@ConfigItem(
 		keyName = "highlightSupplies",
 		name = "Highlight supplies",
 		description = "Outline suggested supplies in your bank as well as gear",
 		section = prepSection,
-		position = 4
+		position = 5
 	)
 	default boolean highlightSupplies()
 	{
@@ -262,7 +277,7 @@ public interface SlayerBisConfig extends Config
 		name = "Supply highlight colour",
 		description = "Colour of the outline around suggested supplies",
 		section = prepSection,
-		position = 5
+		position = 6
 	)
 	default Color supplyHighlightColor()
 	{
@@ -404,6 +419,25 @@ public interface SlayerBisConfig extends Config
 		private final String name;
 		private final int flat;
 		private final int percent;
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+
+	@Getter
+	@RequiredArgsConstructor
+	enum LootTools
+	{
+		OFF("Off", 0),
+		COMMON("Common drops only", PrepPlanner.COMMON_DROP_KILLS),
+		ALL("All drops", Integer.MAX_VALUE);
+
+		private final String name;
+		/** Loot counts when it drops at least once per this many kills on average; 0 is off. */
+		private final int maxKills;
 
 		@Override
 		public String toString()

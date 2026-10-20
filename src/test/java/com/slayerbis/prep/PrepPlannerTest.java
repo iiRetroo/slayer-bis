@@ -67,7 +67,7 @@ public class PrepPlannerTest
 		List<PrepPlan.Requirement> with = planner.requirements("Basilisks", owned("Mirror shield", 1), Collections.emptySet());
 		assertTrue(with.get(0).isOwned());
 
-		PrepPlan plan = planner.plan("Basilisks", null, AttackType.SLASH, without, owned(), 4, 1, true);
+		PrepPlan plan = planner.plan("Basilisks", null, AttackType.SLASH, without, owned(), 4, 1, true, null, 0);
 		assertTrue(plan.getNotes().get(0).contains("Mirror shield"));
 	}
 
@@ -96,7 +96,7 @@ public class PrepPlannerTest
 		OwnedItems bank = owned("Rock hammer", 1, "Super combat potion(4)", 5, "Prayer potion(4)", 20,
 			"Shark", 100, "Lobster", 50);
 		PrepPlan plan = planner.plan("Gargoyles", "Slayer Tower", AttackType.CRUSH,
-			Collections.emptyList(), bank, 4, 1, true);
+			Collections.emptyList(), bank, 4, 1, true, null, 0);
 		assertEquals("Rock hammer", plan.getInventory().get(0).getName());
 		assertEquals(PrepPlanner.INVENTORY_SLOTS, plan.getSlotsUsed());
 		PrepPlan.InventoryLine food = plan.getInventory().get(plan.getInventory().size() - 1);
@@ -108,7 +108,7 @@ public class PrepPlannerTest
 	@Test
 	public void missingTaskItemIsFlagged()
 	{
-		PrepPlan plan = planner.plan("Gargoyles", null, AttackType.CRUSH, Collections.emptyList(), owned(), 4, 1, true);
+		PrepPlan plan = planner.plan("Gargoyles", null, AttackType.CRUSH, Collections.emptyList(), owned(), 4, 1, true, null, 0);
 		assertTrue(plan.getNotes().stream().anyMatch(n -> n.contains("Rock hammer")));
 	}
 
@@ -116,7 +116,7 @@ public class PrepPlannerTest
 	public void teleportsFollowTheReportedLocation()
 	{
 		PrepPlan plan = planner.plan("Abyssal demons", "Slayer Tower", AttackType.SLASH, Collections.emptyList(),
-			owned("Slayer ring (8)", 1), 0, 0, false);
+			owned("Slayer ring (8)", 1), 0, 0, false, null, 0);
 		assertTrue(plan.getTeleports().stream().allMatch(t -> t.getLocation().equals("Slayer Tower")));
 		assertEquals(Boolean.TRUE, plan.getTeleports().get(0).getOwned());
 	}
@@ -165,5 +165,59 @@ public class PrepPlannerTest
 				assertNotNull(task.getKey() + " lists unknown location " + location, data.locations().get(location));
 			}
 		}
+	}
+
+	@Test
+	public void lootToolsFollowTheMonstersDrops()
+	{
+		// abyssal demons drop herbs and items worth alching often, demonic ashes every kill
+		OwnedItems bank = owned("Herb sack", 1, "Rune pouch", 1, "Ash sanctifier", 1, "Seed box", 1, "Shark", 100);
+		PrepPlan plan = planner.plan("Abyssal demons", null, AttackType.SLASH, Collections.emptyList(), bank, 0, 0,
+			true, "Abyssal demon", PrepPlanner.COMMON_DROP_KILLS);
+		List<String> names = new java.util.ArrayList<>();
+		for (PrepPlan.InventoryLine l : plan.getInventory())
+		{
+			names.add(l.getName());
+		}
+		assertTrue(names.contains("Herb sack"));
+		assertTrue(names.contains("Rune pouch"));
+		assertTrue(names.contains("Ash sanctifier"));
+		// abyssal demons don't drop seeds
+		assertFalse(names.contains("Seed box"));
+		assertEquals(PrepPlanner.INVENTORY_SLOTS, plan.getSlotsUsed());
+	}
+
+	@Test
+	public void rareLootOnlyWithAllDrops()
+	{
+		Map<String, Integer> drops = data.drops("Rockslug");
+		Integer alch = drops.get("alchables");
+		assertNotNull(alch);
+		assertTrue("test needs a rare loot type", alch > PrepPlanner.COMMON_DROP_KILLS);
+		OwnedItems bank = owned("Rune pouch", 1);
+		PrepPlan common = planner.plan("Rockslugs", null, AttackType.RANGED, Collections.emptyList(), bank, 0, 0,
+			false, "Rockslug", PrepPlanner.COMMON_DROP_KILLS);
+		PrepPlan all = planner.plan("Rockslugs", null, AttackType.RANGED, Collections.emptyList(), bank, 0, 0,
+			false, "Rockslug", Integer.MAX_VALUE);
+		PrepPlan off = planner.plan("Rockslugs", null, AttackType.RANGED, Collections.emptyList(), bank, 0, 0,
+			false, "Rockslug", 0);
+		assertTrue(common.getInventory().stream().noneMatch(l -> l.getName().equals("Rune pouch")));
+		assertTrue(all.getInventory().stream().anyMatch(l -> l.getName().equals("Rune pouch")));
+		assertTrue(off.getInventory().stream().noneMatch(l -> l.getName().equals("Rune pouch")));
+	}
+
+	@Test
+	public void natureRunesWhenThereIsNoPouch()
+	{
+		PrepPlan plan = planner.plan("Gargoyles", null, AttackType.CRUSH, Collections.emptyList(),
+			owned("Nature rune", 500), 0, 0, false, "Gargoyle", PrepPlanner.COMMON_DROP_KILLS);
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Nature rune")));
+	}
+
+	@Test
+	public void dropNamesAreCaseInsensitive()
+	{
+		assertFalse(data.drops("Skeletal Wyvern").isEmpty());
+		assertFalse(data.drops("skeletal wyvern").isEmpty());
 	}
 }

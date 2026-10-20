@@ -513,7 +513,7 @@ public class SlayerBisPlugin extends Plugin
 
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
-			config.prayerPotions(), config.combatPotions(), config.fillFood());
+			config.prayerPotions(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -565,6 +565,7 @@ public class SlayerBisPlugin extends Plugin
 		int prayerPotions;
 		int combatPotions;
 		boolean fillFood;
+		int lootMaxKills;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -718,7 +719,8 @@ public class SlayerBisPlugin extends Plugin
 			}
 			PrepPlan plan = settings.isShowPreparation()
 				? prep.plan(task, location, best == null ? null : best.getType(), requirements, owned,
-				settings.getPrayerPotions(), settings.getCombatPotions(), settings.isFillFood())
+				settings.getPrayerPotions(), settings.getCombatPotions(), settings.isFillFood(), monster.getName(),
+				settings.getLootMaxKills())
 				: new PrepPlan(requirements, List.of(), List.of(), List.of(), 0, Set.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,

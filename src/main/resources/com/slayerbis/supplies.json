@@ -27,6 +27,16 @@
   "antifire": ["Extended antifire", "Antifire potion"],
   "antivenom": ["Anti-venom+", "Anti-venom", "Antidote++", "Antidote+"],
 
+  "lootTools": {
+    "herbs": ["Open herb sack", "Herb sack"],
+    "seeds": ["Open seed box", "Seed box"],
+    "gems": ["Open gem bag", "Gem bag"],
+    "bones": ["Bonecrusher"],
+    "ashes": ["Ash sanctifier"],
+    "alchables": ["Divine rune pouch", "Rune pouch"]
+  },
+  "alchRunes": ["Nature rune"],
+
   "dragonfireShields": ["Dragonfire shield", "Dragonfire ward", "Ancient wyvern shield", "Anti-dragon shield"],
   "wyvernShields": ["Ancient wyvern shield", "Dragonfire shield", "Dragonfire ward", "Elemental shield", "Mind shield"]
 }

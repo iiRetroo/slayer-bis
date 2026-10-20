@@ -5,7 +5,7 @@
 SlayerBIS is built for one moment: you've just got a Slayer task and you're standing at the bank. There's nothing to search for and no button to press. It already knows your task, so the moment your bank opens it has the answer:
 
 - **Your best gear for this task, outlined in your bank.** It's picked from everything you own, and it already includes the gear the task needs (a mirror shield for basilisks, boots of stone for Karuulm, a nose peg or Slayer helmet for aberrant spectres).
-- **What to bring.** Task items like a rock hammer or bag of salt, antifire where dragons breathe fire, a potion for your best style, prayer potions and your best food. Supplies get their own highlight colour.
+- **What to bring.** Task items like a rock hammer or bag of salt, antifire where dragons breathe fire, a potion for your best style, prayer potions and your best food, plus tools for what the monster drops: a herb sack for herbs, a rune pouch for alchables, a bonecrusher for bones. Supplies get their own highlight colour.
 - **How to get there.** Teleports to the task location, ticked off when you own the item.
 - **How much better it is** than what you're wearing right now.
 
@@ -45,7 +45,20 @@ The panel is laid out like the game: a tab per style with its DPS (best in green
 
 Task requirements, task items and teleports live in `src/main/resources/com/slayerbis/tasks.json`, and food and potions in `supplies.json`. Both are plain data files with a short format note at the top, so adding a task or fixing a teleport needs no code changes. Supplies are matched by item name, so every potion dose counts.
 
-The inventory plan fills 28 slots: required task items first, then antifire or anti-venom where the task calls for it, a boosting potion for your best style, prayer potions (4 by default), and your best food for the rest. The counts are settings. Moving items between bank and inventory does not change the plan, so it stays put while you withdraw.
+The inventory plan fills 28 slots: required task items first, then antifire or anti-venom where the task calls for it, a boosting potion for your best style, prayer potions (4 by default), loot tools, and your best food for the rest. The counts are settings. Moving items between bank and inventory does not change the plan, so it stays put while you withdraw.
+
+Loot tools come from the monster's drop table (`drops.json`, built from the OSRS Wiki):
+
+| If the monster drops | You're told to bring (first one you own) |
+|---|---|
+| Items worth alching | Divine rune pouch or rune pouch (with nature and fire runes), or nature runes |
+| Herbs | Open herb sack or herb sack |
+| Seeds | Open seed box or seed box |
+| Gems | Open gem bag or gem bag |
+| Bones | Bonecrusher |
+| Demonic ashes | Ash sanctifier |
+
+The **Loot tools** setting chooses between common drops only (loot that drops at least once every 64 kills on average, the default), all drops, or off. Tools you don't own are never suggested.
 
 Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
 
@@ -86,7 +99,7 @@ python scripts/refresh_data.py
 ./gradlew build
 ```
 
-The script downloads the calculator's data from GitHub, rewrites the two JSON files and records the source commit in `DATA-NOTICE.txt`. Only the script downloads anything: the plugin itself makes no network requests. If the tests still pass, commit the new files and submit an update to the Plugin Hub.
+The script downloads the calculator's data from GitHub and the drop tables from the OSRS Wiki's public API, rewrites the three JSON files and records the source in `DATA-NOTICE.txt`. Only the script downloads anything: the plugin itself makes no network requests. If the tests still pass, commit the new files and submit an update to the Plugin Hub.
 
 ## Credits
 

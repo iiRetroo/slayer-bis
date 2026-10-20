@@ -1,12 +1,15 @@
 package com.slayerbis.prep;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,6 +60,9 @@ public final class PrepData
 		List<String> antivenom;
 		List<String> dragonfireShields;
 		List<String> wyvernShields;
+		/** Loot type (herbs, seeds, gems, bones, ashes, alchables) to the items that collect it. */
+		Map<String, List<String>> lootTools;
+		List<String> alchRunes;
 	}
 
 	private static final class TasksFile
@@ -68,12 +74,16 @@ public final class PrepData
 	private final Map<String, TaskInfo> tasks;
 	private final Map<String, List<Teleport>> locations;
 	private final Supplies supplies;
+	/** Lower-case monster name to loot type to average kills per item of that type. */
+	private final Map<String, Map<String, Integer>> drops;
 
-	private PrepData(Map<String, TaskInfo> tasks, Map<String, List<Teleport>> locations, Supplies supplies)
+	private PrepData(Map<String, TaskInfo> tasks, Map<String, List<Teleport>> locations, Supplies supplies,
+		Map<String, Map<String, Integer>> drops)
 	{
 		this.tasks = tasks;
 		this.locations = locations;
 		this.supplies = supplies;
+		this.drops = drops;
 	}
 
 	public static PrepData load(Gson gson) throws IOException
@@ -88,10 +98,24 @@ public final class PrepData
 		{
 			supplies = gson.fromJson(r, Supplies.class);
 		}
+		Map<String, Map<String, Integer>> drops = new HashMap<>();
+		try (Reader r = open("drops.json"))
+		{
+			JsonObject root = gson.fromJson(r, JsonObject.class);
+			for (Map.Entry<String, JsonElement> monster : root.entrySet())
+			{
+				Map<String, Integer> kinds = new HashMap<>();
+				for (Map.Entry<String, JsonElement> kind : monster.getValue().getAsJsonObject().entrySet())
+				{
+					kinds.put(kind.getKey(), kind.getValue().getAsInt());
+				}
+				drops.put(monster.getKey().toLowerCase(Locale.ROOT), kinds);
+			}
+		}
 		return new PrepData(
 			tasksFile.tasks == null ? Collections.emptyMap() : tasksFile.tasks,
 			tasksFile.locations == null ? Collections.emptyMap() : tasksFile.locations,
-			supplies);
+			supplies, drops);
 	}
 
 	private static Reader open(String name) throws IOException
@@ -117,6 +141,15 @@ public final class PrepData
 	Supplies supplies()
 	{
 		return supplies;
+	}
+
+	/**
+	 * Loot type to average kills per item of that type, for a monster; empty if unknown.
+	 */
+	Map<String, Integer> drops(String monsterName)
+	{
+		Map<String, Integer> d = monsterName == null ? null : drops.get(monsterName.toLowerCase(Locale.ROOT));
+		return d == null ? Collections.emptyMap() : d;
 	}
 
 	/**

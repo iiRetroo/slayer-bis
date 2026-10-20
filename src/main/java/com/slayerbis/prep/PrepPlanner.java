@@ -20,6 +20,19 @@ public final class PrepPlanner
 	public static final int INVENTORY_SLOTS = 28;
 	private static final int ANTIFIRE_DOSES = 2;
 
+	/** For "common drops only": a loot type counts when it drops at least once per this many kills. */
+	public static final int COMMON_DROP_KILLS = 64;
+
+	/** Loot types in the order they are suggested, with how they are described. */
+	private static final String[][] LOOT_TYPES = {
+		{"alchables", "items worth alching"},
+		{"herbs", "herbs"},
+		{"seeds", "seeds"},
+		{"gems", "gems"},
+		{"bones", "bones"},
+		{"ashes", "demonic ashes"},
+	};
+
 	private final PrepData data;
 
 	public PrepPlanner(PrepData data)
@@ -68,8 +81,13 @@ public final class PrepPlanner
 		return out;
 	}
 
+	/**
+	 * @param monsterName  the monster being fought, for its drops
+	 * @param lootMaxKills suggest tools for loot that drops at least once per this many kills on
+	 *                     average; 0 turns loot suggestions off
+	 */
 	public PrepPlan plan(String task, String location, AttackType bestType, List<PrepPlan.Requirement> requirements,
-		OwnedItems owned, int prayerPotions, int combatPotions, boolean fillFood)
+		OwnedItems owned, int prayerPotions, int combatPotions, boolean fillFood, String monsterName, int lootMaxKills)
 	{
 		PrepData.TaskInfo info = data.task(task);
 		PrepData.Supplies s = data.supplies();
@@ -146,6 +164,11 @@ public final class PrepPlanner
 			slots += addLine(lines, ids, owned, prayer, prayerPotions, "restores prayer points", false);
 		}
 
+		if (lootMaxKills > 0)
+		{
+			slots += addLootTools(lines, ids, owned, monsterName, lootMaxKills);
+		}
+
 		if (fillFood)
 		{
 			int remaining = INVENTORY_SLOTS - slots;
@@ -193,6 +216,44 @@ public final class PrepPlanner
 
 		return new PrepPlan(requirements, lines, teleports(info, location, owned), notes, slots,
 			Collections.unmodifiableSet(ids));
+	}
+
+	/**
+	 * Items that collect or make use of what the monster drops, for the ones the player owns.
+	 */
+	private int addLootTools(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned,
+		String monsterName, int lootMaxKills)
+	{
+		Map<String, Integer> drops = data.drops(monsterName);
+		PrepData.Supplies s = data.supplies();
+		int slots = 0;
+		for (String[] type : LOOT_TYPES)
+		{
+			Integer kills = drops.get(type[0]);
+			if (kills == null || kills > lootMaxKills || s.lootTools == null)
+			{
+				continue;
+			}
+			String often = kills <= 1 ? "every kill" : "about 1 in " + kills + " kills";
+			String tool = firstOwned(s.lootTools.get(type[0]), owned);
+			if (tool != null)
+			{
+				String note = monsterName + " drops " + type[1] + " (" + often + ")"
+					+ ("alchables".equals(type[0]) ? "; fill it with nature and fire runes for High Alchemy" : "");
+				slots += addLine(lines, ids, owned, tool, 1, note, false);
+			}
+			else if ("alchables".equals(type[0]))
+			{
+				// no rune pouch: nature runes still take just one slot
+				String runes = firstOwned(s.alchRunes, owned);
+				if (runes != null)
+				{
+					slots += addLine(lines, ids, owned, runes, 1, monsterName + " drops " + type[1] + " (" + often
+						+ "); bring a fire staff for High Alchemy", false);
+				}
+			}
+		}
+		return slots;
 	}
 
 	private List<PrepPlan.TeleportOption> teleports(PrepData.TaskInfo info, String location, OwnedItems owned)
