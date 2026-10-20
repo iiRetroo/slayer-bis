@@ -49,6 +49,14 @@ public class GameData
 
 	private void loadEquipment(Gson gson) throws IOException
 	{
+		Map<Integer, Integer> weights = new HashMap<>();
+		try (Reader reader = open("weights.json"))
+		{
+			for (Map.Entry<String, JsonElement> w : gson.fromJson(reader, JsonObject.class).entrySet())
+			{
+				weights.put(Integer.parseInt(w.getKey()), w.getValue().getAsInt());
+			}
+		}
 		try (Reader reader = open("equipment.json"))
 		{
 			JsonObject root = gson.fromJson(reader, JsonObject.class);
@@ -64,7 +72,8 @@ public class GameData
 					a.get(0).getAsInt(), a.get(1).getAsString(), a.get(2).getAsString(), slot,
 					a.get(4).getAsInt(), a.get(5).getAsString(), a.get(6).getAsInt() == 1,
 					a.get(7).getAsInt(), a.get(8).getAsInt(), a.get(9).getAsInt(), a.get(10).getAsInt(), a.get(11).getAsInt(),
-					a.get(12).getAsInt(), a.get(13).getAsInt(), a.get(14).getAsInt());
+					a.get(12).getAsInt(), a.get(13).getAsInt(), a.get(14).getAsInt(),
+					weights.getOrDefault(a.get(0).getAsInt(), 0));
 				itemsById.put(item.getId(), item);
 			}
 			for (Map.Entry<String, JsonElement> alias : root.getAsJsonObject("aliases").entrySet())

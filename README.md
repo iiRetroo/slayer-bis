@@ -81,6 +81,8 @@ The **Loot tools** setting chooses between all drops (the default), common drops
 
 **Safespots** are short text descriptions, summarised from the OSRS Wiki, for the location the Slayer plugin reports, or for every listed location when it doesn't. They're text only: no tiles are drawn or highlighted, and bosses, Slayer bosses and demi-bosses are left out, as RuneLite's rules require.
 
+**Gryphons** knock you back if your worn gear weighs under 30 kg (40 kg for the Shellbane gryphon), so on those tasks the gear search only suggests sets heavy enough, and the stats box shows the set's weight. If nothing you own is heavy enough, it says so and shows the best set anyway. The Shellbane gryphon also needs a Tortugan shield in the cape slot.
+
 **Location needs** apply whatever the task: boots of stone anywhere in the Karuulm Slayer Dungeon (so a Konar fire giant task there asks for them too), a light source in the Lumbridge Swamp Caves and Mos Le'Harmless Caves, and an axe plus the 875-coin entry fee for Brimhaven Dungeon. They're enforced when the Slayer plugin reports that location, or when the task is only found there; otherwise they're a tip. Some tasks also get short tips, such as insulated boots for rune dragons, and Fungicide refills are suggested for mutated zygomites (up to 4).
 
 Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
@@ -133,7 +135,7 @@ python scripts/refresh_data.py
 ./gradlew build
 ```
 
-The script downloads the calculator's data from GitHub and the drop tables from the OSRS Wiki's public API, rewrites the three JSON files and records the source in `DATA-NOTICE.txt`. Only the script downloads anything: the plugin itself makes no network requests. If the tests still pass, commit the new files and submit an update to the Plugin Hub.
+The script downloads the calculator's data from GitHub and the drop tables and item weights from the OSRS Wiki's public API, rewrites the four JSON files and records the source in `DATA-NOTICE.txt`. Only the script downloads anything: the plugin itself makes no network requests. If the tests still pass, commit the new files and submit an update to the Plugin Hub.
 
 ## Credits
 

@@ -83,6 +83,8 @@ public final class Optimizer
 	);
 
 	private final DpsCalculator calculator;
+	/** For the search in progress: the least the set may weigh in grams, or 0. */
+	private int minWeight;
 	private final PlayerSetup player;
 	private final Monster monster;
 	private final AtomicBoolean cancelled;
@@ -172,6 +174,17 @@ public final class Optimizer
 	 */
 	public StyleResult optimise(Collection<Candidate> owned, AttackType type, Map<EquipmentSlot, Set<String>> required)
 	{
+		return optimise(owned, type, required, 0);
+	}
+
+	/**
+	 * @param minWeight the least the worn set may weigh, in grams (gryphons knock lighter players
+	 *                  back); 0 for no limit. Heavier items are then never pruned for being weaker.
+	 */
+	public StyleResult optimise(Collection<Candidate> owned, AttackType type, Map<EquipmentSlot, Set<String>> required,
+		int minWeight)
+	{
+		this.minWeight = minWeight;
 		Map<EquipmentSlot, List<Candidate>> bySlot = new EnumMap<>(EquipmentSlot.class);
 		for (EquipmentSlot s : EquipmentSlot.values())
 		{
@@ -382,6 +395,24 @@ public final class Optimizer
 		return c == null ? 0 : damageStat(c.item, type);
 	}
 
+	private static int weight(Candidate c)
+	{
+		return c == null ? 0 : c.item.getWeight();
+	}
+
+	/**
+	 * Total worn weight of a set, in grams.
+	 */
+	public static int weight(Candidate[] gear)
+	{
+		int total = 0;
+		for (Candidate c : gear)
+		{
+			total += weight(c);
+		}
+		return total;
+	}
+
 	/**
 	 * Keeps the items not beaten on every relevant stat by another item in the same slot (or by
 	 * leaving the slot empty). A {@code null} entry in the result means "leave the slot empty".
@@ -405,7 +436,7 @@ public final class Optimizer
 			boolean dominated = false;
 			for (int j = 0; j < all.size() && !dominated; j++)
 			{
-				dominated = j != i && dominates(all.get(j), c, type, j < i);
+				dominated = j != i && dominates(all.get(j), c, type, j < i, minWeight > 0);
 			}
 			if (!dominated)
 			{
@@ -419,17 +450,19 @@ public final class Optimizer
 	 * Whether a is at least as good as b on every relevant stat. Exact ties are broken so that
 	 * exactly one survives, preferring the empty slot and then the earlier item.
 	 */
-	private static boolean dominates(Candidate a, Candidate b, AttackType type, boolean aFirst)
+	private static boolean dominates(Candidate a, Candidate b, AttackType type, boolean aFirst, boolean byWeight)
 	{
 		int aOff = offence(a, type);
 		int bOff = offence(b, type);
 		int aDmg = damage(a, type);
 		int bDmg = damage(b, type);
-		if (aOff < bOff || aDmg < bDmg)
+		int aW = byWeight ? weight(a) : 0;
+		int bW = byWeight ? weight(b) : 0;
+		if (aOff < bOff || aDmg < bDmg || aW < bW)
 		{
 			return false;
 		}
-		if (aOff > bOff || aDmg > bDmg)
+		if (aOff > bOff || aDmg > bDmg || aW > bW)
 		{
 			return true;
 		}
@@ -469,7 +502,7 @@ public final class Optimizer
 					continue;
 				}
 				// a strictly faster weapon wins stat ties outright
-				dominated = dominates(o, c, type, o.item.getSpeed() < c.item.getSpeed() || j < i);
+				dominated = dominates(o, c, type, o.item.getSpeed() < c.item.getSpeed() || j < i, minWeight > 0);
 			}
 			if (!dominated)
 			{
@@ -588,12 +621,14 @@ public final class Optimizer
 	{
 		final int offence;
 		final int damage;
+		final int weight;
 		final Candidate[] picks;
 
-		StatPoint(int offence, int damage, Candidate[] picks)
+		StatPoint(int offence, int damage, int weight, Candidate[] picks)
 		{
 			this.offence = offence;
 			this.damage = damage;
+			this.weight = weight;
 			this.picks = picks;
 		}
 	}
@@ -775,7 +810,7 @@ public final class Optimizer
 			List<StatPoint> points;
 			if (plainMask == 0)
 			{
-				points = Collections.singletonList(new StatPoint(0, 0, new Candidate[SLOTS]));
+				points = Collections.singletonList(new StatPoint(0, 0, 0, new Candidate[SLOTS]));
 			}
 			else
 			{
@@ -789,10 +824,12 @@ public final class Optimizer
 					{
 						Candidate[] picks = p.picks.clone();
 						picks[slot] = c;
-						combined.add(new StatPoint(p.offence + offence(c, type), p.damage + damage(c, type), picks));
+						// only reaching the minimum matters, so heavier than that counts as equal
+						combined.add(new StatPoint(p.offence + offence(c, type), p.damage + damage(c, type),
+							Math.min(minWeight, p.weight + weight(c)), picks));
 					}
 				}
-				points = paretoFront(combined);
+				points = minWeight > 0 ? paretoFrontWithWeight(combined) : paretoFront(combined);
 			}
 			frontierCache.put(plainMask, points);
 			return points;
@@ -840,6 +877,10 @@ public final class Optimizer
 				stoppedEarly = true;
 				return;
 			}
+			if (minWeight > 0 && weight(chosen) < minWeight)
+			{
+				return;
+			}
 			CalcResult r = calculator.best(gear, type);
 			if (r.getDps() <= 0)
 			{
@@ -862,6 +903,34 @@ public final class Optimizer
 	/**
 	 * Keeps the points not beaten or tied on both sums by another point (one of each tie survives).
 	 */
+	/**
+	 * As {@link #paretoFront}, with weight as a third thing to keep: a lighter combination only
+	 * drops out if another is at least as good on offence, damage and weight.
+	 */
+	private static List<StatPoint> paretoFrontWithWeight(List<StatPoint> points)
+	{
+		points.sort((a, b) -> a.offence != b.offence ? Integer.compare(b.offence, a.offence)
+			: a.damage != b.damage ? Integer.compare(b.damage, a.damage) : Integer.compare(b.weight, a.weight));
+		List<StatPoint> out = new ArrayList<>();
+		for (StatPoint p : points)
+		{
+			boolean beaten = false;
+			for (StatPoint q : out)
+			{
+				if (q.damage >= p.damage && q.weight >= p.weight)
+				{
+					beaten = true;
+					break;
+				}
+			}
+			if (!beaten)
+			{
+				out.add(p);
+			}
+		}
+		return out;
+	}
+
 	private static List<StatPoint> paretoFront(List<StatPoint> points)
 	{
 		points.sort((a, b) -> a.offence != b.offence ? Integer.compare(b.offence, a.offence) : Integer.compare(b.damage, a.damage));

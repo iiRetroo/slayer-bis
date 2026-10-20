@@ -1,11 +1,12 @@
 equipment.json and monsters.json contain item and monster statistics taken from the
 data files of the OSRS Wiki DPS calculator (https://github.com/weirdgloop/osrs-dps-calc),
 which are sourced from the Old School RuneScape Wiki (https://oldschool.runescape.wiki/).
-drops.json summarises monster drop tables from the Old School RuneScape Wiki.
+drops.json summarises monster drop tables, and weights.json lists item weights, from the
+Old School RuneScape Wiki.
 
 Old School RuneScape Wiki content is available under the Creative Commons
 Attribution-NonCommercial-ShareAlike 3.0 licence
-(https://creativecommons.org/licenses/by-nc-sa/3.0/). These three data files are
+(https://creativecommons.org/licenses/by-nc-sa/3.0/). These four data files are
 distributed under that licence and are not covered by this project's BSD 2-Clause licence.
 The files were reduced to the fields the plugin uses.
 Generated from weirdgloop/osrs-dps-calc commit 89c3e25b344aea90d0189746e4b5f73dde0f0383 and OSRS Wiki drop tables on 2026-10-20.

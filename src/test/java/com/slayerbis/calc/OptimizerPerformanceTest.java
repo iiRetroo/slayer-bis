@@ -56,4 +56,31 @@ public class OptimizerPerformanceTest
 			assertTrue(r.isValid());
 		}
 	}
+
+	@Test(timeout = 60_000)
+	public void everyItemWithAMinimumWeight() throws Exception
+	{
+		GameData data = GameData.load(new Gson());
+		Monster target = new TaskMonsterResolver(data).fromName("Gryphons");
+		List<Optimizer.Candidate> bank = new ArrayList<>();
+		for (int id = 0; id < 40_000; id++)
+		{
+			GearItem item = data.getItem(id);
+			if (item != null && item.getId() == id)
+			{
+				bank.add(new Optimizer.Candidate(item, id));
+			}
+		}
+		Optimizer optimizer = new Optimizer(DpsCalculatorTest.maxed(true), target);
+		for (AttackType type : new AttackType[]{AttackType.STAB, AttackType.RANGED, AttackType.MAGIC})
+		{
+			long start = System.nanoTime();
+			StyleResult r = optimizer.optimise(bank, type, java.util.Collections.emptyMap(), 40000);
+			System.out.printf("weighted %s: %.3f dps, %.1f kg, %d combinations, %d ms, stopped early %s%n", type,
+				r.getResult().getDps(), Optimizer.weight(r.getGear()) / 1000.0, r.getCombinationsTried(),
+				(System.nanoTime() - start) / 1_000_000, r.isStoppedEarly());
+			assertTrue(r.isValid());
+			assertTrue(Optimizer.weight(r.getGear()) >= 40000);
+		}
+	}
 }

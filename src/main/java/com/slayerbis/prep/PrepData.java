@@ -32,6 +32,8 @@ public final class PrepData
 		boolean stacks;
 		/** Monsters hit hard enough that combo eating helps. */
 		boolean comboEat;
+		/** The least the worn gear must weigh, in kg; 0 for no limit. */
+		double minWeight;
 		List<String> tips;
 		List<String> locations;
 		List<Safespot> safespots;

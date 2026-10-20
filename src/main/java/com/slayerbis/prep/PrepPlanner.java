@@ -118,6 +118,15 @@ public final class PrepPlanner
 	/**
 	 * Whether the task's monsters bunch up, so bursting or barraging is worth working out.
 	 */
+	/**
+	 * The least the worn gear must weigh for this task, in grams; 0 for no limit.
+	 */
+	public int minWeight(String task)
+	{
+		PrepData.TaskInfo info = data.task(task);
+		return info == null ? 0 : (int) Math.round(info.minWeight * 1000);
+	}
+
 	public boolean stacks(String task)
 	{
 		PrepData.TaskInfo info = data.task(task);

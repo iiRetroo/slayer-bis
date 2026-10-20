@@ -24,6 +24,8 @@ public class GearItem
 	int strength;
 	int rangedStrength;
 	int magicDamage;
+	/** Weight in grams (negative for weight-reducing items such as graceful). */
+	int weight;
 
 	/**
 	 * Whether this variant can actually be used in combat. Uncharged, empty, inactive and broken

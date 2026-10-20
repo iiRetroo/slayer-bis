@@ -647,4 +647,24 @@ public class PrepPlannerTest
 			.owned(bank).fillFood(true).preferredFood("Manta ray").build());
 		assertEquals("Anglerfish", none.getInventory().get(0).getName());
 	}
+
+	@Test
+	public void specialRulesForNewerTasks()
+	{
+		// frost dragons breathe fire: antifire is suggested, and a shield required without a super antifire
+		assertEquals(1, planner.requirements("Frost dragons", owned(), Collections.emptySet()).size());
+		PrepPlan suqahs = planner.plan(PrepPlanner.Request.builder().task("Suqahs").bestType(AttackType.SLASH)
+			.owned(owned()).build());
+		assertTrue(suqahs.getTips().stream().anyMatch(t -> t.contains("seal of passage")));
+		PrepPlan scarabs = planner.plan(PrepPlanner.Request.builder().task("Scabarites").location("Sophanem Dungeon")
+			.bestType(AttackType.SLASH).owned(owned()).build());
+		assertTrue(scarabs.getNotes().stream().anyMatch(n -> n.startsWith("Missing Bullseye lantern")));
+		assertEquals(30000, planner.minWeight("Gryphons"));
+		assertEquals(40000, planner.minWeight("The Shellbane Gryphon"));
+		assertEquals(0, planner.minWeight("Bloodveld"));
+		List<PrepPlan.Requirement> boss = planner.requirements("The Shellbane Gryphon", owned("Tortugan shield", 1),
+			Collections.emptySet());
+		assertEquals(EquipmentSlot.CAPE, boss.get(0).getSlot());
+		assertTrue(boss.get(0).isOwned());
+	}
 }

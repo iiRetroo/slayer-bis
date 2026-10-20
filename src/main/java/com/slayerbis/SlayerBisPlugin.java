@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1164,13 +1165,24 @@ public class SlayerBisPlugin extends Plugin
 			Optimizer optimizer = new Optimizer(setup, monster, cancel);
 			Map<AttackType, StyleResult> results = new EnumMap<>(AttackType.class);
 			Map<AttackType, Double> helmetCost = new EnumMap<>(AttackType.class);
+			int minWeight = prep.minWeight(prepTask);
+			Set<AttackType> tooLight = EnumSet.noneOf(AttackType.class);
 			for (AttackType type : AttackType.values())
 			{
 				if (type != AttackType.BURST)
 				{
-					StyleResult r = optimizer.optimise(candidates, type, required);
+					StyleResult r = optimizer.optimise(candidates, type, required, minWeight);
+					if (minWeight > 0 && !r.isValid())
+					{
+						// nothing owned is heavy enough: show the best set anyway, with a warning
+						r = optimizer.optimise(candidates, type, required);
+						if (r.isValid())
+						{
+							tooLight.add(type);
+						}
+					}
 					results.put(type, preferHelmet(optimizer, candidates, type, r, required, setup,
-						settings.getPreferSlayerHelmet(), helmetCost));
+						settings.getPreferSlayerHelmet(), helmetCost, tooLight.contains(type) ? 0 : minWeight));
 				}
 			}
 			if (settings.getBurstTargets() > 0 && prep.stacks(prepTask))
@@ -1182,7 +1194,7 @@ public class SlayerBisPlugin extends Plugin
 				StyleResult r = burstOptimizer.optimise(candidates, AttackType.MAGIC, required);
 				Map<AttackType, Double> burstCost = new EnumMap<>(AttackType.class);
 				r = preferHelmet(burstOptimizer, candidates, AttackType.MAGIC, r, required, setup,
-					settings.getPreferSlayerHelmet(), burstCost);
+					settings.getPreferSlayerHelmet(), burstCost, 0);
 				if (burstCost.containsKey(AttackType.MAGIC))
 				{
 					helmetCost.put(AttackType.BURST, burstCost.get(AttackType.MAGIC));
@@ -1229,7 +1241,8 @@ public class SlayerBisPlugin extends Plugin
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
-				settings.getBurstTargets(), helmetCost, optimizer.ammoOptions(results.get(AttackType.RANGED), candidates));
+				settings.getBurstTargets(), helmetCost, optimizer.ammoOptions(results.get(AttackType.RANGED), candidates),
+				minWeight, tooLight);
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
@@ -1279,7 +1292,7 @@ public class SlayerBisPlugin extends Plugin
 	 */
 	private static StyleResult preferHelmet(Optimizer optimizer, List<Optimizer.Candidate> candidates,
 		AttackType type, StyleResult best, Map<EquipmentSlot, Set<String>> required, PlayerSetup setup,
-		int percent, Map<AttackType, Double> cost)
+		int percent, Map<AttackType, Double> cost, int minWeight)
 	{
 		if (percent <= 0 || !setup.isOnSlayerTask() || !best.isValid() || required.containsKey(EquipmentSlot.HEAD))
 		{
@@ -1305,7 +1318,7 @@ public class SlayerBisPlugin extends Plugin
 		Map<EquipmentSlot, Set<String>> withHelmet = new EnumMap<>(EquipmentSlot.class);
 		withHelmet.putAll(required);
 		withHelmet.put(EquipmentSlot.HEAD, owned);
-		StyleResult kept = optimizer.optimise(candidates, type, withHelmet);
+		StyleResult kept = optimizer.optimise(candidates, type, withHelmet, minWeight);
 		double bestDps = best.getResult().getDps();
 		if (!kept.isValid() || kept.getResult().getDps() * (100 + percent) < bestDps * 100)
 		{

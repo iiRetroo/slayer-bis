@@ -10,6 +10,7 @@ a release.
 Usage (from the repository root):
     python scripts/refresh_data.py            # latest commit on the default branch
     python scripts/refresh_data.py <commit>   # a specific calculator commit
+    python scripts/refresh_data.py --weights  # only refresh item weights (weights.json)
 
 Afterwards run ./gradlew build: the tests check the data still works, including the loadouts
 verified against the wiki calculator. DATA-NOTICE.txt is updated automatically.
@@ -150,6 +151,35 @@ def fetch_drops(monster_names, equipment_names):
     return {name: dict(sorted(kinds.items())) for name, kinds in sorted(drops.items())}
 
 
+def fetch_weights(item_ids):
+    """Item id -> weight in grams (can be negative, e.g. graceful), from the wiki's infobox_item table."""
+    wanted = set(item_ids)
+    weights = {}
+    offset = 0
+    while True:
+        query = ("bucket('infobox_item').select('item_id','weight')"
+                 ".limit(5000).offset(%d).run()" % offset)
+        url = WIKI_API + "?" + urllib.parse.urlencode({"action": "bucket", "format": "json", "query": query})
+        rows = json.loads(fetch(url)).get("bucket", [])
+        for row in rows:
+            weight = row.get("weight")
+            if not isinstance(weight, (int, float)) or weight == 0:
+                continue
+            for raw in row.get("item_id") or []:
+                try:
+                    item_id = int(raw)
+                except (TypeError, ValueError):
+                    continue
+                if item_id in wanted:
+                    weights[str(item_id)] = int(round(weight * 1000))
+        print("weights: read %d rows" % (offset + len(rows)))
+        if len(rows) < 5000:
+            break
+        offset += 5000
+        time.sleep(1)  # be polite to the wiki
+    return dict(sorted(weights.items(), key=lambda kv: int(kv[0])))
+
+
 def write_json(name, value):
     path = os.path.join(OUT_DIR, name)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -167,7 +197,18 @@ def update_notice(commit):
         f.write("\n".join(lines) + "\n")
 
 
+def refresh_weights():
+    with open(os.path.join(OUT_DIR, "equipment.json"), encoding="utf-8") as f:
+        items = json.load(f)["items"]
+    weights = fetch_weights(row[0] for row in items)
+    write_json("weights.json", weights)
+    print("done: weights for %d of %d items." % (len(weights), len(items)))
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "--weights":
+        refresh_weights()
+        return
     ref = sys.argv[1] if len(sys.argv) > 1 else None
     commit = resolve_commit(ref)
     base = "https://raw.githubusercontent.com/%s/%s/cdn/json/" % (REPO, commit)
@@ -179,6 +220,7 @@ def main():
     write_json("monsters.json", compact_monsters(monsters))
     drops = fetch_drops({m["name"] for m in monsters}, {x["name"] for x in equipment})
     write_json("drops.json", drops)
+    refresh_weights()
     update_notice(commit)
     print("done: %d items, %d monsters, drop data for %d monsters. Now run ./gradlew build."
           % (len(equipment), len(monsters), len(drops)))

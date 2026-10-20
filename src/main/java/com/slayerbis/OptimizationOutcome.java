@@ -10,6 +10,7 @@ import com.slayerbis.data.Monster;
 import com.slayerbis.prep.PrepPlan;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Value;
 
 /**
@@ -41,6 +42,10 @@ class OptimizationOutcome
 	Map<AttackType, Double> helmetCost;
 	/** The ranged set with each owned ammo swapped in, best first; empty when it takes none. */
 	List<StyleResult.Alternative> ammoOptions;
+	/** The least the worn set must weigh for this task, in grams; 0 for no limit. */
+	int minWeight;
+	/** Styles where nothing owned is heavy enough, so the best set shown is too light. */
+	Set<AttackType> tooLight;
 
 	@Value
 	static class ChargeHint

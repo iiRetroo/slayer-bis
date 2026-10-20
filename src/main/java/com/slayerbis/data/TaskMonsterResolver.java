@@ -79,6 +79,7 @@ public class TaskMonsterResolver
 		.put("skeletons", ImmutableList.of("Vet'ion", "Calvar'ion"))
 		.put("araxytes", ImmutableList.of("Araxxor"))
 		.put("aviansies", ImmutableList.of("Kree'arra"))
+		.put("gryphons", ImmutableList.of("Shellbane gryphon"))
 		.build();
 
 	/** A boss's own Slayer task name (for its preparation data), by lower-case monster name. */
@@ -107,6 +108,7 @@ public class TaskMonsterResolver
 		.put("araxxor", "araxxor")
 		.put("kree'arra", "kree'arra")
 		.put("vorkath", "vorkath")
+		.put("shellbane gryphon", "the shellbane gryphon")
 		.build();
 
 	private static final int MAX_CANDIDATES = 40;

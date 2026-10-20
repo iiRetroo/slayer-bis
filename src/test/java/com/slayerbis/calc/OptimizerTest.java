@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -316,5 +317,23 @@ public class OptimizerTest
 		}
 		// melee sets have no ammo to compare
 		assertTrue(optimizer.ammoOptions(optimizer.optimise(owned, AttackType.SLASH), owned).isEmpty());
+	}
+
+	@Test
+	public void gryphonSetsMeetTheWeight()
+	{
+		List<Optimizer.Candidate> owned = bank("Abyssal whip", "Dragon defender", "Fighter torso", "Bandos chestplate",
+			"Bandos tassets", "Obsidian platelegs", "Neitiznot faceguard", "Helm of Neitiznot", "Barrows gloves",
+			"Dragon boots", "Amulet of torture", "Fire cape", "Berserker ring (i)", "Granite maul");
+		Optimizer optimizer = new Optimizer(DpsCalculatorTest.maxed(true), monster("Gryphons"));
+		StyleResult free = optimizer.optimise(owned, AttackType.SLASH);
+		StyleResult heavy = optimizer.optimise(owned, AttackType.SLASH, java.util.Collections.emptyMap(), 25000);
+		assertTrue(heavy.isValid());
+		assertTrue(Optimizer.weight(heavy.getGear()) >= 25000);
+		assertTrue(heavy.getResult().getDps() <= free.getResult().getDps() + 1e-9);
+		// impossible weight: nothing qualifies
+		StyleResult impossible = optimizer.optimise(owned, AttackType.SLASH, java.util.Collections.emptyMap(), 500000);
+		assertFalse(impossible.isValid());
+		assertEquals("Shellbane gryphon", resolver.candidates("Gryphons").get(resolver.candidates("Gryphons").size() - 1).getName());
 	}
 }

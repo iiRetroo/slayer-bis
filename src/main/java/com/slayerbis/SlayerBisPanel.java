@@ -54,6 +54,7 @@ import net.runelite.client.ui.PluginPanel;
 class SlayerBisPanel extends PluginPanel
 {
 	private static final DecimalFormat DPS_FORMAT = new DecimalFormat("0.00");
+	private static final DecimalFormat WEIGHT_FORMAT = new DecimalFormat("0.#");
 	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0%");
 	private static final DecimalFormat SECONDS_FORMAT = new DecimalFormat("0.0");
 	private static final String AUTOMATIC = "Automatic";
@@ -280,6 +281,12 @@ class SlayerBisPanel extends PluginPanel
 			content.add(gap(6));
 			content.add(statsBox(shown, best));
 			content.add(banner(shown.getResult()));
+			if (outcome.getTooLight().contains(shown.getType()))
+			{
+				content.add(left(text("None of your sets for this style reach "
+					+ WEIGHT_FORMAT.format(outcome.getMinWeight() / 1000.0)
+					+ " kg, so you'll be knocked back. Wear heavier armour if you can.", WARN, true)));
+			}
 			Double helmet = outcome.getHelmetCost().get(shown.getType());
 			if (helmet != null)
 			{
@@ -469,6 +476,14 @@ class SlayerBisPanel extends PluginPanel
 		box.add(statRow("Max hit", String.valueOf(r.getMaxHit())));
 		box.add(statRow("Accuracy", PERCENT_FORMAT.format(r.getAccuracy())));
 		box.add(statRow("Speed", SECONDS_FORMAT.format(r.getAttackSpeedTicks() * 0.6) + "s"));
+		if (outcome.getMinWeight() > 0)
+		{
+			int grams = Optimizer.weight(shown.getGear());
+			JComponent row = statRow("Weight", WEIGHT_FORMAT.format(grams / 1000.0) + " kg (needs "
+				+ WEIGHT_FORMAT.format(outcome.getMinWeight() / 1000.0) + ")");
+			row.setToolTipText("Gryphons knock you back if your worn gear is lighter than this.");
+			box.add(row);
+		}
 		JComponent eta = taskTime(r);
 		if (eta != null)
 		{
