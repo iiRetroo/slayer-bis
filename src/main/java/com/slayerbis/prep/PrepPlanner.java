@@ -305,7 +305,7 @@ public final class PrepPlanner
 			addOptions(teleports, "Back to " + request.getSlayerMaster(), masterTeleports, owned);
 		}
 		return new PrepPlan(requirements, lines, teleports, notes, tips, slots,
-			Collections.unmodifiableSet(ids));
+			Collections.unmodifiableSet(ids), safespots(info, locationKeys, locationKnown(request.getLocation(), locationKeys)));
 	}
 
 	/**
@@ -534,6 +534,26 @@ public final class PrepPlanner
 			keys.addAll(info.locations);
 		}
 		return keys;
+	}
+
+	/**
+	 * Safespot descriptions: for the reported location when the Slayer plugin knows it, otherwise all.
+	 */
+	private static List<PrepPlan.Safespot> safespots(PrepData.TaskInfo info, List<String> keys, boolean locationKnown)
+	{
+		if (info == null || info.safespots == null)
+		{
+			return Collections.emptyList();
+		}
+		List<PrepPlan.Safespot> out = new ArrayList<>();
+		for (PrepData.Safespot s : info.safespots)
+		{
+			if (!locationKnown || s.location == null || keys.contains(s.location))
+			{
+				out.add(new PrepPlan.Safespot(s.location, s.text));
+			}
+		}
+		return out;
 	}
 
 	private static boolean locationKnown(String location, List<String> keys)

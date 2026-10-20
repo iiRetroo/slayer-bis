@@ -1148,7 +1148,7 @@ public class SlayerBisPlugin extends Plugin
 				.suggestSpecWeapon(settings.isSpecWeapon())
 				.slayerMaster(settings.getSlayerMaster() == SlayerMaster.NONE ? null : settings.getSlayerMaster().getName())
 				.build())
-				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of());
+				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of(), List.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining());

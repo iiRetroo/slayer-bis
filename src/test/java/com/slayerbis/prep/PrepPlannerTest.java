@@ -420,4 +420,26 @@ public class PrepPlannerTest
 			.owned(owned("Necklace of passage(5)", 3)).build());
 		assertTrue(none.getInventory().isEmpty());
 	}
+
+	@Test
+	public void safespotsFollowTheReportedLocation()
+	{
+		PrepPlan any = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned()).build());
+		assertEquals(4, any.getSafespots().size());
+		PrepPlan tower = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").location("Slayer Tower")
+			.bestType(AttackType.SLASH).owned(owned()).build());
+		assertEquals(1, tower.getSafespots().size());
+		assertEquals("Slayer Tower", tower.getSafespots().get(0).getLocation());
+	}
+
+	@Test
+	public void noSafespotsForBosses()
+	{
+		for (String boss : new String[]{"the alchemical hydra", "vorkath", "zulrah", "araxxor", "the king black dragon",
+			"the thermonuclear smoke devil"})
+		{
+			assertTrue(boss, data.allTasks().get(boss).safespots == null);
+		}
+	}
 }

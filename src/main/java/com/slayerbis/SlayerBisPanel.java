@@ -293,6 +293,10 @@ class SlayerBisPanel extends PluginPanel
 		{
 			content.add(collapsible("Getting there", teleports));
 		}
+		if (!outcome.getPrep().getSafespots().isEmpty())
+		{
+			content.add(collapsible("Safespots", safespots()));
+		}
 		content.add(collapsible("Details", details(shown)));
 
 		content.revalidate();
@@ -680,6 +684,23 @@ class SlayerBisPanel extends PluginPanel
 		{
 			list.add(left(text("Fairy rings need a Dramen or Lunar staff unless you have the Lumbridge Elite diary.", MUTED, true)));
 		}
+		return list;
+	}
+
+	private JComponent safespots()
+	{
+		JPanel list = column();
+		String location = null;
+		for (PrepPlan.Safespot s : outcome.getPrep().getSafespots())
+		{
+			if (s.getLocation() != null && !s.getLocation().equals(location))
+			{
+				location = s.getLocation();
+				list.add(left(text(location, Color.WHITE, false)));
+			}
+			list.add(left(text(s.getText(), MUTED, true)));
+		}
+		list.add(left(text("Summarised from the OSRS Wiki; its Slayer task pages have pictures.", MUTED, true)));
 		return list;
 	}
 

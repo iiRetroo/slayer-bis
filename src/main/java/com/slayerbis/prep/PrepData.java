@@ -33,6 +33,7 @@ public final class PrepData
 		/** Monsters hit hard enough that combo eating helps. */
 		boolean comboEat;
 		List<String> locations;
+		List<Safespot> safespots;
 	}
 
 	static final class InventoryItem
@@ -49,6 +50,13 @@ public final class PrepData
 	{
 		String name;
 		String note;
+	}
+
+	static final class Safespot
+	{
+		/** Where it is, or null when it applies anywhere. */
+		String location;
+		String text;
 	}
 
 	static final class Teleport

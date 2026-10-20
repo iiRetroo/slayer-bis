@@ -44,6 +44,14 @@ public class PrepPlan
 	}
 
 	@Value
+	public static class Safespot
+	{
+		/** null when it applies to every location. */
+		String location;
+		String text;
+	}
+
+	@Value
 	public static class TeleportOption
 	{
 		String location;
@@ -62,4 +70,6 @@ public class PrepPlan
 	int slotsUsed;
 	/** Bank item ids of the suggested supplies, for highlighting. */
 	Set<Integer> supplyBankIds;
+	/** Text descriptions of safespots for the task; never drawn in the game. */
+	List<Safespot> safespots;
 }

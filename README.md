@@ -32,6 +32,7 @@ When you open your bank, the plugin reads your banked items (plus, optionally, w
 - gear the task requires, such as a mirror shield for basilisks or boots of stone for Karuulm, which is kept in every suggested set
 - a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, prayer potions or moonlight moth mixes, a boosting potion for your best style, loot tools, a teleport item, and your best food (with karambwans for combo eating on hard-hitting tasks)
 - teleports to the task location, ticked off when you own the item
+- where to safespot the task's monsters, as short text descriptions
 - what was assumed (levels, prayers, potions, spellbook)
 
 The panel is laid out like the game: a tab per style with its DPS (best in green), the set in the worn-equipment layout with bank items outlined, a stats box, and the inventory as item icons with stack counts. By default the inventory shows all 28 slots like the game, ticked off slot by slot as you withdraw; it's tall, so the panel may scroll. The *Inventory view* setting switches to Compact, one tile per item with a stack count. "Other weapons", "Getting there" and "Details" fold away until you need them. The chosen gear is outlined in your bank in one colour and the suggested supplies in another. While you bank, tiles turn green once an item is on you (amber means it's still in the bank), and a badge counts what's left to withdraw. **Show in bank** uses the core Bank Tags plugin's temporary tag view to show only the suggested items; click it again for your full bank. Your saved bank tags are not changed. Use the picker at the top to choose which monster to calculate against (some tasks cover several).
@@ -72,6 +73,8 @@ For monsters with lots of HP (250 or more, such as bosses, rune dragons and Cerb
 Tasks that are usually cannoned (kalphites, dagannoth, trolls and others) get a tip, plus your cannon and cannonballs if you own a full cannon. Tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons) get a bursting tip and your rune pouch.
 
 The **Loot tools** setting chooses between all drops (the default), common drops only (loot that drops at least once every 64 kills on average), or off. Tools you don't own are never suggested.
+
+**Safespots** are short text descriptions, summarised from the OSRS Wiki, for the location the Slayer plugin reports, or for every listed location when it doesn't. They're text only: no tiles are drawn or highlighted, and bosses, Slayer bosses and demi-bosses are left out, as RuneLite's rules require.
 
 Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
 

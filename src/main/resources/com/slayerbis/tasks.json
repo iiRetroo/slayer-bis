@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting.",
+  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles.",
   "tasks": {
     "aberrant spectres": {
       "required": {
@@ -13,6 +13,20 @@
         "Slayer Tower",
         "Stronghold Slayer Cave",
         "Catacombs of Kourend"
+      ],
+      "safespots": [
+        {
+          "location": "Slayer Tower",
+          "text": "Use the walls, brick piles or suits of armour to block them. Ranged or Magic only: you need at least 6 tiles between you."
+        },
+        {
+          "location": "Stronghold Slayer Cave",
+          "text": "Several spots, but most only work once they stop being aggressive."
+        },
+        {
+          "location": "Catacombs of Kourend",
+          "text": "Deviant spectres: stand south of the arch below the steel dragons and attack across the water."
+        }
       ]
     },
     "abyssal demons": {
@@ -20,7 +34,12 @@
         "Slayer Tower",
         "Catacombs of Kourend"
       ],
-      "stacks": true
+      "stacks": true,
+      "safespots": [
+        {
+          "text": "Can't really be safespotted: they teleport themselves or you around when hit."
+        }
+      ]
     },
     "adamant dragons": {
       "dragonfire": "dragon",
@@ -30,14 +49,29 @@
       "comboEat": true
     },
     "ankou": {
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Stronghold of Security",
+          "text": "Large south-west room: stand on the south side of the south-easternmost skeleton."
+        },
+        {
+          "location": "Forgotten Cemetery",
+          "text": "Behind the south-west coffin, between the bone spawns (around level 30 Wilderness)."
+        }
+      ]
     },
     "araxxor": {
       "venom": true,
       "comboEat": true
     },
     "araxytes": {
-      "venom": true
+      "venom": true,
+      "safespots": [
+        {
+          "text": "Along the east wall and in the south-east corner of the room."
+        }
+      ]
     },
     "banshees": {
       "required": {
@@ -49,6 +83,16 @@
       },
       "locations": [
         "Slayer Tower"
+      ],
+      "safespots": [
+        {
+          "location": "Slayer Tower",
+          "text": "Two squares south of the torch on the south side of the stairs."
+        },
+        {
+          "location": "Catacombs of Kourend",
+          "text": "Twisted banshees here can be safespotted and have better drops."
+        }
       ]
     },
     "basilisks": {
@@ -60,6 +104,12 @@
       },
       "locations": [
         "Fremennik Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Fremennik Slayer Dungeon",
+          "text": "From the southern entrance using the south-east wall, or behind the rocks on either side. You still need a mirror shield: their gaze is ranged."
+        }
       ]
     },
     "black demons": {
@@ -67,26 +117,78 @@
         "Taverley Dungeon",
         "Catacombs of Kourend"
       ],
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Taverley Dungeon",
+          "text": "Next to the agility pipe; you can cannon 2 or 3 of the 4 demons from there."
+        },
+        {
+          "location": "Chasm of Fire",
+          "text": "Bottom floor: by the stalagmites in the far north, or in the centre by the Voice of Yama."
+        }
+      ]
     },
     "black dragons": {
       "dragonfire": "dragon",
       "locations": [
         "Taverley Dungeon"
       ],
-      "comboEat": true
+      "comboEat": true,
+      "safespots": [
+        {
+          "location": "Taverley Dungeon",
+          "text": "The two near the Obelisk of Fire: stand behind the ladder. Upper level (task only): spots in the middle; the left one is safer."
+        }
+      ]
     },
     "bloodveld": {
       "locations": [
         "Slayer Tower",
         "Stronghold Slayer Cave",
         "Catacombs of Kourend"
+      ],
+      "safespots": [
+        {
+          "location": "Slayer Tower",
+          "text": "Centre room: the north-east corner behind the chair, or by the armour stands and wardrobes. Basement: the north-west corner between the chest, chair, broken table and shelves."
+        },
+        {
+          "location": "Stronghold Slayer Cave",
+          "text": "East room: north of some rocks and east of a pillar. The north-east section also works with a cannon, but is often busy."
+        },
+        {
+          "location": "God Wars Dungeon",
+          "text": "Behind the brick piles north-east of the entrance rope. Wear a Saradomin and a Zamorak item."
+        },
+        {
+          "location": "Catacombs of Kourend",
+          "text": "From the south-west path to the hill giants."
+        }
       ]
     },
     "blue dragons": {
       "dragonfire": "dragon",
       "locations": [
         "Taverley Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Taverley Dungeon",
+          "text": "Behind the columns and large rocks; a halberd works too."
+        },
+        {
+          "location": "Heroes' Guild",
+          "text": "The fenced-off dragon can be safespotted."
+        },
+        {
+          "location": "Ogre Enclave",
+          "text": "Spots for one or two dragons at a time (needs part of Watchtower)."
+        },
+        {
+          "location": "Isle of Souls Dungeon",
+          "text": "Inside the stalagmite nook with two adamantite rocks on the east side, or in the northern passage."
+        }
       ]
     },
     "bronze dragons": {
@@ -95,6 +197,12 @@
     "cave crawlers": {
       "locations": [
         "Fremennik Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Fremennik Slayer Dungeon",
+          "text": "Use the rocks around the walls of the room."
+        }
       ]
     },
     "cave horrors": {
@@ -105,6 +213,12 @@
       },
       "locations": [
         "Mos Le'Harmless Caves"
+      ],
+      "safespots": [
+        {
+          "location": "Mos Le'Harmless Cave",
+          "text": "Next to the entrance behind the Fire of Eternal Light, or just past it between the stalagmites and the lake."
+        }
       ]
     },
     "cave kraken": {
@@ -121,6 +235,12 @@
       },
       "locations": [
         "Fremennik Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Fremennik Slayer Dungeon",
+          "text": "Behind the large rock formation to the north."
+        }
       ]
     },
     "crawling hands": {
@@ -133,7 +253,13 @@
         "Lighthouse",
         "Waterbirth Island"
       ],
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Catacombs of Kourend",
+          "text": "Lure them round a corner so they get stuck, or stand behind a warped jelly (not aggressive)."
+        }
+      ]
     },
     "dark beasts": {
       "locations": [
@@ -164,21 +290,46 @@
       "locations": [
         "Catacombs of Kourend"
       ],
-      "stacks": true
+      "stacks": true,
+      "safespots": [
+        {
+          "location": "Catacombs of Kourend",
+          "text": "Range them across the water."
+        }
+      ]
     },
     "fever spiders": {
       "required": {
         "hands": [
           "Slayer gloves"
         ]
-      }
+      },
+      "safespots": [
+        {
+          "text": "South-west corner: trap them on the edges of the crates."
+        }
+      ]
     },
     "fire giants": {
       "locations": [
         "Stronghold Slayer Cave",
         "Catacombs of Kourend"
       ],
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Giants' Den",
+          "text": "At the entrance to the fire giant area, or next to the pillar of fire in the middle."
+        },
+        {
+          "location": "Waterfall Dungeon",
+          "text": "Next to the single door in the western room (once they stop being aggressive)."
+        },
+        {
+          "location": "Stronghold Slayer Cave",
+          "text": "Groups of three giants, each with a safespot nearby."
+        }
+      ]
     },
     "fossil island wyverns": {
       "dragonfire": "wyvern",
@@ -200,10 +351,22 @@
       ],
       "locations": [
         "Slayer Tower"
+      ],
+      "safespots": [
+        {
+          "location": "Slayer Tower",
+          "text": "Top floor: by the doorway in the south-west. Basement: the north-east corner behind the bucket."
+        }
       ]
     },
     "greater demons": {
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Demonic Ruins",
+          "text": "Several spots to range them from (Wilderness)."
+        }
+      ]
     },
     "green dragons": {
       "dragonfire": "dragon"
@@ -213,7 +376,12 @@
         "shield": [
           "Bug lantern"
         ]
-      }
+      },
+      "safespots": [
+        {
+          "text": "Near fairy ring DKP: between the two trees to the south behind the small jungle plant, or on the beach by the fairy ring."
+        }
+      ]
     },
     "hellhounds": {
       "locations": [
@@ -221,7 +389,21 @@
         "Taverley Dungeon",
         "Catacombs of Kourend"
       ],
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Taverley Dungeon",
+          "text": "On the rocks and columns in the lower section."
+        },
+        {
+          "location": "Catacombs of Kourend",
+          "text": "In the hallway; stand on its east side or one can reach you."
+        },
+        {
+          "location": "Karuulm Slayer Dungeon",
+          "text": "At the entrance to their section, against the north wall."
+        }
+      ]
     },
     "hill giants": {
       "cannon": true
@@ -251,6 +433,16 @@
     "jellies": {
       "locations": [
         "Fremennik Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Fremennik Slayer Dungeon",
+          "text": "Fire over the rocks in the west of the room, or the south near the turoth."
+        },
+        {
+          "location": "Catacombs of Kourend",
+          "text": "From the east or west shore."
+        }
       ]
     },
     "kalphites": {
@@ -264,16 +456,36 @@
         "feet": [
           "Insulated boots"
         ]
-      }
+      },
+      "safespots": [
+        {
+          "text": "Use the clouds or holes so they can't get into melee range. They still attack with magic from range."
+        }
+      ]
     },
     "kurask": {
       "locations": [
         "Fremennik Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Fremennik Slayer Dungeon",
+          "text": "The north-west corner of the lower level."
+        },
+        {
+          "location": "Iorwerth Dungeon",
+          "text": "The northern wall of the southernmost kurask section."
+        }
       ]
     },
     "lava dragons": {
       "dragonfire": "dragon",
-      "comboEat": true
+      "comboEat": true,
+      "safespots": [
+        {
+          "text": "Skeleton piles and edges on Lava Dragon Isle, or some southern spawns from outside the isle. Ranged or Magic only."
+        }
+      ]
     },
     "lesser demons": {
       "cannon": true
@@ -312,6 +524,11 @@
           "perKill": true,
           "stackable": true
         }
+      ],
+      "safespots": [
+        {
+          "text": "By the fairy ring, the STASH unit to the west, or along the shore."
+        }
       ]
     },
     "molanisks": {
@@ -321,6 +538,11 @@
             "Slayer bell"
           ],
           "note": "to lure molanisks"
+        }
+      ],
+      "safespots": [
+        {
+          "text": "On the large rock down the path south of the fairy ring."
         }
       ]
     },
@@ -344,10 +566,21 @@
     "pyrefiends": {
       "locations": [
         "Fremennik Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "text": "Hard to safespot (they are small); use obstacles you can attack over. Pyrelords can be safespotted behind a tree."
+        }
       ]
     },
     "red dragons": {
-      "dragonfire": "dragon"
+      "dragonfire": "dragon",
+      "safespots": [
+        {
+          "location": "Brimhaven Dungeon",
+          "text": "Next to the pipe shortcut to the black demons, or by the fire and stalagmite near the strange floor shortcut."
+        }
+      ]
     },
     "rockslugs": {
       "inventory": [
@@ -410,7 +643,12 @@
       "comboEat": true
     },
     "suqahs": {
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "text": "Next to the hill in the north (works with a cannon), or by the trees in the quieter south."
+        }
+      ]
     },
     "the alchemical hydra": {
       "required": {
@@ -446,7 +684,12 @@
       "locations": [
         "Troll Stronghold"
       ],
-      "cannon": true
+      "cannon": true,
+      "safespots": [
+        {
+          "text": "Use the rocks along the passages; lots of obstacles make it easy."
+        }
+      ]
     },
     "turoth": {
       "locations": [
@@ -469,6 +712,12 @@
     "waterfiends": {
       "locations": [
         "Ancient Cavern"
+      ],
+      "safespots": [
+        {
+          "location": "Ancient Cavern",
+          "text": "Attack across the river with Ranged or Magic (they only reach 4 tiles), or from by the pillar."
+        }
       ]
     },
     "wyrms": {
@@ -481,6 +730,12 @@
       },
       "locations": [
         "Karuulm Slayer Dungeon"
+      ],
+      "safespots": [
+        {
+          "location": "Karuulm Slayer Dungeon",
+          "text": "Task-only area: lure a wyrm from the east alcove of the second island into the corner and range it."
+        }
       ]
     },
     "zulrah": {
