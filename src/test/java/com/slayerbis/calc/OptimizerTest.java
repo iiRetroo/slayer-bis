@@ -336,4 +336,27 @@ public class OptimizerTest
 		assertFalse(impossible.isValid());
 		assertEquals("Shellbane gryphon", resolver.candidates("Gryphons").get(resolver.candidates("Gryphons").size() - 1).getName());
 	}
+
+	@Test
+	public void spellOptionsListEveryCastableSpellBestFirst()
+	{
+		List<Optimizer.Candidate> owned = bank("Trident of the Swamp", "Staff of the Dead", "Occult necklace");
+		Optimizer optimizer = new Optimizer(DpsCalculatorTest.maxed(true), monster("Bloodveld"));
+		StyleResult magic = optimizer.optimise(owned, AttackType.MAGIC);
+		List<StyleResult.Alternative> spells = optimizer.spellOptions(magic);
+		if (magic.getResult().getSpell() == null)
+		{
+			// a powered staff casts its own spell: nothing to pick
+			assertTrue(spells.isEmpty());
+			magic = optimizer.optimise(bank("Staff of the Dead", "Occult necklace"), AttackType.MAGIC);
+			spells = optimizer.spellOptions(magic);
+		}
+		assertTrue(spells.size() > 5);
+		assertEquals(magic.getResult().getDps(), spells.get(0).getResult().getDps(), 1e-9);
+		assertTrue(spells.stream().anyMatch(a -> a.getResult().getSpell().getName().equals("Fire Strike")));
+		for (int i = 1; i < spells.size(); i++)
+		{
+			assertTrue(spells.get(i).getResult().getDps() <= spells.get(i - 1).getResult().getDps());
+		}
+	}
 }

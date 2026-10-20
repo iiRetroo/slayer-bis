@@ -262,8 +262,8 @@ class SlayerBisPanel extends PluginPanel
 
 		StyleResult best = outcome.best();
 		AttackType shownType = selected != null ? selected : best == null ? null : best.getType();
-		StyleResult shown = shownType == null ? null : outcome.withAmmo(outcome.getResults().get(shownType),
-			plugin.getSelectedAmmo());
+		StyleResult shown = shownType == null ? null : outcome.withSpell(outcome.withAmmo(
+			outcome.getResults().get(shownType), plugin.getSelectedAmmo()), plugin.getSelectedSpell());
 
 		content.add(styleTabs(best, shownType));
 		renderWarnings(best);
@@ -280,7 +280,7 @@ class SlayerBisPanel extends PluginPanel
 			content.add(centered(equipmentGrid(shown)));
 			content.add(gap(6));
 			content.add(statsBox(shown, best));
-			content.add(banner(shown.getResult()));
+			content.add(banner(shown.getResult(), shown.getType()));
 			if (outcome.getTooLight().contains(shown.getType()))
 			{
 				content.add(left(text("None of your sets for this style reach "
@@ -440,6 +440,30 @@ class SlayerBisPanel extends PluginPanel
 	}
 
 	/**
+	 * Every spell the set can cast, with its DPS, so a cheaper one can be picked.
+	 */
+	private JPopupMenu spellMenu(List<StyleResult.Alternative> options, String current)
+	{
+		JPopupMenu menu = new JPopupMenu();
+		double top = options.get(0).getResult().getDps();
+		for (int i = 0; i < options.size(); i++)
+		{
+			CalcResult r = options.get(i).getResult();
+			String name = r.getSpell().getName();
+			JMenuItem item = new JMenuItem((name.equals(current) ? "> " : "") + name + "  " + DPS_FORMAT.format(r.getDps())
+				+ " DPS" + (i == 0 ? " (best)" : " (" + DPS_FORMAT.format(r.getDps() - top) + ")"));
+			String pick = i == 0 ? null : name;
+			item.addActionListener(e ->
+			{
+				plugin.selectSpell(pick);
+				render();
+			});
+			menu.add(item);
+		}
+		return menu;
+	}
+
+	/**
 	 * Every owned ammo the ranged weapon can fire, with its DPS, so a cheaper one can be picked.
 	 */
 	private JPopupMenu ammoMenu(int currentAmmoId)
@@ -549,7 +573,7 @@ class SlayerBisPanel extends PluginPanel
 		return row;
 	}
 
-	private JComponent banner(CalcResult r)
+	private JComponent banner(CalcResult r, AttackType type)
 	{
 		String main = r.getSpell() != null ? r.getSpell().getName() : r.getStance().getDisplayName();
 		int targets = outcome.getBurstTargets();
@@ -563,6 +587,20 @@ class SlayerBisPanel extends PluginPanel
 		label.setOpaque(true);
 		label.setBackground(BANNER);
 		label.setBorder(new EmptyBorder(3, 0, 3, 0));
+		List<StyleResult.Alternative> spells = outcome.getSpellOptions().getOrDefault(type, List.of());
+		if (r.getSpell() != null && spells.size() > 1)
+		{
+			label.setToolTipText("Click to compare spells");
+			label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			label.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseClicked(MouseEvent e)
+				{
+					spellMenu(spells, r.getSpell().getName()).show(label, 0, label.getHeight());
+				}
+			});
+		}
 		JPanel wrap = new JPanel(new BorderLayout());
 		wrap.setBorder(new EmptyBorder(4, 0, 0, 0));
 		wrap.add(label, BorderLayout.CENTER);

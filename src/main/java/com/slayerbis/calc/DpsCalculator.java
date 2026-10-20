@@ -93,6 +93,49 @@ public final class DpsCalculator
 	}
 
 	/**
+	 * The result for every spell this gear can cast: autocast spells for the weapon's spellbook, or
+	 * bursts and barrages when set up for them. Empty when the weapon has its own spell or none.
+	 */
+	public List<CalcResult> spellResults(GearItem[] gear)
+	{
+		Set<String> names = new HashSet<>(16);
+		for (GearItem g : gear)
+		{
+			if (g != null)
+			{
+				names.add(g.getName());
+			}
+		}
+		List<CalcResult> out = new ArrayList<>();
+		if (player.getBurstTargets() > 0)
+		{
+			for (Spell spell : Spell.castable(Spell.ANCIENT, player.getMagic()))
+			{
+				if (spell.isMultiTarget())
+				{
+					CalcResult r = new Attack(gear, names, AttackType.MAGIC, Stance.AUTOCAST, spell).result();
+					out.add(new CalcResult(r.getDps() * player.getBurstTargets(), r.getMaxHit(), r.getAccuracy(),
+						r.getAttackSpeedTicks(), r.getStance(), r.getSpell()));
+				}
+			}
+			return out;
+		}
+		GearItem weapon = gear[WEAPON];
+		String category = weapon == null ? "Unarmed" : weapon.getCategory();
+		if (!WeaponRules.stances(category, AttackType.MAGIC).contains(Stance.AUTOCAST))
+		{
+			return out;
+		}
+		List<Spell> book = player.isAncientSpellbook() && weapon != null && WeaponRules.canAutocastAncients(weapon.getName())
+			? Spell.ANCIENT : Spell.STANDARD;
+		for (Spell spell : Spell.castable(book, player.getMagic()))
+		{
+			out.add(new Attack(gear, names, AttackType.MAGIC, Stance.AUTOCAST, spell).result());
+		}
+		return out;
+	}
+
+	/**
 	 * Casting an Ancient burst or barrage by hand (any weapon can) on a stack of monsters: the best
 	 * one for the Magic level, with DPS on one target times the number of targets. Each target is
 	 * rolled separately in game, so the expected damage simply adds up.

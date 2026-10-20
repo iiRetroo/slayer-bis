@@ -163,6 +163,35 @@ public final class Optimizer
 		return out;
 	}
 
+	/**
+	 * The magic set with each spell it can cast, best first, so a cheaper spell's DPS can be
+	 * compared. Empty when the weapon casts its own spell.
+	 */
+	public List<StyleResult.Alternative> spellOptions(StyleResult result)
+	{
+		if (result == null || !result.isValid() || result.getType() != AttackType.MAGIC
+			|| result.getResult().getSpell() == null)
+		{
+			return Collections.emptyList();
+		}
+		GearItem[] items = new GearItem[SLOTS];
+		for (int i = 0; i < SLOTS; i++)
+		{
+			Candidate c = result.getGear()[i];
+			items[i] = c == null ? null : c.item;
+		}
+		List<StyleResult.Alternative> out = new ArrayList<>();
+		for (CalcResult r : calculator.spellResults(items))
+		{
+			if (r.getDps() > 0)
+			{
+				out.add(new StyleResult.Alternative(r, result.getGear()));
+			}
+		}
+		out.sort((a, b) -> Double.compare(b.getResult().getDps(), a.getResult().getDps()));
+		return out;
+	}
+
 	public StyleResult optimise(Collection<Candidate> owned, AttackType type)
 	{
 		return optimise(owned, type, Collections.emptyMap());

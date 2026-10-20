@@ -48,6 +48,8 @@ class OptimizationOutcome
 	Set<AttackType> tooLight;
 	/** Per style, the DPS given up to wear a Serpentine helm against poison; only where it was worn. */
 	Map<AttackType, Double> serpentineCost;
+	/** Magic and Burst: the set with each spell it can cast, best first. */
+	Map<AttackType, List<StyleResult.Alternative>> spellOptions;
 
 	@Value
 	static class ChargeHint
@@ -83,6 +85,28 @@ class OptimizationOutcome
 	StyleResult resultFor(AttackType type)
 	{
 		return type == null ? best() : results.get(type);
+	}
+
+	/**
+	 * A magic or burst result with the chosen spell, or the result itself when no spell is chosen
+	 * or it isn't one of the options for that style.
+	 */
+	StyleResult withSpell(StyleResult r, String spell)
+	{
+		if (r == null || spell == null)
+		{
+			return r;
+		}
+		for (StyleResult.Alternative alt : spellOptions.getOrDefault(r.getType(), List.of()))
+		{
+			if (spell.equals(alt.getResult().getSpell().getName()))
+			{
+				return new StyleResult(r.getType(), alt.getResult(), r.getGear(), r.getCombinationsTried(),
+					r.getItemsConsidered(), r.getItemsAfterPruning(), r.getSetsConsidered(), r.isStoppedEarly(),
+					r.getAlternatives());
+			}
+		}
+		return r;
 	}
 
 	/**

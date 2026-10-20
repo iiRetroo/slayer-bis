@@ -200,6 +200,8 @@ public class SlayerBisPlugin extends Plugin
 	private volatile Integer selectedAmmo;
 	/** Main food picked in the panel, or null for the best owned. */
 	private volatile String selectedFood;
+	/** Spell picked in the panel for the magic or burst set, or null for the best. */
+	private volatile String selectedSpell;
 	/** Sorted bank item ids to outline; replaced wholesale so the overlay never sees a partial update. */
 	private volatile int[] highlightIds = new int[0];
 	private volatile int[] supplyHighlightIds = new int[0];
@@ -723,6 +725,7 @@ public class SlayerBisPlugin extends Plugin
 			lastGearSignature = Collections.emptySet();
 			selectedMonsterId = null;
 			selectedAmmo = null;
+			selectedSpell = null;
 			selectedFood = null;
 			outcome = null;
 			highlightIds = new int[0];
@@ -785,6 +788,19 @@ public class SlayerBisPlugin extends Plugin
 	Integer getSelectedAmmo()
 	{
 		return selectedAmmo;
+	}
+
+	/**
+	 * Called from the panel's spell menu; null goes back to the best spell.
+	 */
+	void selectSpell(String spell)
+	{
+		selectedSpell = spell;
+	}
+
+	String getSelectedSpell()
+	{
+		return selectedSpell;
 	}
 
 	/**
@@ -882,6 +898,7 @@ public class SlayerBisPlugin extends Plugin
 		if (!sameTask)
 		{
 			selectedAmmo = null;
+			selectedSpell = null;
 			selectedFood = null;
 		}
 		lastTask = task;
@@ -1193,6 +1210,8 @@ public class SlayerBisPlugin extends Plugin
 						settings.getPreferSlayerHelmet(), helmetCost, weight));
 				}
 			}
+			Map<AttackType, List<StyleResult.Alternative>> spellOptions = new EnumMap<>(AttackType.class);
+			spellOptions.put(AttackType.MAGIC, optimizer.spellOptions(results.get(AttackType.MAGIC)));
 			if (settings.getBurstTargets() > 0 && prep.stacks(prepTask))
 			{
 				// casting Ancients by hand on a stack: magic on the Ancient spellbook, DPS times the targets
@@ -1207,6 +1226,7 @@ public class SlayerBisPlugin extends Plugin
 				{
 					helmetCost.put(AttackType.BURST, burstCost.get(AttackType.MAGIC));
 				}
+				spellOptions.put(AttackType.BURST, burstOptimizer.spellOptions(r));
 				results.put(AttackType.BURST, new StyleResult(AttackType.BURST, r.getResult(), r.getGear(),
 					r.getCombinationsTried(), r.getItemsConsidered(), r.getItemsAfterPruning(), r.getSetsConsidered(),
 					r.isStoppedEarly(), r.getAlternatives()));
@@ -1252,7 +1272,7 @@ public class SlayerBisPlugin extends Plugin
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
 				settings.getBurstTargets(), helmetCost, optimizer.ammoOptions(results.get(AttackType.RANGED), candidates),
-				minWeight, tooLight, serpentineCost);
+				minWeight, tooLight, serpentineCost, spellOptions);
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
