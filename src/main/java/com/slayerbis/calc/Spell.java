@@ -60,6 +60,14 @@ public class Spell
 		new Spell("Ice Barrage", 94, 30, true, "")
 	);
 
+	/**
+	 * Bursts and barrages hit up to 9 monsters around the target.
+	 */
+	public boolean isMultiTarget()
+	{
+		return ancient && (name.endsWith("Burst") || name.endsWith("Barrage"));
+	}
+
 	public static List<Spell> castable(List<Spell> book, int magicLevel)
 	{
 		List<Spell> out = new ArrayList<>();

@@ -442,4 +442,31 @@ public class PrepPlannerTest
 			assertTrue(boss, data.allTasks().get(boss).safespots == null);
 		}
 	}
+
+	@Test
+	public void lureWeaponWhenBurstingIsBest()
+	{
+		OwnedItems bank = owned("Rune pouch", 1, "Iron knife", 200, "Bronze dart", 50);
+		PrepPlan burst = planner.plan(PrepPlanner.Request.builder().task("Dust devils").bestType(AttackType.BURST)
+			.owned(bank).build());
+		PrepPlan.InventoryLine knives = burst.getInventory().stream().filter(l -> l.getName().equals("Iron knife"))
+			.findFirst().orElse(null);
+		assertNotNull(knives);
+		assertTrue(knives.isStackable());
+		assertEquals(200, knives.getQuantity());
+		assertTrue(burst.getInventory().stream().noneMatch(l -> l.getName().equals("Bronze dart")));
+
+		PrepPlan melee = planner.plan(PrepPlanner.Request.builder().task("Dust devils").bestType(AttackType.SLASH)
+			.owned(bank).build());
+		assertTrue(melee.getInventory().stream().noneMatch(l -> l.getName().equals("Iron knife")));
+	}
+
+	@Test
+	public void burstUsesMagicPotions()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Dust devils").bestType(AttackType.BURST)
+			.owned(owned("Divine magic potion(4)", 2, "Super combat potion(4)", 2)).combatPotions(1).build());
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Divine magic potion")));
+		assertTrue(plan.getInventory().stream().noneMatch(l -> l.getName().startsWith("Super combat")));
+	}
 }

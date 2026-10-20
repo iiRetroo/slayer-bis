@@ -35,7 +35,11 @@ public class OptimizerPerformanceTest
 		for (AttackType type : AttackType.values())
 		{
 			long start = System.nanoTime();
-			StyleResult r = optimizer.optimise(bank, type);
+			// burst is magic with a burst setup, as the plugin runs it
+			StyleResult r = type == AttackType.BURST
+				? new Optimizer(DpsCalculatorTest.maxed(true).toBuilder().ancientSpellbook(true).burstTargets(3).build(), target)
+					.optimise(bank, AttackType.MAGIC)
+				: optimizer.optimise(bank, type);
 			long ms = (System.nanoTime() - start) / 1_000_000;
 			System.out.printf("%s: %.3f dps, %d -> %d items, %d combinations, %d ms, stopped early %s%n",
 				type, r.getResult().getDps(), r.getItemsConsidered(), r.getItemsAfterPruning(),

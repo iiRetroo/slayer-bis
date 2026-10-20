@@ -43,6 +43,10 @@ public final class DpsCalculator
 	 */
 	public CalcResult best(GearItem[] gear, AttackType type)
 	{
+		if (type == AttackType.MAGIC && player.getBurstTargets() > 0)
+		{
+			return bestBurst(gear);
+		}
 		GearItem weapon = gear[WEAPON];
 		String category = weapon == null ? "Unarmed" : weapon.getCategory();
 		List<Stance> stances = WeaponRules.stances(category, type);
@@ -89,10 +93,11 @@ public final class DpsCalculator
 	}
 
 	/**
-	 * DPS for one specific stance (no autocast spell). Used by tests to compare against the wiki
-	 * calculator one combat style at a time.
+	 * Casting an Ancient burst or barrage by hand (any weapon can) on a stack of monsters: the best
+	 * one for the Magic level, with DPS on one target times the number of targets. Each target is
+	 * rolled separately in game, so the expected damage simply adds up.
 	 */
-	CalcResult single(GearItem[] gear, AttackType type, Stance stance)
+	private CalcResult bestBurst(GearItem[] gear)
 	{
 		Set<String> names = new HashSet<>(16);
 		for (GearItem g : gear)
@@ -102,7 +107,50 @@ public final class DpsCalculator
 				names.add(g.getName());
 			}
 		}
-		return new Attack(gear, names, type, stance, null).result();
+		CalcResult best = CalcResult.NONE;
+		for (Spell spell : Spell.castable(Spell.ANCIENT, player.getMagic()))
+		{
+			if (!spell.isMultiTarget())
+			{
+				continue;
+			}
+			CalcResult r = new Attack(gear, names, AttackType.MAGIC, Stance.AUTOCAST, spell).result();
+			if (r.getDps() > best.getDps())
+			{
+				best = r;
+			}
+		}
+		if (best == CalcResult.NONE)
+		{
+			return best;
+		}
+		return new CalcResult(best.getDps() * player.getBurstTargets(), best.getMaxHit(), best.getAccuracy(),
+			best.getAttackSpeedTicks(), best.getStance(), best.getSpell());
+	}
+
+	/**
+	 * DPS for one specific stance (no autocast spell). Used by tests to compare against the wiki
+	 * calculator one combat style at a time.
+	 */
+	CalcResult single(GearItem[] gear, AttackType type, Stance stance)
+	{
+		return single(gear, type, stance, null);
+	}
+
+	/**
+	 * As above, casting a given spell (autocast or by hand: the maths is the same).
+	 */
+	CalcResult single(GearItem[] gear, AttackType type, Stance stance, Spell spell)
+	{
+		Set<String> names = new HashSet<>(16);
+		for (GearItem g : gear)
+		{
+			if (g != null)
+			{
+				names.add(g.getName());
+			}
+		}
+		return new Attack(gear, names, type, stance, spell).result();
 	}
 
 	/**
@@ -193,7 +241,8 @@ public final class DpsCalculator
 			{
 				rangedStrength += player.getBlowpipeDartStrength();
 			}
-			if (weaponName.equals("Tumeken's shadow") && type == AttackType.MAGIC)
+			// tripled for its own spell only, not for a spell cast by hand
+			if (weaponName.equals("Tumeken's shadow") && type == AttackType.MAGIC && spell == null)
 			{
 				magicDamage = Math.min(1000, magicDamage * 3);
 				offensive *= 3;

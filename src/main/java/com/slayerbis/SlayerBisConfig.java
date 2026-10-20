@@ -211,6 +211,20 @@ public interface SlayerBisConfig extends Config
 		return false;
 	}
 
+	@Range(max = 9)
+	@ConfigItem(
+		keyName = "burstTargets",
+		name = "Burst targets",
+		description = "On tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons), also "
+			+ "work out bursting or barraging, assuming it hits this many monsters per cast. 0 turns it off.",
+		section = assumptionsSection,
+		position = 9
+	)
+	default int burstTargets()
+	{
+		return 3;
+	}
+
 	@ConfigItem(
 		keyName = "targetOverride",
 		name = "Target override",

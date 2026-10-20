@@ -129,4 +129,48 @@ public class WikiReferenceTest
 		check(ANKOU_86, AttackType.SLASH, Stance.ACCURATE, false, 28, 85.22, 4.983, "Abyssal whip", "Salve amulet(ei)");
 		check(ANKOU_86, AttackType.SLASH, Stance.CONTROLLED, false, 30, 84.94, 5.320, "Abyssal whip", "Salve amulet(ei)");
 	}
+
+	/**
+	 * Manual-cast Ice Barrage, as used for the Burst result. Checked on 2026-10-20 (version
+	 * 89c3e25): "Magic, Manual Cast" with Ice Barrage selected, everything else as above.
+	 */
+	private static CalcResult barrage(String... items)
+	{
+		Monster monster = data.getMonster(ABYSSAL_DEMON);
+		GearItem[] gear = new GearItem[EquipmentSlot.values().length];
+		for (String name : items)
+		{
+			GearItem item = data.findItem(name);
+			assertNotNull("missing item " + name, item);
+			gear[item.getSlot().ordinal()] = item;
+		}
+		Spell barrage = Spell.ANCIENT.stream().filter(s -> s.getName().equals("Ice Barrage")).findFirst().get();
+		return new DpsCalculator(player(false), monster).single(gear, AttackType.MAGIC, Stance.AUTOCAST, barrage);
+	}
+
+	private static void assertResult(CalcResult r, int maxHit, double accuracyPercent, double dps)
+	{
+		assertEquals("max hit", maxHit, r.getMaxHit());
+		assertEquals("accuracy", accuracyPercent, r.getAccuracy() * 100, 0.005);
+		assertEquals("dps", dps, r.getDps(), 0.0005);
+	}
+
+	@Test
+	public void iceBarrageWithKodai()
+	{
+		assertResult(barrage("Kodai wand"), 34, 96.77, 5.493);
+	}
+
+	@Test
+	public void iceBarrageWithVirtus()
+	{
+		assertResult(barrage("Kodai wand", "Virtus robe top"), 36, 97.66, 5.868);
+	}
+
+	@Test
+	public void iceBarrageWithTumekensShadow()
+	{
+		// the shadow's bonuses are only tripled for its own spell, not a manual cast
+		assertResult(barrage("Tumeken's shadow", "Virtus robe top"), 31, 97.78, 5.062);
+	}
 }

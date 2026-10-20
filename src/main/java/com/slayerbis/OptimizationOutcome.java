@@ -33,6 +33,8 @@ class OptimizationOutcome
 	PrepPlan prep;
 	/** Kills left on the task when this was calculated, or 0 if unknown. */
 	int taskRemaining;
+	/** Monsters each burst or barrage is assumed to hit, for the Burst result. */
+	int burstTargets;
 
 	@Value
 	static class ChargeHint

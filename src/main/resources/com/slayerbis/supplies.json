@@ -41,6 +41,7 @@
     "alchables": ["Divine rune pouch", "Rune pouch"]
   },
   "alchRunes": ["Nature rune"],
+  "lureWeapons": ["Bronze knife", "Iron knife", "Bronze dart", "Iron dart", "Steel knife", "Steel dart", "Black knife", "Mithril knife", "Mithril dart"],
   "specWeapons": [
     {"name": "Elder maul", "note": "lowers Defence by 35% on hit"},
     {"name": "Dragon warhammer", "note": "lowers Defence by 30% on hit"},

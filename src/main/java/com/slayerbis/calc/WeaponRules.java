@@ -38,6 +38,11 @@ public final class WeaponRules
 	public static List<Stance> stances(String category, AttackType type)
 	{
 		List<Stance> out = new ArrayList<>(3);
+		if (type == AttackType.BURST)
+		{
+			// worked out as MAGIC with a burst setup, never as its own type
+			return out;
+		}
 		switch (category)
 		{
 			case "2h Sword":

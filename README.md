@@ -13,6 +13,7 @@ SlayerBIS is built for one moment: you've just got a Slayer task and you're stan
 ### Why trust the numbers
 
 - **Real DPS maths, not a ranked list.** Every style is compared, with stab, slash and crush kept separate, using the OSRS Wiki DPS calculator's formulas.
+- **Bursting counts on stacking tasks.** For dust devils, nechryael, smoke devils and abyssal demons, a Burst tab works out your best Ancient burst or barrage setup, with damage counted across the stack.
 - **Every combination is checked.** Outclassed items are set aside first, then every remaining combination of your gear is evaluated, including complete armour sets and two-handed weapons.
 - **Checked against the wiki.** The tests include loadouts whose max hit, accuracy and DPS match the live OSRS Wiki DPS calculator exactly.
 
@@ -70,7 +71,11 @@ Task items that are used up on every kill (bags of salt for rockslugs, ice coole
 
 For monsters with lots of HP (250 or more, such as bosses, rune dragons and Cerberus), the plan adds a Defence-lowering special attack weapon you own: Elder maul, Dragon warhammer, Bandos godsword, Arclight or Barrelchest anchor, in that order. The *Spec weapon* setting turns this off. Special attacks aren't part of the DPS figures.
 
-Tasks that are usually cannoned (kalphites, dagannoth, trolls and others) get a tip, plus your cannon and cannonballs if you own a full cannon. Tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons) get a bursting tip and your rune pouch.
+Tasks that are usually cannoned (kalphites, dagannoth, trolls and others) get a tip, plus your cannon and cannonballs if you own a full cannon. Tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons) get a bursting tip and your rune pouch. When bursting is the best style, the plan adds a stack of cheap throwing knives or darts you own, to tag monsters and gather them into a stack.
+
+### Bursting and barraging
+
+On tasks where monsters stack, the panel gets a **Burst** tab. It finds your best gear for casting the strongest Ancient burst or barrage your Magic level allows, cast by hand with any weapon, so Virtus, a Kodai wand or an Occult necklace come into play. Each target is worked out with the wiki calculator's formulas, then multiplied by the *Burst targets* setting (3 by default, 0 turns it off), since every monster in the stack is hit separately. The banner shows the damage on each target too. If bursting comes out ahead, it's the recommended style and its gear is highlighted. Freezes, healing and other spell effects aren't counted.
 
 The **Loot tools** setting chooses between all drops (the default), common drops only (loot that drops at least once every 64 kills on average), or off. Tools you don't own are never suggested.
 

@@ -88,6 +88,15 @@ public final class PrepPlanner
 	}
 
 	/**
+	 * Whether the task's monsters bunch up, so bursting or barraging is worth working out.
+	 */
+	public boolean stacks(String task)
+	{
+		PrepData.TaskInfo info = data.task(task);
+		return info != null && info.stacks;
+	}
+
+	/**
 	 * Everything the inventory plan depends on.
 	 */
 	@Value
@@ -204,20 +213,22 @@ public final class PrepPlanner
 			slots += addPrayer(lines, ids, owned, prayerPotions, request.getPrayerRestore(), notes);
 		}
 
+		boolean magic = bestType == AttackType.MAGIC || bestType == AttackType.BURST;
 		List<String> stylePotions = bestType == null ? Collections.emptyList()
 			: bestType == AttackType.RANGED ? s.rangedPotions
-			: bestType == AttackType.MAGIC ? s.magicPotions
+			: magic ? s.magicPotions
 			: s.meleePotions;
+		String styleName = magic ? "magic" : bestType == null ? "" : bestType.getDisplayName().toLowerCase(Locale.ROOT);
 		String potion = firstOwned(stylePotions, owned);
 		if (potion != null && combatPotions > 0)
 		{
-			slots += addLine(lines, ids, owned, potion, combatPotions, "boosts your " + bestType.getDisplayName().toLowerCase(Locale.ROOT), false);
+			slots += addLine(lines, ids, owned, potion, combatPotions, "boosts your " + styleName, false);
 		}
 		else if (bestType != null && combatPotions > 0)
 		{
-			notes.add("No " + bestType.getDisplayName().toLowerCase(Locale.ROOT) + " boosting potion found.");
+			notes.add("No " + styleName + " boosting potion found.");
 		}
-		if (bestType == AttackType.MAGIC)
+		if (magic)
 		{
 			String heart = firstOwned(s.magicBoostItems, owned);
 			if (heart != null)
@@ -265,6 +276,11 @@ public final class PrepPlanner
 			if (pouch != null && !listed(lines, pouch))
 			{
 				slots += addLine(lines, ids, owned, pouch, 1, "with burst or barrage runes", false);
+			}
+			String lure = bestType == AttackType.BURST ? firstOwned(s.lureWeapons, owned) : null;
+			if (lure != null)
+			{
+				slots += addStack(lines, ids, owned, lure, "throw one at each monster to gather a stack, then burst it");
 			}
 		}
 

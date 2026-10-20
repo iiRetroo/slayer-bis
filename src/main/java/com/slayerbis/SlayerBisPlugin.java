@@ -921,7 +921,7 @@ public class SlayerBisPlugin extends Plugin
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
-			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster());
+			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster(), config.burstTargets());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -978,6 +978,7 @@ public class SlayerBisPlugin extends Plugin
 		int taskRemaining;
 		boolean specWeapon;
 		SlayerMaster slayerMaster;
+		int burstTargets;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1113,7 +1114,20 @@ public class SlayerBisPlugin extends Plugin
 			Map<AttackType, StyleResult> results = new EnumMap<>(AttackType.class);
 			for (AttackType type : AttackType.values())
 			{
-				results.put(type, optimizer.optimise(candidates, type, required));
+				if (type != AttackType.BURST)
+				{
+					results.put(type, optimizer.optimise(candidates, type, required));
+				}
+			}
+			if (settings.getBurstTargets() > 0 && prep.stacks(task))
+			{
+				// casting Ancients by hand on a stack: magic on the Ancient spellbook, DPS times the targets
+				PlayerSetup burstSetup = setup.toBuilder().ancientSpellbook(true)
+					.burstTargets(settings.getBurstTargets()).build();
+				StyleResult r = new Optimizer(burstSetup, monster, cancel).optimise(candidates, AttackType.MAGIC, required);
+				results.put(AttackType.BURST, new StyleResult(AttackType.BURST, r.getResult(), r.getGear(),
+					r.getCombinationsTried(), r.getItemsConsidered(), r.getItemsAfterPruning(), r.getSetsConsidered(),
+					r.isStoppedEarly(), r.getAlternatives()));
 			}
 
 			Map<AttackType, OptimizationOutcome.ChargeHint> hints = chargeHints(optimizer, candidates, chargeable,
@@ -1151,7 +1165,8 @@ public class SlayerBisPlugin extends Plugin
 				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of(), List.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
-				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining());
+				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
+				settings.getBurstTargets());
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
@@ -1211,6 +1226,10 @@ public class SlayerBisPlugin extends Plugin
 		withCharged.addAll(chargeable);
 		for (AttackType type : AttackType.values())
 		{
+			if (type == AttackType.BURST)
+			{
+				continue;
+			}
 			StyleResult charged = optimizer.optimise(withCharged, type, required);
 			if (!charged.isValid() || charged.getResult().getDps() <= results.get(type).getResult().getDps())
 			{

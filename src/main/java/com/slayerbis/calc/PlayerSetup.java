@@ -7,7 +7,7 @@ import lombok.Value;
  * Player levels and assumed buffs for a calculation. Levels already include any potion boost.
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class PlayerSetup
 {
 	int attack;
@@ -35,4 +35,9 @@ public class PlayerSetup
 	boolean kandarinHardDiary;
 	/** Ranged strength of the darts assumed to be loaded in a blowpipe. */
 	int blowpipeDartStrength;
+	/**
+	 * When above 0, magic means casting an Ancient burst or barrage that hits this many monsters:
+	 * any weapon can cast it manually, and DPS is per-target DPS times this.
+	 */
+	int burstTargets;
 }

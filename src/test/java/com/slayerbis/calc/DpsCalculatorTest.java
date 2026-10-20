@@ -126,4 +126,24 @@ public class DpsCalculatorTest
 		assertTrue(r.getMaxHit() >= 21);
 		assertEquals(5, r.getAttackSpeedTicks());
 	}
+
+	@Test
+	public void burstHitsEveryTargetAndNeedsTheLevel()
+	{
+		GearItem[] kodai = gear("Kodai wand");
+		Spell barrage = Spell.ANCIENT.get(Spell.ANCIENT.size() - 1);
+		assertEquals("Ice Barrage", barrage.getName());
+		CalcResult one = new DpsCalculator(maxed(false), abyssalDemon).single(kodai, AttackType.MAGIC, Stance.AUTOCAST, barrage);
+		PlayerSetup burst = maxed(false).toBuilder().ancientSpellbook(true).burstTargets(3).build();
+		CalcResult three = new DpsCalculator(burst, abyssalDemon).best(kodai, AttackType.MAGIC);
+		assertEquals("Ice Barrage", three.getSpell().getName());
+		assertEquals(one.getDps() * 3, three.getDps(), 1e-9);
+		assertEquals(one.getMaxHit(), three.getMaxHit());
+
+		// Ice Burst at 70, nothing below Smoke Burst's 62
+		PlayerSetup lower = burst.toBuilder().magic(75).build();
+		assertEquals("Ice Burst", new DpsCalculator(lower, abyssalDemon).best(kodai, AttackType.MAGIC).getSpell().getName());
+		PlayerSetup low = burst.toBuilder().magic(61).build();
+		assertEquals(0, new DpsCalculator(low, abyssalDemon).best(kodai, AttackType.MAGIC).getDps(), 0);
+	}
 }

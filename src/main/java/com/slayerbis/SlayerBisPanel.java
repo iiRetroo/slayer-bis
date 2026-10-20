@@ -80,7 +80,7 @@ class SlayerBisPanel extends PluginPanel
 		{EquipmentSlot.HANDS, EquipmentSlot.FEET, EquipmentSlot.RING},
 	};
 
-	private static final String[] TAB_NAMES = {"Stab", "Slash", "Crush", "Rng", "Mag"};
+	private static final String[] TAB_NAMES = {"Stab", "Slash", "Crush", "Rng", "Mag", "Burst"};
 
 	/** Text wraps at this width (pixels) so labels get the right height in the narrow sidebar. */
 	private static final int TEXT_WIDTH = 160;
@@ -305,9 +305,14 @@ class SlayerBisPanel extends PluginPanel
 
 	private JComponent styleTabs(StyleResult best, AttackType shownType)
 	{
-		JPanel tabs = new JPanel(new GridLayout(1, AttackType.values().length, 2, 0));
+		JPanel tabs = new JPanel(new GridLayout(1, outcome.getResults().size(), 2, 0));
 		for (AttackType t : AttackType.values())
 		{
+			if (!outcome.getResults().containsKey(t))
+			{
+				// burst only on tasks where monsters stack
+				continue;
+			}
 			StyleResult r = outcome.getResults().get(t);
 			boolean valid = r != null && r.isValid();
 			boolean isBest = best != null && r == best;
@@ -472,7 +477,10 @@ class SlayerBisPanel extends PluginPanel
 	private JComponent banner(CalcResult r)
 	{
 		String main = r.getSpell() != null ? r.getSpell().getName() : r.getStance().getDisplayName();
-		String sub = r.getSpell() != null ? "Autocast" : shownTypeName();
+		int targets = outcome.getBurstTargets();
+		String sub = AttackType.BURST.getDisplayName().equals(shownTypeName())
+			? "Ancient Magicks, " + DPS_FORMAT.format(r.getDps() / Math.max(1, targets)) + " DPS on each of " + targets
+			: r.getSpell() != null ? "Autocast" : shownTypeName();
 		JLabel label = new JLabel("<html><center>" + escape(main) + "<br><font color='#d8c8b0'>" + escape(sub)
 			+ "</font></center></html>", SwingConstants.CENTER);
 		label.setFont(FontManager.getRunescapeSmallFont());

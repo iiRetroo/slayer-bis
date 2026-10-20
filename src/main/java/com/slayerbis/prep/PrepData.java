@@ -97,6 +97,8 @@ public final class PrepData
 		/** Loot type (herbs, seeds, gems, bones, ashes, alchables) to the items that collect it. */
 		Map<String, List<String>> lootTools;
 		List<String> alchRunes;
+		/** Cheap throwing weapons to tag monsters and gather them into a stack before bursting, cheapest first. */
+		List<String> lureWeapons;
 		List<String> cannonParts;
 		List<String> cannonballs;
 		/** Defence-reducing special attack weapons, best first. */
