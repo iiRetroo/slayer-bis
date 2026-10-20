@@ -59,6 +59,10 @@ Loot tools come from the monster's drop table (`drops.json`, built from the OSRS
 | Bones | Bonecrusher |
 | Demonic ashes | Ash sanctifier |
 
+Task items that are used up on every kill (bags of salt for rockslugs, ice coolers for desert lizards, fishing explosives for mogres) are suggested once per kill left on your task, as one stack. If you own fewer, the panel says how many you're short.
+
+For monsters with lots of HP (250 or more, such as bosses, rune dragons and Cerberus), the plan adds a Defence-lowering special attack weapon you own: Elder maul, Dragon warhammer, Bandos godsword, Arclight or Barrelchest anchor, in that order. The *Spec weapon* setting turns this off. Special attacks aren't part of the DPS figures.
+
 Tasks that are usually cannoned (kalphites, dagannoth, trolls and others) get a tip, plus your cannon and cannonballs if you own a full cannon. Tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons) get a bursting tip and your rune pouch.
 
 The **Loot tools** setting chooses between common drops only (loot that drops at least once every 64 kills on average, the default), all drops, or off. Tools you don't own are never suggested.

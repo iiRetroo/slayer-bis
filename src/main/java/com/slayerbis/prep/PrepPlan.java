@@ -39,6 +39,8 @@ public class PrepPlan
 		boolean required;
 		/** An owned item id to show the icon of, or -1 when none is owned. */
 		int itemId;
+		/** All of the quantity fits in one slot. */
+		boolean stackable;
 	}
 
 	@Value

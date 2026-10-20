@@ -805,7 +805,7 @@ public class SlayerBisPlugin extends Plugin
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
-			slayerPluginService.getRemainingAmount());
+			slayerPluginService.getRemainingAmount(), config.specWeapon());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -859,6 +859,7 @@ public class SlayerBisPlugin extends Plugin
 		boolean fillFood;
 		int lootMaxKills;
 		int taskRemaining;
+		boolean specWeapon;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1011,9 +1012,22 @@ public class SlayerBisPlugin extends Plugin
 				}
 			}
 			PrepPlan plan = settings.isShowPreparation()
-				? prep.plan(task, location, best == null ? null : best.getType(), requirements, owned,
-				settings.getPrayerPotions(), settings.getCombatPotions(), settings.isFillFood(), monster.getName(),
-				settings.getLootMaxKills())
+				? prep.plan(PrepPlanner.Request.builder()
+				.task(task)
+				.location(location)
+				.bestType(best == null ? null : best.getType())
+				.requirements(requirements)
+				.owned(owned)
+				.prayerPotions(settings.getPrayerPotions())
+				.combatPotions(settings.getCombatPotions())
+				.fillFood(settings.isFillFood())
+				.monsterName(monster.getName())
+				.lootMaxKills(settings.getLootMaxKills())
+				.taskRemaining(settings.getTaskRemaining())
+				.monsterHitpoints(monster.getHitpoints())
+				.bestWeapon(bestWeaponName(best))
+				.suggestSpecWeapon(settings.isSpecWeapon())
+				.build())
 				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
@@ -1048,6 +1062,16 @@ public class SlayerBisPlugin extends Plugin
 				}
 			});
 		}
+	}
+
+	private static String bestWeaponName(StyleResult best)
+	{
+		if (best == null || best.getGear() == null)
+		{
+			return null;
+		}
+		Optimizer.Candidate weapon = best.getGear()[EquipmentSlot.WEAPON.ordinal()];
+		return weapon == null ? null : weapon.getItem().getName();
 	}
 
 	/**

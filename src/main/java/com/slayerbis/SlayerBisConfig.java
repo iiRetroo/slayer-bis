@@ -286,11 +286,24 @@ public interface SlayerBisConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "specWeapon",
+		name = "Spec weapon",
+		description = "Suggest a Defence-lowering special attack weapon you own (Dragon warhammer, Bandos godsword "
+			+ "and so on) for monsters with lots of HP",
+		section = prepSection,
+		position = 5
+	)
+	default boolean specWeapon()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "highlightSupplies",
 		name = "Highlight supplies",
 		description = "Outline suggested supplies in your bank as well as gear",
 		section = prepSection,
-		position = 5
+		position = 6
 	)
 	default boolean highlightSupplies()
 	{
@@ -303,7 +316,7 @@ public interface SlayerBisConfig extends Config
 		name = "Supply highlight colour",
 		description = "Colour of the outline around suggested supplies",
 		section = prepSection,
-		position = 6
+		position = 7
 	)
 	default Color supplyHighlightColor()
 	{

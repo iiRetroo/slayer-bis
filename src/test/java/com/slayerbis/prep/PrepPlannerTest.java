@@ -254,4 +254,38 @@ public class PrepPlannerTest
 			owned("Rune pouch", 1), 0, 0, false, "Abyssal demon", PrepPlanner.COMMON_DROP_KILLS);
 		assertEquals(1, plan.getInventory().stream().filter(l -> l.getName().equals("Rune pouch")).count());
 	}
+
+	@Test
+	public void consumableTaskItemsScaleWithKillsLeft()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Rockslugs").bestType(AttackType.RANGED)
+			.owned(owned("Bag of salt", 23)).taskRemaining(40).build());
+		PrepPlan.InventoryLine salt = plan.getInventory().get(0);
+		assertEquals("Bag of salt", salt.getName());
+		assertEquals(40, salt.getQuantity());
+		assertTrue(salt.isStackable());
+		assertEquals(1, plan.getSlotsUsed());
+		assertTrue(plan.getNotes().stream().anyMatch(n -> n.contains("need 40") && n.contains("have 23")));
+		// reusable task items stay at one
+		PrepPlan gargoyles = planner.plan(PrepPlanner.Request.builder().task("Gargoyles").bestType(AttackType.CRUSH)
+			.owned(owned("Rock hammer", 1)).taskRemaining(120).build());
+		assertEquals(1, gargoyles.getInventory().get(0).getQuantity());
+	}
+
+	@Test
+	public void specWeaponOnlyForHighHitpointMonsters()
+	{
+		OwnedItems bank = owned("Dragon warhammer", 1, "Bandos godsword", 1);
+		PrepPlan tanky = planner.plan(PrepPlanner.Request.builder().task("Rune dragons").bestType(AttackType.STAB)
+			.owned(bank).monsterHitpoints(330).suggestSpecWeapon(true).build());
+		assertTrue(tanky.getInventory().stream().anyMatch(l -> l.getName().equals("Dragon warhammer")));
+		PrepPlan small = planner.plan(PrepPlanner.Request.builder().task("Gargoyles").bestType(AttackType.CRUSH)
+			.owned(bank).monsterHitpoints(105).suggestSpecWeapon(true).build());
+		assertTrue(small.getInventory().stream().noneMatch(l -> l.getName().equals("Dragon warhammer")));
+		// already wielding the warhammer: suggest the next one instead
+		PrepPlan wielding = planner.plan(PrepPlanner.Request.builder().task("Rune dragons").bestType(AttackType.CRUSH)
+			.owned(bank).monsterHitpoints(330).bestWeapon("Dragon warhammer").suggestSpecWeapon(true).build());
+		assertTrue(wielding.getInventory().stream().anyMatch(l -> l.getName().equals("Bandos godsword")));
+		assertTrue(wielding.getInventory().stream().noneMatch(l -> l.getName().equals("Dragon warhammer")));
+	}
 }

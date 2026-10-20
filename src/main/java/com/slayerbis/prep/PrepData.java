@@ -37,6 +37,16 @@ public final class PrepData
 	{
 		List<String> names;
 		String note;
+		/** Used up on every kill, so one is needed per kill left. */
+		boolean perKill;
+		/** Fits in one inventory slot however many there are. */
+		boolean stackable;
+	}
+
+	static final class SpecWeapon
+	{
+		String name;
+		String note;
 	}
 
 	static final class Teleport
@@ -69,6 +79,10 @@ public final class PrepData
 		List<String> alchRunes;
 		List<String> cannonParts;
 		List<String> cannonballs;
+		/** Defence-reducing special attack weapons, best first. */
+		List<SpecWeapon> specWeapons;
+		/** A spec weapon is suggested for monsters with at least this much HP. */
+		int specMinHitpoints;
 	}
 
 	private static final class TasksFile

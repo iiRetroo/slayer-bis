@@ -36,6 +36,14 @@
     "alchables": ["Divine rune pouch", "Rune pouch"]
   },
   "alchRunes": ["Nature rune"],
+  "specWeapons": [
+    {"name": "Elder maul", "note": "lowers Defence by 35% on hit"},
+    {"name": "Dragon warhammer", "note": "lowers Defence by 30% on hit"},
+    {"name": "Bandos godsword", "note": "lowers Defence by the damage it deals"},
+    {"name": "Arclight", "note": "lowers Attack, Strength and Defence (more against demons)"},
+    {"name": "Barrelchest anchor", "note": "lowers a combat stat by the damage it deals"}
+  ],
+  "specMinHitpoints": 250,
   "cannonParts": ["Cannon base", "Cannon stand", "Cannon barrels", "Cannon furnace"],
   "cannonballs": ["Granite cannonball", "Cannonball"],
 

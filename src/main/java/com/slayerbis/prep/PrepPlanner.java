@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import lombok.Builder;
+import lombok.Value;
 
 /**
  * Builds the preparation suggestions for a task: gear the task requires, an inventory, and
@@ -82,13 +84,56 @@ public final class PrepPlanner
 	}
 
 	/**
-	 * @param monsterName  the monster being fought, for its drops
-	 * @param lootMaxKills suggest tools for loot that drops at least once per this many kills on
-	 *                     average; 0 turns loot suggestions off
+	 * Everything the inventory plan depends on.
+	 */
+	@Value
+	@Builder
+	public static class Request
+	{
+		String task;
+		/** Where the Slayer plugin says the task is, or null. */
+		String location;
+		AttackType bestType;
+		@Builder.Default
+		List<PrepPlan.Requirement> requirements = Collections.emptyList();
+		OwnedItems owned;
+		int prayerPotions;
+		int combatPotions;
+		boolean fillFood;
+		/** The monster being fought, for its drops. */
+		String monsterName;
+		/** Suggest tools for loot that drops at least once per this many kills; 0 is off. */
+		int lootMaxKills;
+		/** Kills left on the task, for items used up per kill; 0 if unknown. */
+		int taskRemaining;
+		int monsterHitpoints;
+		/** The weapon in the best set, so it is not suggested again as a spec weapon. */
+		String bestWeapon;
+		boolean suggestSpecWeapon;
+	}
+
+	/**
+	 * Shorthand used by tests that only care about the basics.
 	 */
 	public PrepPlan plan(String task, String location, AttackType bestType, List<PrepPlan.Requirement> requirements,
 		OwnedItems owned, int prayerPotions, int combatPotions, boolean fillFood, String monsterName, int lootMaxKills)
 	{
+		return plan(Request.builder().task(task).location(location).bestType(bestType).requirements(requirements)
+			.owned(owned).prayerPotions(prayerPotions).combatPotions(combatPotions).fillFood(fillFood)
+			.monsterName(monsterName).lootMaxKills(lootMaxKills).build());
+	}
+
+	public PrepPlan plan(Request request)
+	{
+		String task = request.getTask();
+		AttackType bestType = request.getBestType();
+		List<PrepPlan.Requirement> requirements = request.getRequirements();
+		OwnedItems owned = request.getOwned();
+		int prayerPotions = request.getPrayerPotions();
+		int combatPotions = request.getCombatPotions();
+		boolean fillFood = request.isFillFood();
+		String monsterName = request.getMonsterName();
+		int lootMaxKills = request.getLootMaxKills();
 		PrepData.TaskInfo info = data.task(task);
 		PrepData.Supplies s = data.supplies();
 		List<PrepPlan.InventoryLine> lines = new ArrayList<>();
@@ -101,11 +146,17 @@ public final class PrepPlanner
 			for (PrepData.InventoryItem item : info.inventory)
 			{
 				String name = firstOwned(item.names, owned);
-				lines.add(new PrepPlan.InventoryLine(name != null ? name : item.names.get(0), 1,
-					name != null ? owned.count(name, false) : 0, item.note, true,
-					name != null ? owned.anyId(name, false) : -1));
+				int have = name != null ? owned.count(name, false) : 0;
+				int need = item.perKill && request.getTaskRemaining() > 0 ? request.getTaskRemaining() : 1;
+				String note = item.note + (item.perKill ? " (one per kill)" : "");
+				lines.add(new PrepPlan.InventoryLine(name != null ? name : item.names.get(0), need, have, note, true,
+					name != null ? owned.anyId(name, false) : -1, item.stackable));
 				collect(name, false, owned, ids);
-				slots++;
+				slots += item.stackable ? 1 : need;
+				if (item.perKill && have > 0 && have < need)
+				{
+					notes.add("You need " + need + " " + name + " for " + need + " kills but have " + have + ".");
+				}
 			}
 		}
 
@@ -164,6 +215,18 @@ public final class PrepPlanner
 			slots += addLine(lines, ids, owned, prayer, prayerPotions, "restores prayer points", false);
 		}
 
+		if (request.isSuggestSpecWeapon() && request.getMonsterHitpoints() >= s.specMinHitpoints && s.specWeapons != null)
+		{
+			for (PrepData.SpecWeapon spec : s.specWeapons)
+			{
+				if (owned.owns(spec.name) && !spec.name.equals(request.getBestWeapon()))
+				{
+					slots += addLine(lines, ids, owned, spec.name, 1, "special attack: " + spec.note, false);
+					break;
+				}
+			}
+		}
+
 		if (lootMaxKills > 0)
 		{
 			slots += addLootTools(lines, ids, owned, monsterName, lootMaxKills);
@@ -181,7 +244,7 @@ public final class PrepPlanner
 				{
 					slots += addLine(lines, ids, owned, part, 1, "dwarf cannon", false);
 				}
-				slots += addLine(lines, ids, owned, balls, 1, "for the cannon", false);
+				slots += addStack(lines, ids, owned, balls, "for the cannon");
 			}
 		}
 		if (info != null && info.stacks)
@@ -213,7 +276,7 @@ public final class PrepPlanner
 				anyFood = true;
 				int take = Math.min(remaining, have);
 				lines.add(new PrepPlan.InventoryLine(food.name, take, have, "heals " + food.heal, false,
-					owned.anyId(food.name, true)));
+					owned.anyId(food.name, true), false));
 				owned.collectBankIds(food.name, true, ids);
 				remaining -= take;
 				slots += take;
@@ -240,7 +303,7 @@ public final class PrepPlanner
 			}
 		}
 
-		return new PrepPlan(requirements, lines, teleports(info, location, owned), notes, tips, slots,
+		return new PrepPlan(requirements, lines, teleports(info, request.getLocation(), owned), notes, tips, slots,
 			Collections.unmodifiableSet(ids));
 	}
 
@@ -274,8 +337,8 @@ public final class PrepPlanner
 				String runes = firstOwned(s.alchRunes, owned);
 				if (runes != null)
 				{
-					slots += addLine(lines, ids, owned, runes, 1, monsterName + " drops " + type[1] + " (" + often
-						+ "); bring a fire staff for High Alchemy", false);
+					slots += addStack(lines, ids, owned, runes, monsterName + " drops " + type[1] + " (" + often
+						+ "); bring a fire staff for High Alchemy");
 				}
 			}
 		}
@@ -323,9 +386,21 @@ public final class PrepPlanner
 	{
 		int have = owned.count(name, false);
 		int take = Math.max(1, Math.min(quantity, have));
-		lines.add(new PrepPlan.InventoryLine(name, take, have, note, required, owned.anyId(name, false)));
+		lines.add(new PrepPlan.InventoryLine(name, take, have, note, required, owned.anyId(name, false), false));
 		collect(name, false, owned, ids);
 		return take;
+	}
+
+	/**
+	 * A stackable item (runes, cannonballs): the whole stack in one slot.
+	 */
+	private static int addStack(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, String name,
+		String note)
+	{
+		int have = owned.count(name, false);
+		lines.add(new PrepPlan.InventoryLine(name, Math.max(1, have), have, note, false, owned.anyId(name, false), true));
+		collect(name, false, owned, ids);
+		return 1;
 	}
 
 	private static void collect(String name, boolean exact, OwnedItems owned, Set<Integer> ids)

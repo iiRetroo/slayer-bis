@@ -516,6 +516,14 @@ class SlayerBisPanel extends PluginPanel
 			boolean missing = l.getOwned() == 0;
 			int packed = missing ? 0 : packedCount(l);
 			String tip = l.getName() + (l.getNote() == null ? "" : " - " + l.getNote()) + " (you have " + l.getOwned() + ")";
+			if (l.isStackable() && slots < PrepPlanner.INVENTORY_SLOTS)
+			{
+				boolean stackPacked = !missing && packed >= l.getQuantity();
+				Color border = missing ? MISSING_BORDER : stackPacked ? READY_BORDER : ready != null ? BANK_BORDER : TILE_BORDER;
+				grid.add(tile(missing ? -1 : l.getItemId(), l.getName(), l.getQuantity() + " x " + tip, border, l.getQuantity()));
+				slots++;
+				continue;
+			}
 			for (int i = 0; i < l.getQuantity() && slots < PrepPlanner.INVENTORY_SLOTS; i++, slots++)
 			{
 				boolean slotPacked = i < packed;
