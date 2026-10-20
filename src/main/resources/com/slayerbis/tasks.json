@@ -709,6 +709,22 @@
         ]
       }
     },
+    "warped creatures": {
+      "locations": [
+        "Poison Waste Dungeon"
+      ],
+      "cannon": true,
+      "safespots": [
+        {
+          "location": "Poison Waste Dungeon",
+          "text": "Terrorbirds: at the start of the dungeon, with a weapon that reaches 9 tiles or more (a crossbow on longrange). They never stop being aggressive, so most other spots don't work."
+        },
+        {
+          "location": "Poison Waste Dungeon",
+          "text": "Tortoises: behind the pillars further in."
+        }
+      ]
+    },
     "waterfiends": {
       "locations": [
         "Ancient Cavern"
@@ -903,6 +919,26 @@
         "items": [
           "Mos le'harmless teleport"
         ]
+      }
+    ],
+    "Poison Waste Dungeon": [
+      {
+        "text": "Spirit tree to the Poison Waste; the dungeon is just west of it"
+      },
+      {
+        "text": "Grand seed pod, then the spirit tree",
+        "items": [
+          "Grand seed pod"
+        ]
+      },
+      {
+        "text": "Ring of wealth: Grand Exchange, then the spirit tree",
+        "items": [
+          "Ring of wealth"
+        ]
+      },
+      {
+        "text": "Fairy ring BKP, then cross the river with a crossbow and mithril grapple"
       }
     ]
   },

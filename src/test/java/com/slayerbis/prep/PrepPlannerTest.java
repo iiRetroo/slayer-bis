@@ -469,4 +469,17 @@ public class PrepPlannerTest
 		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Divine magic potion")));
 		assertTrue(plan.getInventory().stream().noneMatch(l -> l.getName().startsWith("Super combat")));
 	}
+
+	@Test
+	public void warpedCreaturesHaveTeleports()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Warped Creatures").bestType(AttackType.SLASH)
+			.owned(owned("Ring of wealth (5)", 1)).build());
+		assertTrue(plan.getTeleports().stream().anyMatch(t -> t.getLocation().equals("Poison Waste Dungeon")));
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Ring of wealth")));
+		// an uncharged ring can't teleport
+		PrepPlan uncharged = planner.plan(PrepPlanner.Request.builder().task("Warped Creatures").bestType(AttackType.SLASH)
+			.owned(owned("Ring of wealth", 1)).build());
+		assertTrue(uncharged.getInventory().isEmpty());
+	}
 }
