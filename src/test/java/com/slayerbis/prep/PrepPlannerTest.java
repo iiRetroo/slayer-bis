@@ -626,4 +626,25 @@ public class PrepPlannerTest
 			assertNotNull(boss, data.allTasks().get(boss).locations);
 		}
 	}
+
+	@Test
+	public void pickedFoodComesFirst()
+	{
+		OwnedItems bank = owned("Anglerfish", 10, "Shark", 100, "Monkfish", 5);
+		PrepPlan best = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(bank).fillFood(true).build());
+		assertEquals("Anglerfish", best.getInventory().get(0).getName());
+		assertEquals(3, best.getFoodOptions().size());
+		assertEquals("Anglerfish", best.getFoodOptions().get(0).getName());
+
+		PrepPlan sharks = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(bank).fillFood(true).preferredFood("Shark").build());
+		assertEquals("Shark", sharks.getInventory().get(0).getName());
+		assertEquals(28, sharks.getInventory().get(0).getQuantity());
+
+		// a picked food you don't own is ignored
+		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(bank).fillFood(true).preferredFood("Manta ray").build());
+		assertEquals("Anglerfish", none.getInventory().get(0).getName());
+	}
 }

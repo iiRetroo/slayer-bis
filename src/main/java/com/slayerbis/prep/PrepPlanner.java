@@ -155,6 +155,8 @@ public final class PrepPlanner
 		boolean suggestSpecWeapon;
 		/** The Slayer master to teleport back to, or null. */
 		String slayerMaster;
+		/** Food picked in the panel to use first, or null for the best owned. */
+		String preferredFood;
 	}
 
 	/**
@@ -370,7 +372,7 @@ public final class PrepPlanner
 		if (fillFood)
 		{
 			boolean comboEat = info != null && info.comboEat || request.getMonsterHitpoints() >= s.specMinHitpoints;
-			slots += addFood(lines, ids, owned, INVENTORY_SLOTS - slots, comboEat, notes);
+			slots += addFood(lines, ids, owned, INVENTORY_SLOTS - slots, comboEat, request.getPreferredFood(), notes);
 		}
 
 		for (PrepPlan.Requirement r : requirements)
@@ -395,7 +397,8 @@ public final class PrepPlanner
 			addOptions(teleports, "Back to " + request.getSlayerMaster(), masterTeleports, owned);
 		}
 		return new PrepPlan(requirements, lines, teleports, notes, tips, slots,
-			Collections.unmodifiableSet(ids), safespots(info, locationKeys, locationKnown(request.getLocation(), locationKeys)));
+			Collections.unmodifiableSet(ids), safespots(info, locationKeys, locationKnown(request.getLocation(), locationKeys)),
+			foodOptions(owned));
 	}
 
 	/**
@@ -540,7 +543,7 @@ public final class PrepPlanner
 	 * Karambwans to combo eat when the task hits hard, then the best food for the rest.
 	 */
 	private int addFood(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, int remaining,
-		boolean comboEat, List<String> notes)
+		boolean comboEat, String preferred, List<String> notes)
 	{
 		PrepData.Supplies s = data.supplies();
 		int slots = 0;
@@ -567,7 +570,7 @@ public final class PrepPlanner
 			}
 		}
 		boolean anyFood = combo != null;
-		for (PrepData.Food food : s.food)
+		for (PrepData.Food food : foodOrder(preferred, owned))
 		{
 			if (remaining <= 0)
 			{
@@ -602,6 +605,40 @@ public final class PrepPlanner
 			notes.add("No food found in your bank.");
 		}
 		return slots;
+	}
+
+	/**
+	 * Food in order of preference, with the picked food (if owned) moved to the front.
+	 */
+	private List<PrepData.Food> foodOrder(String preferred, OwnedItems owned)
+	{
+		List<PrepData.Food> order = new ArrayList<>(data.supplies().food);
+		if (preferred != null && owned.count(preferred, true) > 0)
+		{
+			for (int i = 0; i < order.size(); i++)
+			{
+				if (order.get(i).name.equals(preferred))
+				{
+					order.add(0, order.remove(i));
+					break;
+				}
+			}
+		}
+		return order;
+	}
+
+	private List<PrepPlan.FoodOption> foodOptions(OwnedItems owned)
+	{
+		List<PrepPlan.FoodOption> out = new ArrayList<>();
+		for (PrepData.Food food : data.supplies().food)
+		{
+			int have = owned.count(food.name, true);
+			if (have > 0)
+			{
+				out.add(new PrepPlan.FoodOption(food.name, food.heal, have, owned.anyId(food.name, true)));
+			}
+		}
+		return out;
 	}
 
 	private List<String> locationKeys(PrepData.TaskInfo info, String location)

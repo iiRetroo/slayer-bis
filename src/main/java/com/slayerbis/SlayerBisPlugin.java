@@ -195,6 +195,8 @@ public class SlayerBisPlugin extends Plugin
 	private volatile AttackType selectedType;
 	/** Ammo picked in the panel for the ranged set (owned item id), or null for the best. */
 	private volatile Integer selectedAmmo;
+	/** Main food picked in the panel, or null for the best owned. */
+	private volatile String selectedFood;
 	/** Sorted bank item ids to outline; replaced wholesale so the overlay never sees a partial update. */
 	private volatile int[] highlightIds = new int[0];
 	private volatile int[] supplyHighlightIds = new int[0];
@@ -718,6 +720,7 @@ public class SlayerBisPlugin extends Plugin
 			lastGearSignature = Collections.emptySet();
 			selectedMonsterId = null;
 			selectedAmmo = null;
+			selectedFood = null;
 			outcome = null;
 			highlightIds = new int[0];
 			supplyHighlightIds = new int[0];
@@ -779,6 +782,18 @@ public class SlayerBisPlugin extends Plugin
 	Integer getSelectedAmmo()
 	{
 		return selectedAmmo;
+	}
+
+	/**
+	 * Called from the panel's food menu; null goes back to the best food. Re-plans the inventory.
+	 */
+	void selectFood(String food)
+	{
+		clientThread.invokeLater(() ->
+		{
+			selectedFood = food;
+			recalculate(Trigger.FORCE);
+		});
 	}
 
 	/**
@@ -864,6 +879,7 @@ public class SlayerBisPlugin extends Plugin
 		if (!sameTask)
 		{
 			selectedAmmo = null;
+			selectedFood = null;
 		}
 		lastTask = task;
 
@@ -944,7 +960,7 @@ public class SlayerBisPlugin extends Plugin
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
 			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster(), config.burstTargets(),
-			config.preferSlayerHelmet());
+			config.preferSlayerHelmet(), selectedFood);
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -1003,6 +1019,7 @@ public class SlayerBisPlugin extends Plugin
 		SlayerMaster slayerMaster;
 		int burstTargets;
 		int preferSlayerHelmet;
+		String preferredFood;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1206,8 +1223,9 @@ public class SlayerBisPlugin extends Plugin
 				.bestWeapon(bestWeaponName(best))
 				.suggestSpecWeapon(settings.isSpecWeapon())
 				.slayerMaster(settings.getSlayerMaster() == SlayerMaster.NONE ? null : settings.getSlayerMaster().getName())
+				.preferredFood(settings.getPreferredFood())
 				.build())
-				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of(), List.of());
+				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of(), List.of(), List.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),

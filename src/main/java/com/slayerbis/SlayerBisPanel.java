@@ -593,8 +593,8 @@ class SlayerBisPanel extends PluginPanel
 			{
 				boolean slotPacked = i < packed;
 				Color border = missing ? MISSING_BORDER : slotPacked ? READY_BORDER : ready != null ? BANK_BORDER : TILE_BORDER;
-				grid.add(tile(missing ? -1 : l.getItemId(), l.getName(), missing ? "Missing: " + tip
-					: slotPacked ? tip + " - packed" : tip, border));
+				grid.add(foodMenu(tile(missing ? -1 : l.getItemId(), l.getName(), missing ? "Missing: " + tip
+					: slotPacked ? tip + " - packed" : tip, border), l));
 			}
 		}
 		for (; slots < PrepPlanner.INVENTORY_SLOTS; slots++)
@@ -603,6 +603,41 @@ class SlayerBisPanel extends PluginPanel
 		}
 		grid.setMaximumSize(grid.getPreferredSize());
 		return grid;
+	}
+
+	/**
+	 * On a main food tile, a click lists every food you own, with how much it heals, so a
+	 * different one can be used. Other tiles are returned unchanged.
+	 */
+	private JLabel foodMenu(JLabel tile, PrepPlan.InventoryLine line)
+	{
+		List<PrepPlan.FoodOption> options = outcome.getPrep().getFoodOptions();
+		boolean mainFood = line.getNote() != null && line.getNote().startsWith("heals ");
+		if (!mainFood || options.size() < 2)
+		{
+			return tile;
+		}
+		tile.setToolTipText(tile.getToolTipText() + " - click to pick another food");
+		tile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		tile.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				JPopupMenu menu = new JPopupMenu();
+				for (int i = 0; i < options.size(); i++)
+				{
+					PrepPlan.FoodOption food = options.get(i);
+					JMenuItem item = new JMenuItem((food.getName().equals(line.getName()) ? "> " : "") + food.getName()
+						+ "  heals " + food.getHeal() + "  (you have " + food.getOwned() + ")" + (i == 0 ? " (best)" : ""));
+					String pick = i == 0 ? null : food.getName();
+					item.addActionListener(ev -> plugin.selectFood(pick));
+					menu.add(item);
+				}
+				menu.show(tile, 0, tile.getHeight());
+			}
+		});
+		return tile;
 	}
 
 	/**
@@ -682,7 +717,7 @@ class SlayerBisPanel extends PluginPanel
 				Color border = missing ? MISSING_BORDER : packed ? READY_BORDER : ready != null ? BANK_BORDER : TILE_BORDER;
 				JLabel tile = tile(missing ? -1 : l.getItemId(), l.getName(), missing ? "Missing: " + tip
 					: packed ? tip + " - packed" : tip, border, l.getQuantity());
-				grid.add(tile);
+				grid.add(foodMenu(tile, l));
 			}
 			grid.setMaximumSize(grid.getPreferredSize());
 			content.add(centered(grid));

@@ -44,6 +44,16 @@ public class PrepPlan
 	}
 
 	@Value
+	public static class FoodOption
+	{
+		String name;
+		int heal;
+		/** How many the player owns. */
+		int owned;
+		int itemId;
+	}
+
+	@Value
 	public static class Safespot
 	{
 		/** null when it applies to every location. */
@@ -72,4 +82,6 @@ public class PrepPlan
 	Set<Integer> supplyBankIds;
 	/** Text descriptions of safespots for the task; never drawn in the game. */
 	List<Safespot> safespots;
+	/** Every food the player owns, best first, for picking a different main food. */
+	List<FoodOption> foodOptions;
 }
