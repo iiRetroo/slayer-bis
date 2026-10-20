@@ -78,12 +78,25 @@ public interface SlayerBisConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "includeGroupStorage",
+		name = "Include group storage",
+		description = "Group ironmen: also count your group's shared storage. It's read when you open it and "
+			+ "remembered with your bank.",
+		section = sourcesSection,
+		position = 2
+	)
+	default boolean includeGroupStorage()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "rememberBank",
 		name = "Remember bank",
 		description = "Remember what is in your bank between sessions (kept in your RuneLite settings for this "
 			+ "account, like other plugin settings), so suggestions show before you open the bank",
 		section = sourcesSection,
-		position = 2
+		position = 3
 	)
 	default boolean rememberBank()
 	{
@@ -96,7 +109,7 @@ public interface SlayerBisConfig extends Config
 		description = "Send a chat message if you attack a task monster without your Slayer helmet or black mask on, "
 			+ "once per task",
 		section = sourcesSection,
-		position = 3
+		position = 4
 	)
 	default boolean helmetReminder()
 	{
@@ -110,7 +123,7 @@ public interface SlayerBisConfig extends Config
 		description = "On task, keep your Slayer helmet or black mask on if the best set without it is no more "
 			+ "than this many percent better (e.g. Salve amulet with a Serpentine helm on undead). 0 turns it off.",
 		section = sourcesSection,
-		position = 4
+		position = 5
 	)
 	default int preferSlayerHelmet()
 	{
@@ -124,7 +137,7 @@ public interface SlayerBisConfig extends Config
 			+ "helm instead of a Slayer helmet: always, only if the DPS is within 10%, or never. Saves the "
 			+ "anti-venom's inventory slot.",
 		section = sourcesSection,
-		position = 5
+		position = 6
 	)
 	default SerpentineHelm serpentineHelm()
 	{

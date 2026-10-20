@@ -112,6 +112,7 @@ public class SlayerBisPlugin extends Plugin
 	/** Per-account setting holding the remembered bank, as "itemId:quantity,..." */
 	private static final String BANK_KEY = "bankItems";
 	private static final String POTION_STORE_KEY = "potionStore";
+	private static final String GROUP_STORAGE_KEY = "groupStorage";
 	private static final int MAX_DOSES = 4;
 	/** Items that give the Slayer helmet's on-task bonus, by canonical name. */
 	private static final Set<String> SLAYER_HELMS = Set.of("Slayer helmet", "Slayer helmet (i)", "Black mask", "Black mask (i)");
@@ -172,6 +173,9 @@ public class SlayerBisPlugin extends Plugin
 	private Map<Integer, Integer> bankItems;
 	/** Potions in the bank's potion storage, as whole potions of their highest dose. */
 	private Map<Integer, Integer> potionStoreItems = Collections.emptyMap();
+	/** A group ironman's shared group storage, as last seen. */
+	private Map<Integer, Integer> groupStorageItems = Collections.emptyMap();
+	private String savedGroupStorage;
 	private String savedPotionStore;
 	private boolean potionStoreQueued;
 	private final Map<Integer, Integer> wornItems = new HashMap<>();
@@ -338,6 +342,15 @@ public class SlayerBisPlugin extends Plugin
 			bankItems = readItems(event.getItemContainer());
 			saveBank();
 			recalculate(Trigger.BANK);
+		}
+		else if (id == InventoryID.INV_GROUP_TEMP)
+		{
+			groupStorageItems = readItems(event.getItemContainer());
+			saveBank();
+			if (bankItems != null)
+			{
+				recalculate(Trigger.BANK);
+			}
 		}
 		else if (id == InventoryID.WORN)
 		{
@@ -560,6 +573,12 @@ public class SlayerBisPlugin extends Plugin
 			configManager.setRSProfileConfiguration(SlayerBisConfig.GROUP, POTION_STORE_KEY, potions);
 			savedPotionStore = potions;
 		}
+		String group = serialise(groupStorageItems);
+		if (!group.equals(savedGroupStorage))
+		{
+			configManager.setRSProfileConfiguration(SlayerBisConfig.GROUP, GROUP_STORAGE_KEY, group);
+			savedGroupStorage = group;
+		}
 	}
 
 	private static String serialise(Map<Integer, Integer> items)
@@ -615,6 +634,11 @@ public class SlayerBisPlugin extends Plugin
 		{
 			savedPotionStore = configManager.getRSProfileConfiguration(SlayerBisConfig.GROUP, POTION_STORE_KEY);
 			potionStoreItems = deserialise(savedPotionStore);
+		}
+		if (groupStorageItems.isEmpty())
+		{
+			savedGroupStorage = configManager.getRSProfileConfiguration(SlayerBisConfig.GROUP, GROUP_STORAGE_KEY);
+			groupStorageItems = deserialise(savedGroupStorage);
 		}
 		recalculate(Trigger.FORCE);
 	}
@@ -699,6 +723,7 @@ public class SlayerBisPlugin extends Plugin
 				{
 					configManager.unsetRSProfileConfiguration(SlayerBisConfig.GROUP, BANK_KEY);
 					configManager.unsetRSProfileConfiguration(SlayerBisConfig.GROUP, POTION_STORE_KEY);
+					configManager.unsetRSProfileConfiguration(SlayerBisConfig.GROUP, GROUP_STORAGE_KEY);
 					savedBank = null;
 				}
 			}
@@ -719,6 +744,8 @@ public class SlayerBisPlugin extends Plugin
 			savedBank = null;
 			potionStoreItems = Collections.emptyMap();
 			savedPotionStore = null;
+			groupStorageItems = Collections.emptyMap();
+			savedGroupStorage = null;
 			lastReady = null;
 			remindedTask = null;
 			lastSignature = Collections.emptyMap();
@@ -871,6 +898,10 @@ public class SlayerBisPlugin extends Plugin
 		addSource(inventoryItems, ItemSource.INVENTORY, totals, sources);
 		addSource(bankItems, ItemSource.BANK, totals, sources);
 		addSource(potionStoreItems, ItemSource.BANK, totals, sources);
+		if (config.includeGroupStorage())
+		{
+			addSource(groupStorageItems, ItemSource.GROUP_STORAGE, totals, sources);
+		}
 
 		String task = slayerPluginService.getTask();
 		if (!Objects.equals(task, lastTask))

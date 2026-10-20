@@ -89,6 +89,7 @@ Teleports cover common task locations only. When the Slayer plugin reports where
 
 ## Other conveniences
 
+- **Group ironmen:** your group's shared storage counts too (setting: *Include group storage*, on by default). It's read when you open it and remembered with your bank; items there are marked "group storage" in the panel.
 - **Remembers your bank** between sessions (setting: *Remember bank*, on by default), so suggestions are ready as soon as you get a task. It's kept in your RuneLite settings for that account, like any other plugin setting; turning the setting off deletes it.
 - **Task time estimate** in the stats box: kills left x monster HP / DPS. It ignores walking, respawns and overkill, so treat it as a rough lower bound.
 - **Prefer Slayer helmet** (setting, 5% by default): on task, if the best set swaps your Slayer helmet or black mask for something else (say a Salve amulet with a Serpentine helm on undead), the plugin searches again with the helmet kept and uses that set when it's within this percentage. The panel says how much DPS that costs. 0 turns it off.

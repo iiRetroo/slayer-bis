@@ -9,7 +9,8 @@ enum ItemSource
 {
 	WORN("worn"),
 	INVENTORY("inventory"),
-	BANK("bank");
+	BANK("bank"),
+	GROUP_STORAGE("group storage");
 
 	private final String label;
 }
