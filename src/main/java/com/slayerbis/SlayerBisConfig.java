@@ -237,13 +237,14 @@ public interface SlayerBisConfig extends Config
 	@ConfigItem(
 		keyName = "prayerPotions",
 		name = "Prayer potions",
-		description = "How many prayer potions (or super restores) to suggest",
+		description = "How many prayer potions (or super restores) to suggest. Moonlight moth mixes make up "
+			+ "any shortfall, two mixes per potion.",
 		section = prepSection,
 		position = 1
 	)
 	default int prayerPotions()
 	{
-		return 4;
+		return 5;
 	}
 
 	@Range(max = 27)
@@ -282,7 +283,7 @@ public interface SlayerBisConfig extends Config
 	)
 	default LootTools lootTools()
 	{
-		return LootTools.COMMON;
+		return LootTools.ALL;
 	}
 
 	@ConfigItem(

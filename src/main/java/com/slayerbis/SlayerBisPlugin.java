@@ -42,18 +42,23 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.EnumComposition;
+import net.runelite.api.EnumID;
 import net.runelite.api.GameState;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.NPC;
+import net.runelite.api.ScriptID;
 import net.runelite.api.Skill;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
@@ -102,6 +107,8 @@ public class SlayerBisPlugin extends Plugin
 	private static final String BANK_TAG = "slayerbis";
 	/** Per-account setting holding the remembered bank, as "itemId:quantity,..." */
 	private static final String BANK_KEY = "bankItems";
+	private static final String POTION_STORE_KEY = "potionStore";
+	private static final int MAX_DOSES = 4;
 	/** Items that give the Slayer helmet's on-task bonus, by canonical name. */
 	private static final Set<String> SLAYER_HELMS = Set.of("Slayer helmet", "Slayer helmet (i)", "Black mask", "Black mask (i)");
 
@@ -157,6 +164,10 @@ public class SlayerBisPlugin extends Plugin
 
 	// Owned items by canonical item id and quantity, per container. Only touched on the client thread.
 	private Map<Integer, Integer> bankItems;
+	/** Potions in the bank's potion storage, as whole potions of their highest dose. */
+	private Map<Integer, Integer> potionStoreItems = Collections.emptyMap();
+	private String savedPotionStore;
+	private boolean potionStoreQueued;
 	private final Map<Integer, Integer> wornItems = new HashMap<>();
 	private final Map<Integer, Integer> inventoryItems = new HashMap<>();
 	/** Item names, looked up once per id on the client thread. */
@@ -329,6 +340,11 @@ public class SlayerBisPlugin extends Plugin
 		{
 			inventoryItems.clear();
 			inventoryItems.putAll(readItems(event.getItemContainer()));
+			if (bankOpen)
+			{
+				// potions can be deposited straight into potion storage
+				queuePotionStoreRead();
+			}
 			if (bankItems != null)
 			{
 				recalculate(Trigger.GEAR_ONLY);
@@ -346,6 +362,7 @@ public class SlayerBisPlugin extends Plugin
 		if (event.getGroupId() == InterfaceID.BANKMAIN)
 		{
 			bankOpen = true;
+			queuePotionStoreRead();
 			updateReadiness();
 		}
 	}
@@ -356,6 +373,74 @@ public class SlayerBisPlugin extends Plugin
 		if (event.getGroupId() == InterfaceID.BANKMAIN)
 		{
 			bankOpen = false;
+		}
+	}
+
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged event)
+	{
+		int id = event.getVarpId();
+		if (id == VarPlayerID.POTIONSTORE_BASE_VAR_1 || id == VarPlayerID.POTIONSTORE_BASE_VAR_2
+			|| id == VarPlayerID.POTIONSTORE_BASE_VAR_3 || id == VarPlayerID.POTIONSTORE_BASE_VAR_4
+			|| id == VarPlayerID.POTIONSTORE_BASE_VAR_5 || id == VarPlayerID.POTIONSTORE_BASE_VAR_6)
+		{
+			queuePotionStoreRead();
+		}
+	}
+
+	/**
+	 * Reads the potion storage once, later this tick, however many changes asked for it.
+	 */
+	private void queuePotionStoreRead()
+	{
+		if (!potionStoreQueued)
+		{
+			potionStoreQueued = true;
+			clientThread.invokeLater(this::readPotionStore);
+		}
+	}
+
+	/**
+	 * Reads the potion storage (from Mastering Mixology) the way RuneLite's Bank Tags plugin does:
+	 * the game's own scripts give the doses stored of each potion. Read-only.
+	 */
+	private void readPotionStore()
+	{
+		potionStoreQueued = false;
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+		Map<Integer, Integer> items = new HashMap<>();
+		for (int enumId : new int[]{EnumID.POTIONSTORE_POTIONS, EnumID.POTIONSTORE_UNFINISHED_POTIONS})
+		{
+			for (int potionEnumId : client.getEnum(enumId).getIntVals())
+			{
+				client.runScript(ScriptID.POTIONSTORE_DOSES, potionEnumId);
+				int doses = client.getIntStack()[0];
+				if (doses <= 0)
+				{
+					continue;
+				}
+				EnumComposition potion = client.getEnum(potionEnumId);
+				for (int dose = MAX_DOSES; dose >= 1; dose--)
+				{
+					int itemId = potion.getIntValue(dose);
+					if (itemId > 0)
+					{
+						int id = itemManager.canonicalize(itemId);
+						items.merge(id, Math.max(1, doses / dose), Integer::sum);
+						itemNames.computeIfAbsent(id, i -> itemManager.getItemComposition(i).getName());
+						break;
+					}
+				}
+			}
+		}
+		if (!items.equals(potionStoreItems))
+		{
+			potionStoreItems = items;
+			saveBank();
+			recalculate(Trigger.BANK);
 		}
 	}
 
@@ -451,15 +536,50 @@ public class SlayerBisPlugin extends Plugin
 		{
 			return;
 		}
-		StringBuilder sb = new StringBuilder();
-		bankItems.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e ->
-			sb.append(sb.length() == 0 ? "" : ",").append(e.getKey()).append(':').append(e.getValue()));
-		String value = sb.toString();
+		String value = serialise(bankItems);
 		if (!value.equals(savedBank))
 		{
 			configManager.setRSProfileConfiguration(SlayerBisConfig.GROUP, BANK_KEY, value);
 			savedBank = value;
 		}
+		String potions = serialise(potionStoreItems);
+		if (!potions.equals(savedPotionStore))
+		{
+			configManager.setRSProfileConfiguration(SlayerBisConfig.GROUP, POTION_STORE_KEY, potions);
+			savedPotionStore = potions;
+		}
+	}
+
+	private static String serialise(Map<Integer, Integer> items)
+	{
+		StringBuilder sb = new StringBuilder();
+		items.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e ->
+			sb.append(sb.length() == 0 ? "" : ",").append(e.getKey()).append(':').append(e.getValue()));
+		return sb.toString();
+	}
+
+	private Map<Integer, Integer> deserialise(String value)
+	{
+		Map<Integer, Integer> items = new HashMap<>();
+		if (value == null || value.isEmpty())
+		{
+			return items;
+		}
+		for (String entry : value.split(","))
+		{
+			int colon = entry.indexOf(':');
+			try
+			{
+				int id = Integer.parseInt(entry.substring(0, colon));
+				items.put(id, Integer.parseInt(entry.substring(colon + 1)));
+				itemNames.computeIfAbsent(id, i -> itemManager.getItemComposition(i).getName());
+			}
+			catch (RuntimeException e)
+			{
+				log.debug("Skipping bad remembered bank entry {}", entry);
+			}
+		}
+		return items;
 	}
 
 	/**
@@ -477,23 +597,13 @@ public class SlayerBisPlugin extends Plugin
 		{
 			return;
 		}
-		Map<Integer, Integer> items = new HashMap<>();
-		for (String entry : value.split(","))
-		{
-			int colon = entry.indexOf(':');
-			try
-			{
-				int id = Integer.parseInt(entry.substring(0, colon));
-				items.put(id, Integer.parseInt(entry.substring(colon + 1)));
-				itemNames.computeIfAbsent(id, i -> itemManager.getItemComposition(i).getName());
-			}
-			catch (RuntimeException e)
-			{
-				log.debug("Skipping bad remembered bank entry {}", entry);
-			}
-		}
-		bankItems = items;
+		bankItems = deserialise(value);
 		savedBank = value;
+		if (potionStoreItems.isEmpty())
+		{
+			savedPotionStore = configManager.getRSProfileConfiguration(SlayerBisConfig.GROUP, POTION_STORE_KEY);
+			potionStoreItems = deserialise(savedPotionStore);
+		}
 		recalculate(Trigger.FORCE);
 	}
 
@@ -576,6 +686,7 @@ public class SlayerBisPlugin extends Plugin
 				if (!config.rememberBank())
 				{
 					configManager.unsetRSProfileConfiguration(SlayerBisConfig.GROUP, BANK_KEY);
+					configManager.unsetRSProfileConfiguration(SlayerBisConfig.GROUP, POTION_STORE_KEY);
 					savedBank = null;
 				}
 			}
@@ -594,6 +705,8 @@ public class SlayerBisPlugin extends Plugin
 			// a different account may log in next, so forget the previous bank
 			bankItems = null;
 			savedBank = null;
+			potionStoreItems = Collections.emptyMap();
+			savedPotionStore = null;
 			lastReady = null;
 			remindedTask = null;
 			lastSignature = Collections.emptyMap();
@@ -700,6 +813,7 @@ public class SlayerBisPlugin extends Plugin
 		addSource(wornItems, ItemSource.WORN, totals, sources);
 		addSource(inventoryItems, ItemSource.INVENTORY, totals, sources);
 		addSource(bankItems, ItemSource.BANK, totals, sources);
+		addSource(potionStoreItems, ItemSource.BANK, totals, sources);
 
 		String task = slayerPluginService.getTask();
 		if (!Objects.equals(task, lastTask))
@@ -739,7 +853,7 @@ public class SlayerBisPlugin extends Plugin
 			{
 				quantitiesByName.merge(name, e.getValue(), Integer::sum);
 				anyIdByName.putIfAbsent(name, e.getKey());
-				if (bankItems.containsKey(e.getKey()))
+				if (bankItems.containsKey(e.getKey()) || potionStoreItems.containsKey(e.getKey()))
 				{
 					bankIdsByName.computeIfAbsent(name, n -> new HashSet<>()).add(e.getKey());
 				}

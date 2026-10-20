@@ -21,6 +21,10 @@ public final class PrepPlanner
 {
 	public static final int INVENTORY_SLOTS = 28;
 	private static final int ANTIFIRE_DOSES = 2;
+	/** A moonlight moth mix has two doses to a prayer potion's four. */
+	private static final int PRAYER_MIXES_PER_POTION = 2;
+	/** Karambwans to bring for combo eating. */
+	private static final int COMBO_FOOD = 4;
 
 	/** For "common drops only": a loot type counts when it drops at least once per this many kills. */
 	public static final int COMMON_DROP_KILLS = 64;
@@ -191,6 +195,11 @@ public final class PrepPlanner
 			}
 		}
 
+		if (prayerPotions > 0)
+		{
+			slots += addPrayer(lines, ids, owned, prayerPotions, notes);
+		}
+
 		List<String> stylePotions = bestType == null ? Collections.emptyList()
 			: bestType == AttackType.RANGED ? s.rangedPotions
 			: bestType == AttackType.MAGIC ? s.magicPotions
@@ -200,6 +209,10 @@ public final class PrepPlanner
 		{
 			slots += addLine(lines, ids, owned, potion, combatPotions, "boosts your " + bestType.getDisplayName().toLowerCase(Locale.ROOT), false);
 		}
+		else if (bestType != null && combatPotions > 0)
+		{
+			notes.add("No " + bestType.getDisplayName().toLowerCase(Locale.ROOT) + " boosting potion found.");
+		}
 		if (bestType == AttackType.MAGIC)
 		{
 			String heart = firstOwned(s.magicBoostItems, owned);
@@ -207,12 +220,6 @@ public final class PrepPlanner
 			{
 				slots += addLine(lines, ids, owned, heart, 1, "boosts Magic", false);
 			}
-		}
-
-		String prayer = firstOwned(s.prayerPotions, owned);
-		if (prayer != null && prayerPotions > 0)
-		{
-			slots += addLine(lines, ids, owned, prayer, prayerPotions, "restores prayer points", false);
 		}
 
 		if (request.isSuggestSpecWeapon() && request.getMonsterHitpoints() >= s.specMinHitpoints && s.specWeapons != null)
@@ -251,40 +258,19 @@ public final class PrepPlanner
 		{
 			tips.add("Monsters stack here, so bursting or barraging (Ancient Magicks) works well.");
 			String pouch = firstOwned(s.lootTools == null ? null : s.lootTools.get("alchables"), owned);
-			boolean pouchListed = pouch != null && lines.stream().anyMatch(l -> l.getName().equals(pouch));
-			if (pouch != null && !pouchListed)
+			if (pouch != null && !listed(lines, pouch))
 			{
 				slots += addLine(lines, ids, owned, pouch, 1, "with burst or barrage runes", false);
 			}
 		}
 
+		List<String> locationKeys = locationKeys(info, request.getLocation());
+		slots += addTeleports(lines, ids, owned, locationKeys, locationKnown(request.getLocation(), locationKeys), tips);
+
 		if (fillFood)
 		{
-			int remaining = INVENTORY_SLOTS - slots;
-			boolean anyFood = false;
-			for (PrepData.Food food : s.food)
-			{
-				if (remaining <= 0)
-				{
-					break;
-				}
-				int have = owned.count(food.name, true);
-				if (have <= 0)
-				{
-					continue;
-				}
-				anyFood = true;
-				int take = Math.min(remaining, have);
-				lines.add(new PrepPlan.InventoryLine(food.name, take, have, "heals " + food.heal, false,
-					owned.anyId(food.name, true), false));
-				owned.collectBankIds(food.name, true, ids);
-				remaining -= take;
-				slots += take;
-			}
-			if (!anyFood)
-			{
-				notes.add("No food found in your bank.");
-			}
+			boolean comboEat = info != null && info.comboEat || request.getMonsterHitpoints() >= s.specMinHitpoints;
+			slots += addFood(lines, ids, owned, INVENTORY_SLOTS - slots, comboEat, notes);
 		}
 
 		for (PrepPlan.Requirement r : requirements)
@@ -303,7 +289,7 @@ public final class PrepPlanner
 			}
 		}
 
-		return new PrepPlan(requirements, lines, teleports(info, request.getLocation(), owned), notes, tips, slots,
+		return new PrepPlan(requirements, lines, teleports(locationKeys, owned), notes, tips, slots,
 			Collections.unmodifiableSet(ids));
 	}
 
@@ -345,7 +331,162 @@ public final class PrepPlanner
 		return slots;
 	}
 
-	private List<PrepPlan.TeleportOption> teleports(PrepData.TaskInfo info, String location, OwnedItems owned)
+	/**
+	 * Prayer potions first, then moonlight moth mixes for any shortfall, two mixes per potion.
+	 */
+	private int addPrayer(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, int wanted,
+		List<String> notes)
+	{
+		PrepData.Supplies s = data.supplies();
+		int slots = 0;
+		int missing = wanted;
+		if (s.prayerPotions != null)
+		{
+			for (String name : s.prayerPotions)
+			{
+				if (missing > 0 && owned.owns(name))
+				{
+					int take = addLine(lines, ids, owned, name, missing, "restores prayer points", false);
+					slots += take;
+					missing -= take;
+				}
+			}
+		}
+		if (s.prayerMixes != null)
+		{
+			for (String name : s.prayerMixes)
+			{
+				if (missing > 0 && owned.owns(name))
+				{
+					int take = addLine(lines, ids, owned, name, missing * PRAYER_MIXES_PER_POTION,
+						"restores prayer points; two stand in for one prayer potion", false);
+					slots += take;
+					missing -= (take + PRAYER_MIXES_PER_POTION - 1) / PRAYER_MIXES_PER_POTION;
+				}
+			}
+		}
+		if (missing == wanted)
+		{
+			notes.add("No prayer potions, super restores or moonlight moth mixes found.");
+		}
+		return slots;
+	}
+
+	/**
+	 * One owned teleport item per location (just one in all when the location isn't known), so
+	 * the plan doesn't carry several ways to the same task. Worn teleports become a tip instead.
+	 */
+	private int addTeleports(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned,
+		List<String> keys, boolean locationKnown, List<String> tips)
+	{
+		PrepData.Supplies s = data.supplies();
+		int slots = 0;
+		for (String key : keys)
+		{
+			List<PrepData.Teleport> list = data.locations().get(key);
+			if (list == null)
+			{
+				continue;
+			}
+			boolean added = false;
+			for (PrepData.Teleport t : list)
+			{
+				String name = firstOwned(t.items, owned);
+				if (name == null)
+				{
+					continue;
+				}
+				added = true;
+				if (matchesAny(name, s.wornTeleports))
+				{
+					tips.add("Wear your " + name + " to teleport to " + key + ".");
+				}
+				else if (!listed(lines, name))
+				{
+					String note = "teleport to " + key;
+					slots += matchesAny(name, s.stackableTeleports)
+						? addStack(lines, ids, owned, name, note)
+						: addLine(lines, ids, owned, name, 1, note, false);
+				}
+				break;
+			}
+			if (added && !locationKnown)
+			{
+				break;
+			}
+		}
+		return slots;
+	}
+
+	/**
+	 * Karambwans to combo eat when the task hits hard, then the best food for the rest.
+	 */
+	private int addFood(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, int remaining,
+		boolean comboEat, List<String> notes)
+	{
+		PrepData.Supplies s = data.supplies();
+		int slots = 0;
+		String combo = null;
+		int comboTaken = 0;
+		int comboIndex = -1;
+		if (comboEat && s.comboFood != null)
+		{
+			for (String name : s.comboFood)
+			{
+				int have = owned.count(name, true);
+				if (have > 0 && remaining > 0)
+				{
+					combo = name;
+					comboTaken = Math.min(Math.min(COMBO_FOOD, have), remaining);
+					comboIndex = lines.size();
+					lines.add(new PrepPlan.InventoryLine(name, comboTaken, have,
+						"eat in the same tick as your main food (combo eating)", false, owned.anyId(name, true), false));
+					owned.collectBankIds(name, true, ids);
+					remaining -= comboTaken;
+					slots += comboTaken;
+					break;
+				}
+			}
+		}
+		boolean anyFood = combo != null;
+		for (PrepData.Food food : s.food)
+		{
+			if (remaining <= 0)
+			{
+				break;
+			}
+			int have = owned.count(food.name, true);
+			int available = food.name.equals(combo) ? have - comboTaken : have;
+			if (available <= 0)
+			{
+				continue;
+			}
+			anyFood = true;
+			int take = Math.min(remaining, available);
+			if (food.name.equals(combo))
+			{
+				// the combo food is also the best food left: keep it on one line
+				PrepPlan.InventoryLine line = lines.get(comboIndex);
+				lines.set(comboIndex, new PrepPlan.InventoryLine(line.getName(), line.getQuantity() + take, have,
+					line.getNote(), false, line.getItemId(), false));
+			}
+			else
+			{
+				lines.add(new PrepPlan.InventoryLine(food.name, take, have, "heals " + food.heal, false,
+					owned.anyId(food.name, true), false));
+				owned.collectBankIds(food.name, true, ids);
+			}
+			remaining -= take;
+			slots += take;
+		}
+		if (!anyFood)
+		{
+			notes.add("No food found in your bank.");
+		}
+		return slots;
+	}
+
+	private List<String> locationKeys(PrepData.TaskInfo info, String location)
 	{
 		List<String> keys = new ArrayList<>();
 		if (location != null && !location.trim().isEmpty())
@@ -364,6 +505,16 @@ public final class PrepPlanner
 		{
 			keys.addAll(info.locations);
 		}
+		return keys;
+	}
+
+	private static boolean locationKnown(String location, List<String> keys)
+	{
+		return location != null && !location.trim().isEmpty() && !keys.isEmpty();
+	}
+
+	private List<PrepPlan.TeleportOption> teleports(List<String> keys, OwnedItems owned)
+	{
 		List<PrepPlan.TeleportOption> out = new ArrayList<>();
 		for (String key : keys)
 		{
@@ -379,6 +530,27 @@ public final class PrepPlanner
 			}
 		}
 		return out;
+	}
+
+	private static boolean listed(List<PrepPlan.InventoryLine> lines, String name)
+	{
+		return lines.stream().anyMatch(l -> l.getName().equals(name));
+	}
+
+	private static boolean matchesAny(String name, List<String> bases)
+	{
+		if (bases == null)
+		{
+			return false;
+		}
+		for (String base : bases)
+		{
+			if (OwnedItems.matches(name, base))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static int addLine(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, String name,

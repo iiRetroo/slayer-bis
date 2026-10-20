@@ -30,6 +30,8 @@ public final class PrepData
 		boolean cannon;
 		/** Monsters bunch up, so multi-target spells work well. */
 		boolean stacks;
+		/** Monsters hit hard enough that combo eating helps. */
+		boolean comboEat;
 		List<String> locations;
 	}
 
@@ -69,6 +71,14 @@ public final class PrepData
 		List<String> magicPotions;
 		List<String> magicBoostItems;
 		List<String> prayerPotions;
+		/** Cheaper prayer restores; two of these stand in for one prayer potion. */
+		List<String> prayerMixes;
+		/** Food eaten in the same tick as other food (combo eating). */
+		List<String> comboFood;
+		/** Teleport items worn rather than carried, so they need no inventory slot. */
+		List<String> wornTeleports;
+		/** Teleport items that stack in one slot. */
+		List<String> stackableTeleports;
 		List<String> superAntifire;
 		List<String> antifire;
 		List<String> antivenom;

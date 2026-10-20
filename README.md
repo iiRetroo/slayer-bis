@@ -30,7 +30,7 @@ When you open your bank, the plugin reads your banked items (plus, optionally, w
 - the best set for each style, with its DPS, max hit, accuracy and attack speed
 - the best set with each of your other strong weapons, in case you would rather use one of those
 - gear the task requires, such as a mirror shield for basilisks or boots of stone for Karuulm, which is kept in every suggested set
-- a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, a boosting potion for your best style, prayer potions, and your best food
+- a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, prayer potions or moonlight moth mixes, a boosting potion for your best style, loot tools, a teleport item, and your best food (with karambwans for combo eating on hard-hitting tasks)
 - teleports to the task location, ticked off when you own the item
 - what was assumed (levels, prayers, potions, spellbook)
 
@@ -46,7 +46,12 @@ The panel is laid out like the game: a tab per style with its DPS (best in green
 
 Task requirements, task items and teleports live in `src/main/resources/com/slayerbis/tasks.json`, and food and potions in `supplies.json`. Both are plain data files with a short format note at the top, so adding a task or fixing a teleport needs no code changes. Supplies are matched by item name, so every potion dose counts.
 
-The inventory plan fills 28 slots: required task items first, then antifire or anti-venom where the task calls for it, a boosting potion for your best style, prayer potions (4 by default), loot tools, and your best food for the rest. The counts are settings. Moving items between bank and inventory does not change the plan, so it stays put while you withdraw.
+The inventory plan fills 28 slots: required task items first, then antifire or anti-venom where the task calls for it, prayer potions (5 by default), a boosting potion for your best style, loot tools, a teleport item, and your best food for the rest. The counts are settings. Moving items between bank and inventory does not change the plan, so it stays put while you withdraw.
+
+- **Prayer:** prayer potions or super restores first. If you don't have enough, moonlight moth mixes make up the difference, two mixes per potion (so 10 mixes when you have no prayer potions). If you have none at all, the panel says so, and the same goes for a missing style potion.
+- **Potion storage:** potions in your bank's potion storage (from Mastering Mixology) count as banked, read the same way RuneLite's Bank Tags plugin reads them.
+- **Teleports:** one teleport item you own for the task location, such as a slayer ring. Worn teleports (Rada's blessing, Ghommal's hilt) are a tip instead, since they need no inventory slot.
+- **Combo eating:** for tasks that hit hard (metal dragons, wyverns, dark beasts, hydras, bosses and anything with 250+ HP), 4 karambwans to eat in the same tick as your main food.
 
 Loot tools come from the monster's drop table (`drops.json`, built from the OSRS Wiki):
 
@@ -65,7 +70,7 @@ For monsters with lots of HP (250 or more, such as bosses, rune dragons and Cerb
 
 Tasks that are usually cannoned (kalphites, dagannoth, trolls and others) get a tip, plus your cannon and cannonballs if you own a full cannon. Tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons) get a bursting tip and your rune pouch.
 
-The **Loot tools** setting chooses between common drops only (loot that drops at least once every 64 kills on average, the default), all drops, or off. Tools you don't own are never suggested.
+The **Loot tools** setting chooses between all drops (the default), common drops only (loot that drops at least once every 64 kills on average), or off. Tools you don't own are never suggested.
 
 Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
 

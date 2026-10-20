@@ -288,4 +288,71 @@ public class PrepPlannerTest
 		assertTrue(wielding.getInventory().stream().anyMatch(l -> l.getName().equals("Bandos godsword")));
 		assertTrue(wielding.getInventory().stream().noneMatch(l -> l.getName().equals("Dragon warhammer")));
 	}
+
+	@Test
+	public void mothMixesMakeUpForMissingPrayerPotions()
+	{
+		PrepPlan both = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Prayer potion(4)", 2, "Moonlight moth mix (2)", 20)).prayerPotions(5).build());
+		assertEquals("Prayer potion", both.getInventory().get(0).getName());
+		assertEquals(2, both.getInventory().get(0).getQuantity());
+		assertEquals("Moonlight moth mix", both.getInventory().get(1).getName());
+		assertEquals(6, both.getInventory().get(1).getQuantity());
+
+		PrepPlan mixes = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Moonlight moth mix (2)", 20)).prayerPotions(5).build());
+		assertEquals(10, mixes.getInventory().get(0).getQuantity());
+
+		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned()).prayerPotions(5).combatPotions(1).build());
+		assertTrue(none.getNotes().stream().anyMatch(n -> n.contains("No prayer potions")));
+		assertTrue(none.getNotes().stream().anyMatch(n -> n.contains("No slash boosting potion")));
+	}
+
+	@Test
+	public void prayerThenToolsThenTeleportsThenFood()
+	{
+		OwnedItems bank = owned("Prayer potion(4)", 10, "Bonecrusher", 1, "Slayer ring (8)", 1, "Anglerfish", 100);
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(bank).prayerPotions(5).fillFood(true).monsterName("Bloodveld").lootMaxKills(Integer.MAX_VALUE).build());
+		List<PrepPlan.InventoryLine> inv = plan.getInventory();
+		assertEquals("Prayer potion", inv.get(0).getName());
+		assertEquals(5, inv.get(0).getQuantity());
+		assertEquals("Bonecrusher", inv.get(1).getName());
+		assertEquals("Slayer ring", inv.get(2).getName());
+		assertEquals("Anglerfish", inv.get(3).getName());
+		assertEquals(21, inv.get(3).getQuantity());
+		assertEquals(PrepPlanner.INVENTORY_SLOTS, plan.getSlotsUsed());
+	}
+
+	@Test
+	public void karambwansForHardHittingTasks()
+	{
+		OwnedItems bank = owned("Anglerfish", 100, "Cooked karambwan", 50);
+		PrepPlan rune = planner.plan(PrepPlanner.Request.builder().task("Rune dragons").bestType(AttackType.STAB)
+			.owned(bank).fillFood(true).build());
+		assertEquals("Cooked karambwan", rune.getInventory().get(0).getName());
+		assertEquals(4, rune.getInventory().get(0).getQuantity());
+		assertEquals("Anglerfish", rune.getInventory().get(1).getName());
+		assertEquals(24, rune.getInventory().get(1).getQuantity());
+
+		PrepPlan gargoyles = planner.plan(PrepPlanner.Request.builder().task("Gargoyles").bestType(AttackType.CRUSH)
+			.owned(bank).monsterHitpoints(105).fillFood(true).build());
+		assertTrue(gargoyles.getInventory().stream().noneMatch(l -> l.getName().equals("Cooked karambwan")));
+
+		// karambwans as the best food too: one line, not two
+		PrepPlan onlyKarambwans = planner.plan(PrepPlanner.Request.builder().task("Rune dragons").bestType(AttackType.STAB)
+			.owned(owned("Cooked karambwan", 50)).fillFood(true).build());
+		assertEquals(1, onlyKarambwans.getInventory().size());
+		assertEquals(28, onlyKarambwans.getInventory().get(0).getQuantity());
+	}
+
+	@Test
+	public void wornTeleportsAreATipNotASlot()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Hydras").location("Karuulm Slayer Dungeon")
+			.bestType(AttackType.SLASH).owned(owned("Rada's blessing 4", 1)).build());
+		assertTrue(plan.getInventory().stream().noneMatch(l -> l.getName().startsWith("Rada's")));
+		assertTrue(plan.getTips().stream().anyMatch(t -> t.contains("Rada's blessing")));
+	}
 }
