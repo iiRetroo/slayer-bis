@@ -49,7 +49,7 @@ public final class OwnedItems
 	 * Whether an owned item name is the base name, or the base name followed by a dose, charge
 	 * count or variant, e.g. "Prayer potion(3)", "Slayer ring (8)", "Fungicide spray 10".
 	 */
-	static boolean matches(String ownedName, String base)
+	public static boolean matches(String ownedName, String base)
 	{
 		return ownedName.equals(base) || ownedName.startsWith(base + "(") || ownedName.startsWith(base + " ");
 	}

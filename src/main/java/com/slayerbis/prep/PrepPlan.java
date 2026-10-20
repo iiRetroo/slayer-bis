@@ -53,7 +53,10 @@ public class PrepPlan
 	List<Requirement> requirements;
 	List<InventoryLine> inventory;
 	List<TeleportOption> teleports;
+	/** Warnings: missing items and supplies. */
 	List<String> notes;
+	/** Tips about the task, e.g. that it is often cannoned. */
+	List<String> tips;
 	int slotsUsed;
 	/** Bank item ids of the suggested supplies, for highlighting. */
 	Set<Integer> supplyBankIds;

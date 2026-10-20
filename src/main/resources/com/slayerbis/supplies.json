@@ -36,6 +36,8 @@
     "alchables": ["Divine rune pouch", "Rune pouch"]
   },
   "alchRunes": ["Nature rune"],
+  "cannonParts": ["Cannon base", "Cannon stand", "Cannon barrels", "Cannon furnace"],
+  "cannonballs": ["Granite cannonball", "Cannonball"],
 
   "dragonfireShields": ["Dragonfire shield", "Dragonfire ward", "Ancient wyvern shield", "Anti-dragon shield"],
   "wyvernShields": ["Ancient wyvern shield", "Dragonfire shield", "Dragonfire ward", "Elemental shield", "Mind shield"]

@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Actor;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Item;
@@ -46,17 +48,29 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.NPC;
 import net.runelite.api.Skill;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.WidgetClosed;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.banktags.BankTagsPlugin;
+import net.runelite.client.plugins.banktags.BankTagsService;
+import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.slayer.SlayerPlugin;
 import net.runelite.client.plugins.slayer.SlayerPluginService;
 import net.runelite.client.ui.ClientToolbar;
@@ -76,12 +90,20 @@ import net.runelite.client.util.ImageUtil;
 	tags = {"dps", "gear", "bank", "slayer", "bis", "best in slot", "optimizer", "calculator", "inventory"}
 )
 @PluginDependency(SlayerPlugin.class)
+@PluginDependency(BankTagsPlugin.class)
 public class SlayerBisPlugin extends Plugin
 {
 	private static final String SLAYER_CONFIG_GROUP = "slayer";
 	private static final String SLAYER_TASK_KEY = "taskName";
 	private static final String SLAYER_LOCATION_KEY = "taskLocation";
+	private static final String SLAYER_AMOUNT_KEY = "amount";
 	private static final int SPELLBOOK_ANCIENT = 1;
+	/** Name of the temporary bank tag that shows the suggested gear and supplies. */
+	private static final String BANK_TAG = "slayerbis";
+	/** Per-account setting holding the remembered bank, as "itemId:quantity,..." */
+	private static final String BANK_KEY = "bankItems";
+	/** Items that give the Slayer helmet's on-task bonus, by canonical name. */
+	private static final Set<String> SLAYER_HELMS = Set.of("Slayer helmet", "Slayer helmet (i)", "Black mask", "Black mask (i)");
 
 	@Inject
 	private Client client;
@@ -110,6 +132,18 @@ public class SlayerBisPlugin extends Plugin
 	@Inject
 	private Gson gson;
 
+	@Inject
+	private ConfigManager configManager;
+
+	@Inject
+	private TagManager tagManager;
+
+	@Inject
+	private BankTagsService bankTagsService;
+
+	@Inject
+	private ChatMessageManager chatMessageManager;
+
 	private SlayerBisPanel panel;
 	private NavigationButton navButton;
 	private ExecutorService executor;
@@ -134,6 +168,13 @@ public class SlayerBisPlugin extends Plugin
 	private String lastTask;
 	/** Monster picked in the panel, or null to choose automatically. Reset when the task changes. */
 	private Integer selectedMonsterId;
+	/** The remembered bank as last saved, to avoid rewriting an unchanged value. */
+	private String savedBank;
+	private boolean bankOpen;
+	/** What the panel was last told about the items on you, to only update it on change. */
+	private ReadyState lastReady;
+	/** The task the Slayer helmet reminder was last shown for, so it shows once per task. */
+	private String remindedTask;
 
 	/** Results of the last calculation; replaced wholesale, read from the overlay and Swing threads. */
 	private volatile OptimizationOutcome outcome;
@@ -184,11 +225,21 @@ public class SlayerBisPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 		updateHighlightColors();
 		overlayManager.add(overlay);
+		tagManager.registerTag(BANK_TAG, this::inBankTag);
+		clientThread.invokeLater(this::loadSavedBank);
 	}
 
 	@Override
 	protected void shutDown()
 	{
+		clientThread.invokeLater(() ->
+		{
+			if (BANK_TAG.equals(bankTagsService.getActiveTag()))
+			{
+				bankTagsService.closeBankTag();
+			}
+		});
+		tagManager.unregisterTag(BANK_TAG);
 		overlayManager.remove(overlay);
 		clientToolbar.removeNavigation(navButton);
 		cancelRunning();
@@ -207,6 +258,10 @@ public class SlayerBisPlugin extends Plugin
 		lastGearSignature = Collections.emptySet();
 		lastTask = null;
 		selectedMonsterId = null;
+		savedBank = null;
+		bankOpen = false;
+		lastReady = null;
+		remindedTask = null;
 		outcome = null;
 		selectedType = null;
 		highlightIds = new int[0];
@@ -253,6 +308,7 @@ public class SlayerBisPlugin extends Plugin
 		if (id == InventoryID.BANK)
 		{
 			bankItems = readItems(event.getItemContainer());
+			saveBank();
 			recalculate(Trigger.BANK);
 		}
 		else if (id == InventoryID.WORN)
@@ -273,6 +329,199 @@ public class SlayerBisPlugin extends Plugin
 				recalculate(Trigger.GEAR_ONLY);
 			}
 		}
+		if (bankOpen)
+		{
+			updateReadiness();
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		if (event.getGroupId() == InterfaceID.BANKMAIN)
+		{
+			bankOpen = true;
+			updateReadiness();
+		}
+	}
+
+	@Subscribe
+	public void onWidgetClosed(WidgetClosed event)
+	{
+		if (event.getGroupId() == InterfaceID.BANKMAIN)
+		{
+			bankOpen = false;
+		}
+	}
+
+	@Subscribe
+	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
+	{
+		clientThread.invokeLater(this::loadSavedBank);
+	}
+
+	/**
+	 * Reminds the player, once per task, when they attack a task monster without a Slayer helmet
+	 * or black mask on but own one. A local chat message only; nothing is sent to the server.
+	 */
+	@Subscribe
+	public void onInteractingChanged(InteractingChanged event)
+	{
+		if (!config.helmetReminder() || event.getSource() != client.getLocalPlayer())
+		{
+			return;
+		}
+		Actor target = event.getTarget();
+		String task = slayerPluginService.getTask();
+		if (!(target instanceof NPC) || task == null || task.isEmpty() || task.equals(remindedTask)
+			|| !slayerPluginService.getTargets().contains(target))
+		{
+			return;
+		}
+		GameData data = gameData;
+		if (data == null || hasSlayerHelm(data, wornItems.keySet()) || !ownsSlayerHelm(data))
+		{
+			return;
+		}
+		remindedTask = task;
+		chatMessageManager.queue(QueuedMessage.builder()
+			.type(ChatMessageType.CONSOLE)
+			.runeLiteFormattedMessage(new ChatMessageBuilder()
+				.append(ChatColorType.HIGHLIGHT).append("SlayerBIS: ")
+				.append(ChatColorType.NORMAL).append("you're not wearing your Slayer helmet or black mask.")
+				.build())
+			.build());
+	}
+
+	private static boolean hasSlayerHelm(GameData data, Collection<Integer> ids)
+	{
+		for (int id : ids)
+		{
+			GearItem item = data.getItem(id);
+			if (item != null && SLAYER_HELMS.contains(item.getName()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean ownsSlayerHelm(GameData data)
+	{
+		return hasSlayerHelm(data, inventoryItems.keySet()) || (bankItems != null && hasSlayerHelm(data, bankItems.keySet()));
+	}
+
+	/**
+	 * Called from the panel's "Show in bank" button: filters the bank to the suggested items, or
+	 * goes back to the normal bank if they are already shown. Uses the Bank Tags plugin's own
+	 * temporary tag view; saved tags and layouts are not changed.
+	 */
+	void toggleBankTag()
+	{
+		clientThread.invokeLater(() ->
+		{
+			if (BANK_TAG.equals(bankTagsService.getActiveTag()))
+			{
+				bankTagsService.closeBankTag();
+			}
+			else
+			{
+				bankTagsService.openBankTag(BANK_TAG, BankTagsService.OPTION_NO_LAYOUT);
+			}
+		});
+	}
+
+	private boolean inBankTag(int itemId)
+	{
+		return Arrays.binarySearch(highlightIds, itemId) >= 0 || Arrays.binarySearch(supplyHighlightIds, itemId) >= 0;
+	}
+
+	/**
+	 * Saves the bank for this account so it is known before the bank is next opened. Stored in
+	 * RuneLite's own per-account settings, like any other plugin setting.
+	 */
+	private void saveBank()
+	{
+		if (!config.rememberBank() || bankItems == null)
+		{
+			return;
+		}
+		StringBuilder sb = new StringBuilder();
+		bankItems.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e ->
+			sb.append(sb.length() == 0 ? "" : ",").append(e.getKey()).append(':').append(e.getValue()));
+		String value = sb.toString();
+		if (!value.equals(savedBank))
+		{
+			configManager.setRSProfileConfiguration(SlayerBisConfig.GROUP, BANK_KEY, value);
+			savedBank = value;
+		}
+	}
+
+	/**
+	 * Loads the remembered bank for the logged-in account, if the bank has not been read yet.
+	 * Runs on the client thread.
+	 */
+	private void loadSavedBank()
+	{
+		if (!config.rememberBank() || bankItems != null || client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+		String value = configManager.getRSProfileConfiguration(SlayerBisConfig.GROUP, BANK_KEY);
+		if (value == null || value.isEmpty())
+		{
+			return;
+		}
+		Map<Integer, Integer> items = new HashMap<>();
+		for (String entry : value.split(","))
+		{
+			int colon = entry.indexOf(':');
+			try
+			{
+				int id = Integer.parseInt(entry.substring(0, colon));
+				items.put(id, Integer.parseInt(entry.substring(colon + 1)));
+				itemNames.computeIfAbsent(id, i -> itemManager.getItemComposition(i).getName());
+			}
+			catch (RuntimeException e)
+			{
+				log.debug("Skipping bad remembered bank entry {}", entry);
+			}
+		}
+		bankItems = items;
+		savedBank = value;
+		recalculate(Trigger.FORCE);
+	}
+
+	/**
+	 * Tells the panel which suggested items are already on you, so it can tick them off while you
+	 * bank. Runs on the client thread; only updates the panel when something changed.
+	 */
+	private void updateReadiness()
+	{
+		Set<Integer> onPerson = new HashSet<>(wornItems.keySet());
+		onPerson.addAll(inventoryItems.keySet());
+		Map<String, Integer> inventoryByName = new HashMap<>();
+		for (Map.Entry<Integer, Integer> e : inventoryItems.entrySet())
+		{
+			String name = itemNames.get(e.getKey());
+			if (name != null)
+			{
+				inventoryByName.merge(name, e.getValue(), Integer::sum);
+			}
+		}
+		ReadyState ready = new ReadyState(onPerson, inventoryByName);
+		if (ready.equals(lastReady))
+		{
+			return;
+		}
+		lastReady = ready;
+		SwingUtilities.invokeLater(() ->
+		{
+			if (panel != null)
+			{
+				panel.showReadiness(ready);
+			}
+		});
 	}
 
 	@Subscribe
@@ -283,6 +532,21 @@ public class SlayerBisPlugin extends Plugin
 		{
 			clientThread.invokeLater(() -> recalculate(Trigger.GEAR_ONLY));
 		}
+		else if (SLAYER_CONFIG_GROUP.equals(event.getGroup()) && SLAYER_AMOUNT_KEY.equals(event.getKey()))
+		{
+			// a kill: only the task time estimate changes
+			clientThread.invokeLater(() ->
+			{
+				int remaining = slayerPluginService.getRemainingAmount();
+				SwingUtilities.invokeLater(() ->
+				{
+					if (panel != null)
+					{
+						panel.showRemaining(remaining);
+					}
+				});
+			});
+		}
 		else if (SlayerBisConfig.GROUP.equals(event.getGroup()))
 		{
 			String key = event.getKey();
@@ -290,6 +554,14 @@ public class SlayerBisPlugin extends Plugin
 				|| "highlightSupplies".equals(key) || "supplyHighlightColor".equals(key))
 			{
 				updateHighlightColors();
+			}
+			else if ("rememberBank".equals(key) || "helmetReminder".equals(key))
+			{
+				if (!config.rememberBank())
+				{
+					configManager.unsetRSProfileConfiguration(SlayerBisConfig.GROUP, BANK_KEY);
+					savedBank = null;
+				}
 			}
 			else
 			{
@@ -305,6 +577,9 @@ public class SlayerBisPlugin extends Plugin
 		{
 			// a different account may log in next, so forget the previous bank
 			bankItems = null;
+			savedBank = null;
+			lastReady = null;
+			remindedTask = null;
 			lastSignature = Collections.emptyMap();
 			lastGearSignature = Collections.emptySet();
 			selectedMonsterId = null;
@@ -513,7 +788,8 @@ public class SlayerBisPlugin extends Plugin
 
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
-			config.prayerPotions(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills());
+			config.prayerPotions(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
+			slayerPluginService.getRemainingAmount());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -566,6 +842,7 @@ public class SlayerBisPlugin extends Plugin
 		int combatPotions;
 		boolean fillFood;
 		int lootMaxKills;
+		int taskRemaining;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -721,12 +998,17 @@ public class SlayerBisPlugin extends Plugin
 				? prep.plan(task, location, best == null ? null : best.getType(), requirements, owned,
 				settings.getPrayerPotions(), settings.getCombatPotions(), settings.isFillFood(), monster.getName(),
 				settings.getLootMaxKills())
-				: new PrepPlan(requirements, List.of(), List.of(), List.of(), 0, Set.of());
+				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
-				setup, candidates.size(), hints, current, plan);
+				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining());
 			outcome = done;
 			updateHighlights();
+			clientThread.invokeLater(() ->
+			{
+				lastReady = null;
+				updateReadiness();
+			});
 			SwingUtilities.invokeLater(() ->
 			{
 				if (panel != null)

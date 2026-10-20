@@ -26,6 +26,10 @@ public final class PrepData
 		List<InventoryItem> inventory;
 		String dragonfire;
 		boolean venom;
+		/** Commonly done with a dwarf cannon. */
+		boolean cannon;
+		/** Monsters bunch up, so multi-target spells work well. */
+		boolean stacks;
 		List<String> locations;
 	}
 
@@ -63,6 +67,8 @@ public final class PrepData
 		/** Loot type (herbs, seeds, gems, bones, ashes, alchables) to the items that collect it. */
 		Map<String, List<String>> lootTools;
 		List<String> alchRunes;
+		List<String> cannonParts;
+		List<String> cannonballs;
 	}
 
 	private static final class TasksFile

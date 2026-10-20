@@ -220,4 +220,38 @@ public class PrepPlannerTest
 		assertFalse(data.drops("Skeletal Wyvern").isEmpty());
 		assertFalse(data.drops("skeletal wyvern").isEmpty());
 	}
+
+	@Test
+	public void cannonIsSuggestedWhenYouOwnOne()
+	{
+		OwnedItems bank = owned("Cannon base", 1, "Cannon stand", 1, "Cannon barrels", 1, "Cannon furnace", 1,
+			"Granite cannonball", 2000);
+		PrepPlan plan = planner.plan("Kalphites", null, AttackType.STAB, Collections.emptyList(), bank, 0, 0, false,
+			null, 0);
+		assertEquals(5, plan.getInventory().size());
+		assertTrue(plan.getTips().get(0).contains("cannon"));
+		// without a full cannon only the tip shows
+		PrepPlan partial = planner.plan("Kalphites", null, AttackType.STAB, Collections.emptyList(),
+			owned("Cannon base", 1, "Cannonball", 500), 0, 0, false, null, 0);
+		assertTrue(partial.getInventory().isEmpty());
+		assertEquals(1, partial.getTips().size());
+	}
+
+	@Test
+	public void stackingTasksSuggestBursting()
+	{
+		PrepPlan plan = planner.plan("Dust devils", null, AttackType.MAGIC, Collections.emptyList(),
+			owned("Rune pouch", 1), 0, 0, false, "Dust devil", 0);
+		assertTrue(plan.getTips().stream().anyMatch(t -> t.contains("bursting")));
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Rune pouch")));
+	}
+
+	@Test
+	public void runePouchIsNotListedTwice()
+	{
+		// abyssal demons stack and drop alchables: one pouch line, not two
+		PrepPlan plan = planner.plan("Abyssal demons", null, AttackType.SLASH, Collections.emptyList(),
+			owned("Rune pouch", 1), 0, 0, false, "Abyssal demon", PrepPlanner.COMMON_DROP_KILLS);
+		assertEquals(1, plan.getInventory().stream().filter(l -> l.getName().equals("Rune pouch")).count());
+	}
 }

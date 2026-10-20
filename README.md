@@ -7,7 +7,8 @@ SlayerBIS is built for one moment: you've just got a Slayer task and you're stan
 - **Your best gear for this task, outlined in your bank.** It's picked from everything you own, and it already includes the gear the task needs (a mirror shield for basilisks, boots of stone for Karuulm, a nose peg or Slayer helmet for aberrant spectres).
 - **What to bring.** Task items like a rock hammer or bag of salt, antifire where dragons breathe fire, a potion for your best style, prayer potions and your best food, plus tools for what the monster drops: a herb sack for herbs, a rune pouch for alchables, a bonecrusher for bones. Supplies get their own highlight colour.
 - **How to get there.** Teleports to the task location, ticked off when you own the item.
-- **How much better it is** than what you're wearing right now.
+- **How much better it is** than what you're wearing right now, and roughly how long the task will take.
+- **A checklist while you bank.** Items turn green as they reach your inventory or equipment, until it says "Ready to go". **Show in bank** filters your bank to just the suggested items.
 
 ### Why trust the numbers
 
@@ -33,7 +34,7 @@ When you open your bank, the plugin reads your banked items (plus, optionally, w
 - teleports to the task location, ticked off when you own the item
 - what was assumed (levels, prayers, potions, spellbook)
 
-The panel is laid out like the game: a tab per style with its DPS (best in green), the set in the worn-equipment layout with bank items outlined, a stats box, and the inventory as item icons with stack counts. "Other weapons", "Getting there" and "Details" fold away until you need them. The chosen gear is outlined in your bank in one colour and the suggested supplies in another. Use the picker at the top to choose which monster to calculate against (some tasks cover several).
+The panel is laid out like the game: a tab per style with its DPS (best in green), the set in the worn-equipment layout with bank items outlined, a stats box, and the inventory as item icons with stack counts. "Other weapons", "Getting there" and "Details" fold away until you need them. The chosen gear is outlined in your bank in one colour and the suggested supplies in another. While you bank, tiles turn green once an item is on you (amber means it's still in the bank), and a badge counts what's left to withdraw. **Show in bank** uses the core Bank Tags plugin's temporary tag view to show only the suggested items; click it again for your full bank. Your saved bank tags are not changed. Use the picker at the top to choose which monster to calculate against (some tasks cover several).
 
 ## How the search works
 
@@ -58,9 +59,19 @@ Loot tools come from the monster's drop table (`drops.json`, built from the OSRS
 | Bones | Bonecrusher |
 | Demonic ashes | Ash sanctifier |
 
+Tasks that are usually cannoned (kalphites, dagannoth, trolls and others) get a tip, plus your cannon and cannonballs if you own a full cannon. Tasks where monsters stack (dust devils, nechryael, smoke devils, abyssal demons) get a bursting tip and your rune pouch.
+
 The **Loot tools** setting chooses between common drops only (loot that drops at least once every 64 kills on average, the default), all drops, or off. Tools you don't own are never suggested.
 
 Teleports cover common task locations only. When the Slayer plugin reports where your task is (for example from Konar), the teleports for that location are shown; otherwise the task's usual locations are listed.
+
+## Other conveniences
+
+- **Remembers your bank** between sessions (setting: *Remember bank*, on by default), so suggestions are ready as soon as you get a task. It's kept in your RuneLite settings for that account, like any other plugin setting; turning the setting off deletes it.
+- **Task time estimate** in the stats box: kills left x monster HP / DPS. It ignores walking, respawns and overkill, so treat it as a rough lower bound.
+- **Slayer helmet reminder** (setting, on by default): a chat message if you attack a task monster without your Slayer helmet or black mask on while you own one. Once per task, and only in your own chat box.
+
+The Bank Tags plugin, a RuneLite core plugin that's on by default, needs to be enabled for Show in bank.
 
 ## Target monster
 

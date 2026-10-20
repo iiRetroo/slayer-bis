@@ -169,6 +169,32 @@ public final class PrepPlanner
 			slots += addLootTools(lines, ids, owned, monsterName, lootMaxKills);
 		}
 
+		List<String> tips = new ArrayList<>();
+		if (info != null && info.cannon)
+		{
+			tips.add("This task is often cannoned; check your spot allows a cannon.");
+			String balls = firstOwned(s.cannonballs, owned);
+			boolean fullCannon = s.cannonParts != null && s.cannonParts.stream().allMatch(owned::owns);
+			if (fullCannon && balls != null)
+			{
+				for (String part : s.cannonParts)
+				{
+					slots += addLine(lines, ids, owned, part, 1, "dwarf cannon", false);
+				}
+				slots += addLine(lines, ids, owned, balls, 1, "for the cannon", false);
+			}
+		}
+		if (info != null && info.stacks)
+		{
+			tips.add("Monsters stack here, so bursting or barraging (Ancient Magicks) works well.");
+			String pouch = firstOwned(s.lootTools == null ? null : s.lootTools.get("alchables"), owned);
+			boolean pouchListed = pouch != null && lines.stream().anyMatch(l -> l.getName().equals(pouch));
+			if (pouch != null && !pouchListed)
+			{
+				slots += addLine(lines, ids, owned, pouch, 1, "with burst or barrage runes", false);
+			}
+		}
+
 		if (fillFood)
 		{
 			int remaining = INVENTORY_SLOTS - slots;
@@ -214,7 +240,7 @@ public final class PrepPlanner
 			}
 		}
 
-		return new PrepPlan(requirements, lines, teleports(info, location, owned), notes, slots,
+		return new PrepPlan(requirements, lines, teleports(info, location, owned), notes, tips, slots,
 			Collections.unmodifiableSet(ids));
 	}
 

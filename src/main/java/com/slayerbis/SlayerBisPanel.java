@@ -7,6 +7,7 @@ import com.slayerbis.calc.StyleResult;
 import com.slayerbis.data.AttackType;
 import com.slayerbis.data.EquipmentSlot;
 import com.slayerbis.data.Monster;
+import com.slayerbis.prep.OwnedItems;
 import com.slayerbis.prep.PrepPlan;
 import com.slayerbis.prep.PrepPlanner;
 import java.awt.BasicStroke;
@@ -57,7 +58,10 @@ class SlayerBisPanel extends PluginPanel
 	private static final Dimension TILE = new Dimension(36, 32);
 	private static final Color TILE_BACKGROUND = ColorScheme.DARKER_GRAY_COLOR;
 	private static final Color TILE_BORDER = new Color(60, 60, 60);
-	private static final Color BANK_BORDER = new Color(0, 255, 140);
+	/** Still in the bank: withdraw it. */
+	private static final Color BANK_BORDER = new Color(255, 185, 0);
+	/** Already on you (worn or in the inventory). */
+	private static final Color READY_BORDER = new Color(0, 220, 110);
 	private static final Color MISSING_BORDER = new Color(200, 50, 50);
 	private static final Color GOOD = ColorScheme.PROGRESS_COMPLETE_COLOR;
 	private static final Color WARN = ColorScheme.PROGRESS_INPROGRESS_COLOR;
@@ -94,6 +98,10 @@ class SlayerBisPanel extends PluginPanel
 	private final Map<String, Boolean> expanded = new HashMap<>();
 
 	private OptimizationOutcome outcome;
+	/** Items on the player, for ticking off suggestions; null until known. */
+	private ReadyState ready;
+	/** Kills left on the task, kept up to date between calculations. */
+	private int remaining;
 	/** The style tab picked by the player, or null to follow the best style. */
 	private AttackType selected;
 	private boolean updatingSelect;
@@ -140,6 +148,15 @@ class SlayerBisPanel extends PluginPanel
 		top.add(refresh, BorderLayout.EAST);
 		header.add(left(top));
 
+		JButton showInBank = new JButton("Show in bank");
+		showInBank.setFont(FontManager.getRunescapeSmallFont());
+		showInBank.setToolTipText("Filter your bank to the suggested gear and supplies (click again for the full bank)");
+		showInBank.addActionListener(e -> plugin.toggleBankTag());
+		JPanel bankRow = new JPanel(new BorderLayout());
+		bankRow.setBorder(new EmptyBorder(4, 0, 0, 0));
+		bankRow.add(showInBank, BorderLayout.CENTER);
+		header.add(left(bankRow));
+
 		add(header, BorderLayout.NORTH);
 
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -167,6 +184,7 @@ class SlayerBisPanel extends PluginPanel
 	void reset(String message)
 	{
 		outcome = null;
+		ready = null;
 		updatingSelect = true;
 		monsterSelect.removeAllItems();
 		monsterIds.clear();
@@ -174,10 +192,29 @@ class SlayerBisPanel extends PluginPanel
 		showMessage(message);
 	}
 
+	/**
+	 * Which items are on the player, so suggestions can be ticked off while banking.
+	 */
+	void showReadiness(ReadyState ready)
+	{
+		this.ready = ready;
+		render();
+	}
+
+	/**
+	 * Kills left on the task, after a kill.
+	 */
+	void showRemaining(int remaining)
+	{
+		this.remaining = remaining;
+		render();
+	}
+
 	void showOutcome(OptimizationOutcome outcome, AttackType selected)
 	{
 		this.outcome = outcome;
 		this.selected = selected;
+		this.remaining = outcome.getTaskRemaining();
 		statusLabel.setText(wrap(escape(outcome.getMonster().displayName()) + " &middot; "
 			+ outcome.getItemsScanned() + " items scanned"));
 		updatingSelect = true;
@@ -217,6 +254,7 @@ class SlayerBisPanel extends PluginPanel
 
 		content.add(styleTabs(best, shownType));
 		renderWarnings(best);
+		renderReadyBadge(shown);
 
 		if (shown == null || !shown.isValid())
 		{
@@ -332,10 +370,12 @@ class SlayerBisPanel extends PluginPanel
 					grid.add(tile(-1, null, slot.getDisplayName() + ": empty", TILE_BORDER));
 					continue;
 				}
-				ItemSource source = outcome.getSources().get(c.getOwnedItemId());
-				boolean fromBank = source == ItemSource.BANK;
-				String tip = c.getItem().getName() + " (" + (source == null ? "owned" : source.getLabel()) + ")";
-				grid.add(tile(c.getOwnedItemId(), c.getItem().getName(), tip, fromBank ? BANK_BORDER : TILE_BORDER));
+				boolean onYou = isOnPerson(c);
+				ItemSource source = onYou ? null : outcome.getSources().get(c.getOwnedItemId());
+				String where = onYou ? "on you" : source == null ? "owned" : source.getLabel();
+				String tip = c.getItem().getName() + " (" + where + ")";
+				Color border = onYou ? READY_BORDER : source == ItemSource.BANK ? BANK_BORDER : TILE_BORDER;
+				grid.add(tile(c.getOwnedItemId(), c.getItem().getName(), tip, border));
 			}
 		}
 		grid.setMaximumSize(grid.getPreferredSize());
@@ -359,6 +399,11 @@ class SlayerBisPanel extends PluginPanel
 		box.add(statRow("Max hit", String.valueOf(r.getMaxHit())));
 		box.add(statRow("Accuracy", PERCENT_FORMAT.format(r.getAccuracy())));
 		box.add(statRow("Speed", SECONDS_FORMAT.format(r.getAttackSpeedTicks() * 0.6) + "s"));
+		JComponent eta = taskTime(r);
+		if (eta != null)
+		{
+			box.add(eta);
+		}
 		OptimizationOutcome.CurrentGear current = outcome.getCurrentGear();
 		if (current != null)
 		{
@@ -374,6 +419,26 @@ class SlayerBisPanel extends PluginPanel
 		box.setAlignmentX(Component.LEFT_ALIGNMENT);
 		box.setMaximumSize(new Dimension(Integer.MAX_VALUE, box.getPreferredSize().height));
 		return box;
+	}
+
+	/**
+	 * A rough time to finish the task: kills left x (monster HP / DPS). Ignores walking, respawns
+	 * and overkill, so it is a lower bound.
+	 */
+	private JComponent taskTime(CalcResult r)
+	{
+		int hp = outcome.getMonster().getHitpoints();
+		String task = outcome.getTask();
+		if (remaining <= 0 || hp <= 0 || r.getDps() <= 0 || task == null || task.isEmpty())
+		{
+			return null;
+		}
+		double seconds = remaining * hp / r.getDps();
+		String time = seconds >= 3600 ? (int) (seconds / 3600) + "h " + (int) (seconds % 3600 / 60) + "m"
+			: Math.max(1, Math.round(seconds / 60)) + " min";
+		JComponent row = statRow("Task", "~" + time + " (" + remaining + " left)");
+		row.setToolTipText("Rough: kills left x monster HP / DPS. Walking, respawns and overkill are not counted.");
+		return row;
 	}
 
 	private JComponent statRow(String name, String value)
@@ -416,10 +481,66 @@ class SlayerBisPanel extends PluginPanel
 		return t == null ? "" : t.getDisplayName();
 	}
 
+	private boolean isOnPerson(Optimizer.Candidate c)
+	{
+		return ready != null && ready.getOnPerson().contains(c.getOwnedItemId());
+	}
+
+	/**
+	 * Whether enough of this item is already in the inventory.
+	 */
+	private boolean isPacked(PrepPlan.InventoryLine l)
+	{
+		if (ready == null)
+		{
+			return false;
+		}
+		int have = 0;
+		for (Map.Entry<String, Integer> e : ready.getInventoryByName().entrySet())
+		{
+			if (OwnedItems.matches(e.getKey(), l.getName()))
+			{
+				have += e.getValue();
+			}
+		}
+		return have >= l.getQuantity();
+	}
+
+	/**
+	 * "Ready to go" once every suggested item is on you, otherwise how many are left to withdraw.
+	 */
+	private void renderReadyBadge(StyleResult shown)
+	{
+		if (ready == null || shown == null || !shown.isValid())
+		{
+			return;
+		}
+		int left = 0;
+		for (Optimizer.Candidate c : shown.getGear())
+		{
+			if (c != null && !isOnPerson(c))
+			{
+				left++;
+			}
+		}
+		for (PrepPlan.InventoryLine l : outcome.getPrep().getInventory())
+		{
+			if (l.getOwned() > 0 && !isPacked(l))
+			{
+				left++;
+			}
+		}
+		JLabel badge = new JLabel(left == 0 ? "Ready to go" : left + " to withdraw", SwingConstants.CENTER);
+		badge.setFont(FontManager.getRunescapeSmallFont());
+		badge.setForeground(left == 0 ? READY_BORDER : BANK_BORDER);
+		badge.setBorder(new EmptyBorder(4, 0, 0, 0));
+		content.add(left(badge));
+	}
+
 	private void renderInventory()
 	{
 		PrepPlan prep = outcome.getPrep();
-		if (prep.getInventory().isEmpty() && prep.getNotes().isEmpty())
+		if (prep.getInventory().isEmpty() && prep.getNotes().isEmpty() && prep.getTips().isEmpty())
 		{
 			return;
 		}
@@ -434,8 +555,10 @@ class SlayerBisPanel extends PluginPanel
 				String tip = l.getQuantity() + " x " + l.getName() + (l.getNote() == null ? "" : " - " + l.getNote())
 					+ " (you have " + l.getOwned() + ")";
 				boolean missing = l.getOwned() == 0;
-				JLabel tile = tile(missing ? -1 : l.getItemId(), l.getName(), missing ? "Missing: " + tip : tip,
-					missing ? MISSING_BORDER : TILE_BORDER, l.getQuantity());
+				boolean packed = !missing && isPacked(l);
+				Color border = missing ? MISSING_BORDER : packed ? READY_BORDER : ready != null ? BANK_BORDER : TILE_BORDER;
+				JLabel tile = tile(missing ? -1 : l.getItemId(), l.getName(), missing ? "Missing: " + tip
+					: packed ? tip + " - packed" : tip, border, l.getQuantity());
 				grid.add(tile);
 			}
 			grid.setMaximumSize(grid.getPreferredSize());
@@ -444,6 +567,10 @@ class SlayerBisPanel extends PluginPanel
 		for (String note : prep.getNotes())
 		{
 			content.add(left(text(note, WARN, true)));
+		}
+		for (String tip : prep.getTips())
+		{
+			content.add(left(text(tip, MUTED, true)));
 		}
 	}
 

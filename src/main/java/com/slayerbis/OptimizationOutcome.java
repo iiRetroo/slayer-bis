@@ -31,6 +31,8 @@ class OptimizationOutcome
 	CurrentGear currentGear;
 	/** Requirements, inventory and teleports; only the requirements when preparation is turned off. */
 	PrepPlan prep;
+	/** Kills left on the task when this was calculated, or 0 if unknown. */
+	int taskRemaining;
 
 	@Value
 	static class ChargeHint

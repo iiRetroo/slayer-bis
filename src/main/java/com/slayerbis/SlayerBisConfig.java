@@ -17,8 +17,8 @@ public interface SlayerBisConfig extends Config
 	String GROUP = "slayerbis";
 
 	@ConfigSection(
-		name = "Gear sources",
-		description = "Which of your items are considered",
+		name = "General",
+		description = "Which items are considered, and reminders",
 		position = 0
 	)
 	String sourcesSection = "sources";
@@ -71,6 +71,32 @@ public interface SlayerBisConfig extends Config
 		position = 1
 	)
 	default boolean includeInventory()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "rememberBank",
+		name = "Remember bank",
+		description = "Remember what is in your bank between sessions (kept in your RuneLite settings for this "
+			+ "account, like other plugin settings), so suggestions show before you open the bank",
+		section = sourcesSection,
+		position = 2
+	)
+	default boolean rememberBank()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "helmetReminder",
+		name = "Slayer helmet reminder",
+		description = "Send a chat message if you attack a task monster without your Slayer helmet or black mask on, "
+			+ "once per task",
+		section = sourcesSection,
+		position = 3
+	)
+	default boolean helmetReminder()
 	{
 		return true;
 	}
