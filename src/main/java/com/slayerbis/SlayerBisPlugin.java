@@ -72,6 +72,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -921,7 +922,8 @@ public class SlayerBisPlugin extends Plugin
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
-			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster(), config.burstTargets());
+			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster(), config.burstTargets(),
+			config.preferSlayerHelmet());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -979,6 +981,7 @@ public class SlayerBisPlugin extends Plugin
 		boolean specWeapon;
 		SlayerMaster slayerMaster;
 		int burstTargets;
+		int preferSlayerHelmet;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1112,11 +1115,14 @@ public class SlayerBisPlugin extends Plugin
 
 			Optimizer optimizer = new Optimizer(setup, monster, cancel);
 			Map<AttackType, StyleResult> results = new EnumMap<>(AttackType.class);
+			Map<AttackType, Double> helmetCost = new EnumMap<>(AttackType.class);
 			for (AttackType type : AttackType.values())
 			{
 				if (type != AttackType.BURST)
 				{
-					results.put(type, optimizer.optimise(candidates, type, required));
+					StyleResult r = optimizer.optimise(candidates, type, required);
+					results.put(type, preferHelmet(optimizer, candidates, type, r, required, setup,
+						settings.getPreferSlayerHelmet(), helmetCost));
 				}
 			}
 			if (settings.getBurstTargets() > 0 && prep.stacks(task))
@@ -1124,14 +1130,22 @@ public class SlayerBisPlugin extends Plugin
 				// casting Ancients by hand on a stack: magic on the Ancient spellbook, DPS times the targets
 				PlayerSetup burstSetup = setup.toBuilder().ancientSpellbook(true)
 					.burstTargets(settings.getBurstTargets()).build();
-				StyleResult r = new Optimizer(burstSetup, monster, cancel).optimise(candidates, AttackType.MAGIC, required);
+				Optimizer burstOptimizer = new Optimizer(burstSetup, monster, cancel);
+				StyleResult r = burstOptimizer.optimise(candidates, AttackType.MAGIC, required);
+				Map<AttackType, Double> burstCost = new EnumMap<>(AttackType.class);
+				r = preferHelmet(burstOptimizer, candidates, AttackType.MAGIC, r, required, setup,
+					settings.getPreferSlayerHelmet(), burstCost);
+				if (burstCost.containsKey(AttackType.MAGIC))
+				{
+					helmetCost.put(AttackType.BURST, burstCost.get(AttackType.MAGIC));
+				}
 				results.put(AttackType.BURST, new StyleResult(AttackType.BURST, r.getResult(), r.getGear(),
 					r.getCombinationsTried(), r.getItemsConsidered(), r.getItemsAfterPruning(), r.getSetsConsidered(),
 					r.isStoppedEarly(), r.getAlternatives()));
 			}
 
 			Map<AttackType, OptimizationOutcome.ChargeHint> hints = chargeHints(optimizer, candidates, chargeable,
-				results, required);
+				results, required, helmetCost);
 
 			OptimizationOutcome.CurrentGear current = currentGear(setup, monster, worn);
 
@@ -1166,7 +1180,7 @@ public class SlayerBisPlugin extends Plugin
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
-				settings.getBurstTargets());
+				settings.getBurstTargets(), helmetCost);
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
@@ -1210,11 +1224,54 @@ public class SlayerBisPlugin extends Plugin
 	}
 
 	/**
+	 * On task, if the best set leaves off an owned Slayer helmet (say for a Salve amulet and a
+	 * Serpentine helm), searches again with the helmet kept and uses that set when it is within
+	 * the allowed percentage. Records the DPS given up.
+	 */
+	private static StyleResult preferHelmet(Optimizer optimizer, List<Optimizer.Candidate> candidates,
+		AttackType type, StyleResult best, Map<EquipmentSlot, Set<String>> required, PlayerSetup setup,
+		int percent, Map<AttackType, Double> cost)
+	{
+		if (percent <= 0 || !setup.isOnSlayerTask() || !best.isValid() || required.containsKey(EquipmentSlot.HEAD))
+		{
+			return best;
+		}
+		Optimizer.Candidate head = best.getGear()[EquipmentSlot.HEAD.ordinal()];
+		if (head != null && (SLAYER_HELMS.contains(head.getItem().getName()) || head.getItem().getName().equals("V's helm")))
+		{
+			return best;
+		}
+		Set<String> owned = new HashSet<>();
+		for (Optimizer.Candidate c : candidates)
+		{
+			if (SLAYER_HELMS.contains(c.getItem().getName()))
+			{
+				owned.add(c.getItem().getName());
+			}
+		}
+		if (owned.isEmpty())
+		{
+			return best;
+		}
+		Map<EquipmentSlot, Set<String>> withHelmet = new EnumMap<>(EquipmentSlot.class);
+		withHelmet.putAll(required);
+		withHelmet.put(EquipmentSlot.HEAD, owned);
+		StyleResult kept = optimizer.optimise(candidates, type, withHelmet);
+		double bestDps = best.getResult().getDps();
+		if (!kept.isValid() || kept.getResult().getDps() * (100 + percent) < bestDps * 100)
+		{
+			return best;
+		}
+		cost.put(type, bestDps - kept.getResult().getDps());
+		return kept;
+	}
+
+	/**
 	 * A second search as if the uncharged items were charged; reported only where it would win.
 	 */
 	private static Map<AttackType, OptimizationOutcome.ChargeHint> chargeHints(Optimizer optimizer,
 		List<Optimizer.Candidate> candidates, List<Optimizer.Candidate> chargeable, Map<AttackType, StyleResult> results,
-		Map<EquipmentSlot, Set<String>> required)
+		Map<EquipmentSlot, Set<String>> required, Map<AttackType, Double> helmetCost)
 	{
 		Map<AttackType, OptimizationOutcome.ChargeHint> hints = new EnumMap<>(AttackType.class);
 		if (chargeable.isEmpty())
@@ -1231,7 +1288,9 @@ public class SlayerBisPlugin extends Plugin
 				continue;
 			}
 			StyleResult charged = optimizer.optimise(withCharged, type, required);
-			if (!charged.isValid() || charged.getResult().getDps() <= results.get(type).getResult().getDps())
+			// compare with the best set before any Slayer helmet preference
+			double withoutCharging = results.get(type).getResult().getDps() + helmetCost.getOrDefault(type, 0.0);
+			if (!charged.isValid() || charged.getResult().getDps() <= withoutCharging)
 			{
 				continue;
 			}
@@ -1288,9 +1347,28 @@ public class SlayerBisPlugin extends Plugin
 			if (c != null && o.getSources().get(c.getOwnedItemId()) == ItemSource.BANK)
 			{
 				ids.add(c.getOwnedItemId());
+				addVariations(c.getOwnedItemId(), ids);
 			}
 		}
 		highlightIds = sorted(ids);
+	}
+
+	/**
+	 * Other versions of the same item (Blood Moon armour has new, used and broken ones, each its own
+	 * item id), so the bank outline and Show in bank still find it if the id in the bank differs.
+	 * Broken and other unusable versions are left out.
+	 */
+	private void addVariations(int itemId, Set<Integer> ids)
+	{
+		GameData data = gameData;
+		for (int variation : ItemVariationMapping.getVariations(ItemVariationMapping.map(itemId)))
+		{
+			GearItem item = data == null ? null : data.getItem(variation);
+			if (item == null || item.isUsable())
+			{
+				ids.add(variation);
+			}
+		}
 	}
 
 	private static int[] sorted(Collection<Integer> ids)

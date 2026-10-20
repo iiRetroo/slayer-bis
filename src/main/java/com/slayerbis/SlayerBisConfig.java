@@ -103,6 +103,20 @@ public interface SlayerBisConfig extends Config
 		return true;
 	}
 
+	@Range(max = 50)
+	@ConfigItem(
+		keyName = "preferSlayerHelmet",
+		name = "Prefer Slayer helmet (%)",
+		description = "On task, keep your Slayer helmet or black mask on if the best set without it is no more "
+			+ "than this many percent better (e.g. Salve amulet with a Serpentine helm on undead). 0 turns it off.",
+		section = sourcesSection,
+		position = 4
+	)
+	default int preferSlayerHelmet()
+	{
+		return 5;
+	}
+
 	@ConfigItem(
 		keyName = "meleePrayer",
 		name = "Melee prayer",

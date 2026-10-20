@@ -35,6 +35,8 @@ class OptimizationOutcome
 	int taskRemaining;
 	/** Monsters each burst or barrage is assumed to hit, for the Burst result. */
 	int burstTargets;
+	/** Per style, the DPS given up to keep the Slayer helmet on; only where it was kept. */
+	Map<AttackType, Double> helmetCost;
 
 	@Value
 	static class ChargeHint

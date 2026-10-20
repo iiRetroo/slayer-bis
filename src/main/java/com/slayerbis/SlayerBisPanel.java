@@ -276,6 +276,13 @@ class SlayerBisPanel extends PluginPanel
 			content.add(gap(6));
 			content.add(statsBox(shown, best));
 			content.add(banner(shown.getResult()));
+			Double helmet = outcome.getHelmetCost().get(shown.getType());
+			if (helmet != null)
+			{
+				content.add(left(text(helmet > 0.005
+					? "Slayer helmet kept on: " + DPS_FORMAT.format(helmet) + " DPS less than the best set without it."
+					: "Slayer helmet kept on: no DPS lost.", MUTED, true)));
+			}
 			OptimizationOutcome.ChargeHint hint = outcome.getChargeHints().get(shown.getType());
 			if (hint != null)
 			{

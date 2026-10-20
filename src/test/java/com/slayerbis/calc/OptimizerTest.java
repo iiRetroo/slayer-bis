@@ -252,4 +252,26 @@ public class OptimizerTest
 			"Mithril dragon", "Adamant dragon", "Rune dragon")));
 		assertTrue(resolver.candidates("Abyssal demons").size() >= 2);
 	}
+
+	@Test
+	public void slayerHelmetCanBeKeptOnUndead()
+	{
+		// Salve amulet (ei) and Slayer helmet (i) don't stack; which wins depends on the rest of the gear,
+		// and either way keeping the helmet costs little against crawling hands
+		List<Optimizer.Candidate> owned = bank("Slayer helmet (i)", "Serpentine helm", "Salve amulet(ei)",
+			"Amulet of glory", "Abyssal whip", "Dragon defender", "Fighter torso", "Bandos tassets",
+			"Barrows gloves", "Dragon boots", "Berserker ring (i)", "Fire cape");
+		Optimizer optimizer = new Optimizer(DpsCalculatorTest.maxed(true), monster("Crawling hands"));
+		StyleResult best = optimizer.optimise(owned, AttackType.SLASH);
+
+		java.util.Map<EquipmentSlot, java.util.Set<String>> helmet = new java.util.EnumMap<>(EquipmentSlot.class);
+		helmet.put(EquipmentSlot.HEAD, java.util.Collections.singleton("Slayer helmet (i)"));
+		StyleResult kept = optimizer.optimise(owned, AttackType.SLASH, helmet);
+		assertEquals("Slayer helmet (i)", nameIn(kept, EquipmentSlot.HEAD));
+		double gap = 1 - kept.getResult().getDps() / best.getResult().getDps();
+		System.out.printf("crawling hands: best %.3f (%s, %s), with helmet %.3f (%s), gap %.1f%%%n",
+			best.getResult().getDps(), nameIn(best, EquipmentSlot.HEAD), nameIn(best, EquipmentSlot.NECK),
+			kept.getResult().getDps(), nameIn(kept, EquipmentSlot.NECK), gap * 100);
+		assertTrue(gap >= 0 && gap < 0.05);
+	}
 }
