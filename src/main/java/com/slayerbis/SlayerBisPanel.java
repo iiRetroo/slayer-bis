@@ -36,7 +36,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.game.ItemManager;
@@ -259,7 +261,8 @@ class SlayerBisPanel extends PluginPanel
 
 		StyleResult best = outcome.best();
 		AttackType shownType = selected != null ? selected : best == null ? null : best.getType();
-		StyleResult shown = shownType == null ? null : outcome.getResults().get(shownType);
+		StyleResult shown = shownType == null ? null : outcome.withAmmo(outcome.getResults().get(shownType),
+			plugin.getSelectedAmmo());
 
 		content.add(styleTabs(best, shownType));
 		renderWarnings(best);
@@ -400,11 +403,53 @@ class SlayerBisPanel extends PluginPanel
 				String where = onYou ? "on you" : source == null ? "owned" : source.getLabel();
 				String tip = c.getItem().getName() + " (" + where + ")";
 				Color border = onYou ? READY_BORDER : source == ItemSource.BANK ? BANK_BORDER : TILE_BORDER;
-				grid.add(tile(c.getOwnedItemId(), c.getItem().getName(), tip, border));
+				boolean ammoMenu = slot == EquipmentSlot.AMMO && shown.getType() == AttackType.RANGED
+					&& outcome.getAmmoOptions().size() > 1;
+				JLabel tile = tile(c.getOwnedItemId(), c.getItem().getName(), ammoMenu ? tip + " - click to compare ammo" : tip, border);
+				if (ammoMenu)
+				{
+					tile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					tile.addMouseListener(new MouseAdapter()
+					{
+						@Override
+						public void mouseClicked(MouseEvent e)
+						{
+							ammoMenu(c.getOwnedItemId()).show(tile, 0, tile.getHeight());
+						}
+					});
+				}
+				grid.add(tile);
 			}
 		}
 		grid.setMaximumSize(grid.getPreferredSize());
 		return grid;
+	}
+
+	/**
+	 * Every owned ammo the ranged weapon can fire, with its DPS, so a cheaper one can be picked.
+	 */
+	private JPopupMenu ammoMenu(int currentAmmoId)
+	{
+		JPopupMenu menu = new JPopupMenu();
+		List<StyleResult.Alternative> options = outcome.getAmmoOptions();
+		double top = options.get(0).getResult().getDps();
+		for (int i = 0; i < options.size(); i++)
+		{
+			StyleResult.Alternative alt = options.get(i);
+			Optimizer.Candidate ammo = alt.getGear()[EquipmentSlot.AMMO.ordinal()];
+			double dps = alt.getResult().getDps();
+			String text = (ammo.getOwnedItemId() == currentAmmoId ? "> " : "") + ammo.getItem().getName() + "  "
+				+ DPS_FORMAT.format(dps) + " DPS" + (i == 0 ? " (best)" : " (" + DPS_FORMAT.format(dps - top) + ")");
+			JMenuItem item = new JMenuItem(text);
+			Integer pick = i == 0 ? null : ammo.getOwnedItemId();
+			item.addActionListener(e ->
+			{
+				plugin.selectAmmo(pick);
+				render();
+			});
+			menu.add(item);
+		}
+		return menu;
 	}
 
 	private JComponent statsBox(StyleResult shown, StyleResult best)

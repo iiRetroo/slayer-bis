@@ -193,6 +193,8 @@ public class SlayerBisPlugin extends Plugin
 	/** Results of the last calculation; replaced wholesale, read from the overlay and Swing threads. */
 	private volatile OptimizationOutcome outcome;
 	private volatile AttackType selectedType;
+	/** Ammo picked in the panel for the ranged set (owned item id), or null for the best. */
+	private volatile Integer selectedAmmo;
 	/** Sorted bank item ids to outline; replaced wholesale so the overlay never sees a partial update. */
 	private volatile int[] highlightIds = new int[0];
 	private volatile int[] supplyHighlightIds = new int[0];
@@ -715,6 +717,7 @@ public class SlayerBisPlugin extends Plugin
 			lastSignature = Collections.emptyMap();
 			lastGearSignature = Collections.emptySet();
 			selectedMonsterId = null;
+			selectedAmmo = null;
 			outcome = null;
 			highlightIds = new int[0];
 			supplyHighlightIds = new int[0];
@@ -762,6 +765,20 @@ public class SlayerBisPlugin extends Plugin
 	{
 		selectedType = type;
 		updateHighlights();
+	}
+
+	/**
+	 * Called from the panel's ammo menu; null goes back to the best ammo.
+	 */
+	void selectAmmo(Integer ammoId)
+	{
+		selectedAmmo = ammoId;
+		updateHighlights();
+	}
+
+	Integer getSelectedAmmo()
+	{
+		return selectedAmmo;
 	}
 
 	/**
@@ -844,6 +861,10 @@ public class SlayerBisPlugin extends Plugin
 		}
 		lastSignature = totals;
 		lastGearSignature = gearSignature;
+		if (!sameTask)
+		{
+			selectedAmmo = null;
+		}
 		lastTask = task;
 
 		Map<String, Integer> quantitiesByName = new HashMap<>();
@@ -1190,7 +1211,7 @@ public class SlayerBisPlugin extends Plugin
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
-				settings.getBurstTargets(), helmetCost);
+				settings.getBurstTargets(), helmetCost, optimizer.ammoOptions(results.get(AttackType.RANGED), candidates));
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
@@ -1345,7 +1366,7 @@ public class SlayerBisPlugin extends Plugin
 			return;
 		}
 		supplyHighlightIds = sorted(o.getPrep().getSupplyBankIds());
-		StyleResult r = o.resultFor(selectedType);
+		StyleResult r = o.withAmmo(o.resultFor(selectedType), selectedAmmo);
 		if (r == null || !r.isValid())
 		{
 			highlightIds = new int[0];

@@ -297,4 +297,24 @@ public class OptimizerTest
 			assertTrue(task, resolver.candidates(task).stream().anyMatch(m -> TaskMonsterResolver.isTaskBoss(m.getName())));
 		}
 	}
+
+	@Test
+	public void ammoOptionsListEveryUsableAmmoBestFirst()
+	{
+		List<Optimizer.Candidate> owned = bank("Twisted bow", "Dragon arrow", "Rune arrow", "Amethyst arrow",
+			"Broad bolts", "Abyssal whip");
+		Optimizer optimizer = new Optimizer(DpsCalculatorTest.maxed(true), monster("Abyssal demons"));
+		StyleResult ranged = optimizer.optimise(owned, AttackType.RANGED);
+		List<StyleResult.Alternative> options = optimizer.ammoOptions(ranged, owned);
+		assertEquals(3, options.size());
+		assertEquals("Dragon arrow", options.get(0).getGear()[EquipmentSlot.AMMO.ordinal()].getItem().getName());
+		assertEquals(ranged.getResult().getDps(), options.get(0).getResult().getDps(), 1e-9);
+		for (int i = 1; i < options.size(); i++)
+		{
+			assertTrue(options.get(i).getResult().getDps() <= options.get(i - 1).getResult().getDps());
+			assertEquals("Twisted bow", options.get(i).getGear()[EquipmentSlot.WEAPON.ordinal()].getItem().getName());
+		}
+		// melee sets have no ammo to compare
+		assertTrue(optimizer.ammoOptions(optimizer.optimise(owned, AttackType.SLASH), owned).isEmpty());
+	}
 }

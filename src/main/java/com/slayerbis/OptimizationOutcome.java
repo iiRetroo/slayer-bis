@@ -1,9 +1,11 @@
 package com.slayerbis;
 
 import com.slayerbis.calc.CalcResult;
+import com.slayerbis.calc.Optimizer;
 import com.slayerbis.calc.PlayerSetup;
 import com.slayerbis.calc.StyleResult;
 import com.slayerbis.data.AttackType;
+import com.slayerbis.data.EquipmentSlot;
 import com.slayerbis.data.Monster;
 import com.slayerbis.prep.PrepPlan;
 import java.util.List;
@@ -37,6 +39,8 @@ class OptimizationOutcome
 	int burstTargets;
 	/** Per style, the DPS given up to keep the Slayer helmet on; only where it was kept. */
 	Map<AttackType, Double> helmetCost;
+	/** The ranged set with each owned ammo swapped in, best first; empty when it takes none. */
+	List<StyleResult.Alternative> ammoOptions;
 
 	@Value
 	static class ChargeHint
@@ -72,5 +76,28 @@ class OptimizationOutcome
 	StyleResult resultFor(AttackType type)
 	{
 		return type == null ? best() : results.get(type);
+	}
+
+	/**
+	 * The ranged result with the chosen ammo swapped in, or the result itself when no ammo is
+	 * chosen or it isn't one of the options.
+	 */
+	StyleResult withAmmo(StyleResult r, Integer ammoId)
+	{
+		if (r == null || ammoId == null || r.getType() != AttackType.RANGED)
+		{
+			return r;
+		}
+		for (StyleResult.Alternative alt : ammoOptions)
+		{
+			Optimizer.Candidate ammo = alt.getGear()[EquipmentSlot.AMMO.ordinal()];
+			if (ammo != null && ammo.getOwnedItemId() == ammoId)
+			{
+				return new StyleResult(r.getType(), alt.getResult(), alt.getGear(), r.getCombinationsTried(),
+					r.getItemsConsidered(), r.getItemsAfterPruning(), r.getSetsConsidered(), r.isStoppedEarly(),
+					r.getAlternatives());
+			}
+		}
+		return r;
 	}
 }

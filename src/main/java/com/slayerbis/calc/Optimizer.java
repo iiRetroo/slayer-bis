@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,6 +117,48 @@ public final class Optimizer
 			this.item = item;
 			this.ownedItemId = ownedItemId;
 		}
+	}
+
+	/**
+	 * The ranged set with each owned ammo the weapon can fire swapped in, best first, so a cheaper
+	 * ammo's DPS can be compared. Empty when the weapon takes no ammo.
+	 */
+	public List<StyleResult.Alternative> ammoOptions(StyleResult result, Collection<Candidate> owned)
+	{
+		if (result == null || !result.isValid() || result.getType() != AttackType.RANGED)
+		{
+			return Collections.emptyList();
+		}
+		Candidate weapon = result.getGear()[WEAPON];
+		WeaponRules.AmmoKind kind = weapon == null ? WeaponRules.AmmoKind.NONE : WeaponRules.ammoKind(weapon.item);
+		if (kind == WeaponRules.AmmoKind.NONE || kind == WeaponRules.AmmoKind.UNSUPPORTED)
+		{
+			return Collections.emptyList();
+		}
+		List<StyleResult.Alternative> out = new ArrayList<>();
+		Set<Integer> seen = new HashSet<>();
+		for (Candidate c : owned)
+		{
+			if (c.item.getSlot() != EquipmentSlot.AMMO || !WeaponRules.ammoUsable(weapon.item, c.item)
+				|| !seen.add(c.item.getId()))
+			{
+				continue;
+			}
+			Candidate[] gear = result.getGear().clone();
+			gear[AMMO] = c;
+			GearItem[] items = new GearItem[SLOTS];
+			for (int i = 0; i < SLOTS; i++)
+			{
+				items[i] = gear[i] == null ? null : gear[i].item;
+			}
+			CalcResult r = calculator.best(items, AttackType.RANGED);
+			if (r.getDps() > 0)
+			{
+				out.add(new StyleResult.Alternative(r, gear));
+			}
+		}
+		out.sort((a, b) -> Double.compare(b.getResult().getDps(), a.getResult().getDps()));
+		return out;
 	}
 
 	public StyleResult optimise(Collection<Candidate> owned, AttackType type)
