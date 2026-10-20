@@ -299,11 +299,27 @@ public final class PrepPlanner
 			: bestType == AttackType.RANGED ? s.rangedPotions
 			: magic ? s.magicPotions
 			: s.meleePotions;
-		String styleName = magic ? "magic" : bestType == null ? "" : bestType.getDisplayName().toLowerCase(Locale.ROOT);
+		String styleName = magic ? "magic" : bestType == null ? "" : bestType.isMelee() ? "melee"
+			: bestType.getDisplayName().toLowerCase(Locale.ROOT);
 		String potion = firstOwned(stylePotions, owned);
 		if (potion != null && combatPotions > 0)
 		{
 			slots += addLine(lines, ids, owned, potion, combatPotions, "boosts your " + styleName, false);
+		}
+		else if (bestType != null && bestType.isMelee() && combatPotions > 0
+			&& (firstOwned(s.attackPotions, owned) != null || firstOwned(s.strengthPotions, owned) != null))
+		{
+			// no combat potion: separate attack and strength potions boost the same stats
+			String attack = firstOwned(s.attackPotions, owned);
+			String strength = firstOwned(s.strengthPotions, owned);
+			if (attack != null)
+			{
+				slots += addLine(lines, ids, owned, attack, combatPotions, "boosts your Attack", false);
+			}
+			if (strength != null)
+			{
+				slots += addLine(lines, ids, owned, strength, combatPotions, "boosts your Strength", false);
+			}
 		}
 		else if (bestType != null && combatPotions > 0)
 		{

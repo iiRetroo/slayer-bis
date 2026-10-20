@@ -359,7 +359,7 @@ public class PrepPlannerTest
 		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
 			.owned(owned()).prayerPotions(5).combatPotions(1).build());
 		assertTrue(none.getNotes().stream().anyMatch(n -> n.contains("No prayer potions")));
-		assertTrue(none.getNotes().stream().anyMatch(n -> n.contains("No slash boosting potion")));
+		assertTrue(none.getNotes().stream().anyMatch(n -> n.contains("No melee boosting potion")));
 	}
 
 	@Test
@@ -666,5 +666,23 @@ public class PrepPlannerTest
 			Collections.emptySet());
 		assertEquals(EquipmentSlot.CAPE, boss.get(0).getSlot());
 		assertTrue(boss.get(0).isOwned());
+	}
+
+	@Test
+	public void separateAttackAndStrengthPotions()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
+			.owned(owned("Super attack(4)", 3, "Super strength(4)", 3)).combatPotions(1).build());
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Super attack")));
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Super strength")));
+		assertTrue(plan.getNotes().stream().noneMatch(n -> n.contains("boosting potion")));
+		// a combat potion is still preferred
+		PrepPlan combat = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
+			.owned(owned("Super combat potion(4)", 2, "Super attack(4)", 3)).combatPotions(1).build());
+		assertTrue(combat.getInventory().stream().noneMatch(l -> l.getName().equals("Super attack")));
+		// none at all: the note says melee, not stab
+		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
+			.owned(owned()).combatPotions(1).build());
+		assertTrue(none.getNotes().contains("No melee boosting potion found."));
 	}
 }

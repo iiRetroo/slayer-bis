@@ -31,7 +31,7 @@ When you open your bank, the plugin reads your banked items (plus, optionally, w
 - the best set for each style, with its DPS, max hit, accuracy and attack speed
 - the best set with each of your other strong weapons, in case you would rather use one of those
 - gear the task requires, such as a mirror shield for basilisks or boots of stone for Karuulm, which is kept in every suggested set
-- a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, prayer potions or moonlight moth mixes, a boosting potion for your best style, loot tools, a teleport item, and your best food (with karambwans for combo eating on hard-hitting tasks)
+- a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, prayer potions or moonlight moth mixes, a boosting potion for your best style (or a super attack and super strength for melee if you have no combat potion), loot tools, a teleport item, and your best food (with karambwans for combo eating on hard-hitting tasks)
 - teleports to the task location, ticked off when you own the item
 - where to safespot the task's monsters, as short text descriptions
 - what was assumed (levels, prayers, potions, spellbook)

@@ -19,6 +19,8 @@
   ],
 
   "meleePotions": ["Divine super combat potion", "Super combat potion", "Combat potion"],
+  "attackPotions": ["Divine super attack potion", "Super attack", "Attack potion"],
+  "strengthPotions": ["Divine super strength potion", "Super strength", "Strength potion"],
   "rangedPotions": ["Divine ranging potion", "Ranging potion", "Divine bastion potion", "Bastion potion"],
   "magicPotions": ["Divine magic potion", "Magic potion", "Divine battlemage potion", "Battlemage potion"],
   "magicBoostItems": ["Saturated heart", "Imbued heart"],

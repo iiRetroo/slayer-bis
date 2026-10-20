@@ -96,6 +96,9 @@ public final class PrepData
 	{
 		List<Food> food;
 		List<String> meleePotions;
+		/** Used together when there's no combat potion. */
+		List<String> attackPotions;
+		List<String> strengthPotions;
 		List<String> rangedPotions;
 		List<String> magicPotions;
 		List<String> magicBoostItems;
