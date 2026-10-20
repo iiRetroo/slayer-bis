@@ -54,7 +54,89 @@ public class TaskMonsterResolver
 		.put("warped creatures", ImmutableList.of("Warped Terrorbird", "Warped Tortoise"))
 		.build();
 
+	/**
+	 * Bosses that count for a task, offered in the picker after the task's own monsters but
+	 * never chosen automatically.
+	 */
+	private static final Map<String, List<String>> TASK_BOSSES = ImmutableMap.<String, List<String>>builder()
+		.put("hellhounds", ImmutableList.of("Cerberus"))
+		.put("abyssal demons", ImmutableList.of("Abyssal Sire"))
+		.put("smoke devils", ImmutableList.of("Thermonuclear smoke devil"))
+		.put("cave kraken", ImmutableList.of("Kraken"))
+		.put("hydras", ImmutableList.of("Alchemical Hydra"))
+		.put("gargoyles", ImmutableList.of("Dusk", "Dawn"))
+		.put("kalphites", ImmutableList.of("Kalphite Queen"))
+		.put("black dragons", ImmutableList.of("King Black Dragon"))
+		.put("dagannoth", ImmutableList.of("Dagannoth Rex", "Dagannoth Prime", "Dagannoth Supreme"))
+		.put("greater demons", ImmutableList.of("K'ril Tsutsaroth"))
+		.put("black demons", ImmutableList.of("Skotizo"))
+		.put("bears", ImmutableList.of("Callisto", "Artio"))
+		.put("spiders", ImmutableList.of("Sarachnis", "Venenatis", "Spindel"))
+		.put("scorpions", ImmutableList.of("Scorpia"))
+		.put("skeletons", ImmutableList.of("Vet'ion", "Calvar'ion"))
+		.put("araxytes", ImmutableList.of("Araxxor"))
+		.put("aviansies", ImmutableList.of("Kree'arra"))
+		.build();
+
+	/** A boss's own Slayer task name (for its preparation data), by lower-case monster name. */
+	private static final Map<String, String> BOSS_TASKS = ImmutableMap.<String, String>builder()
+		.put("cerberus", "cerberus")
+		.put("abyssal sire", "the abyssal sire")
+		.put("thermonuclear smoke devil", "the thermonuclear smoke devil")
+		.put("kraken", "the cave kraken boss")
+		.put("alchemical hydra", "the alchemical hydra")
+		.put("dusk", "the grotesque guardians")
+		.put("dawn", "the grotesque guardians")
+		.put("kalphite queen", "the kalphite queen")
+		.put("king black dragon", "the king black dragon")
+		.put("dagannoth rex", "dagannoth kings")
+		.put("dagannoth prime", "dagannoth kings")
+		.put("dagannoth supreme", "dagannoth kings")
+		.put("k'ril tsutsaroth", "k'ril tsutsaroth")
+		.put("callisto", "callisto")
+		.put("artio", "callisto")
+		.put("sarachnis", "sarachnis")
+		.put("venenatis", "venenatis")
+		.put("spindel", "venenatis")
+		.put("scorpia", "scorpia")
+		.put("vet'ion", "vet'ion")
+		.put("calvar'ion", "vet'ion")
+		.put("araxxor", "araxxor")
+		.put("kree'arra", "kree'arra")
+		.build();
+
 	private static final int MAX_CANDIDATES = 40;
+
+	/**
+	 * Whether this monster is a boss offered on a regular task, for labelling it in the picker.
+	 */
+	public static boolean isTaskBoss(String monsterName)
+	{
+		if (monsterName == null)
+		{
+			return false;
+		}
+		String lower = monsterName.toLowerCase(Locale.ROOT);
+		for (List<String> bosses : TASK_BOSSES.values())
+		{
+			for (String b : bosses)
+			{
+				if (b.toLowerCase(Locale.ROOT).equals(lower))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The boss's own task name, for its preparation data, or null if this isn't such a boss.
+	 */
+	public static String bossTask(String monsterName)
+	{
+		return monsterName == null ? null : BOSS_TASKS.get(monsterName.toLowerCase(Locale.ROOT));
+	}
 
 	private final GameData data;
 
@@ -136,13 +218,26 @@ public class TaskMonsterResolver
 				names.add(n.toLowerCase(Locale.ROOT));
 			}
 		}
+		List<String> bosses = TASK_BOSSES.getOrDefault(task.trim().toLowerCase(Locale.ROOT), ImmutableList.of());
+		addNamed(out, names, MAX_CANDIDATES - bosses.size());
+		Set<String> bossNames = new LinkedHashSet<>();
+		for (String b : bosses)
+		{
+			bossNames.add(b.toLowerCase(Locale.ROOT));
+		}
+		addNamed(out, bossNames, MAX_CANDIDATES);
+		return out;
+	}
+
+	private void addNamed(List<Monster> out, Set<String> names, int limit)
+	{
 		for (String name : names)
 		{
 			for (Monster m : data.getMonsters())
 			{
-				if (out.size() >= MAX_CANDIDATES)
+				if (out.size() >= limit)
 				{
-					return out;
+					return;
 				}
 				if (m.getName().toLowerCase(Locale.ROOT).equals(name) && !out.contains(m))
 				{
@@ -150,7 +245,6 @@ public class TaskMonsterResolver
 				}
 			}
 		}
-		return out;
 	}
 
 	private static Set<String> singulars(String task)

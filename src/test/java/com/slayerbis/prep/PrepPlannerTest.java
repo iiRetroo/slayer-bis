@@ -597,4 +597,33 @@ public class PrepPlannerTest
 			.owned(owned()).build());
 		assertTrue(plan.getTips().stream().anyMatch(t -> t.contains("Insulated boots")));
 	}
+
+	@Test
+	public void bossTasksGetEntryItemsButNoSafespots()
+	{
+		PrepPlan barrows = planner.plan(PrepPlanner.Request.builder().task("Barrows Brothers").bestType(AttackType.MAGIC)
+			.owned(owned("Spade", 1, "Barrows teleport", 20)).build());
+		assertTrue(barrows.getInventory().stream().anyMatch(l -> l.getName().equals("Spade") && l.isRequired()));
+		assertTrue(barrows.getInventory().stream().anyMatch(l -> l.getName().equals("Barrows teleport") && l.isStackable()));
+
+		PrepPlan mole = planner.plan(PrepPlanner.Request.builder().task("The Giant Mole").bestType(AttackType.SLASH)
+			.owned(owned()).build());
+		assertTrue(mole.getNotes().stream().anyMatch(n -> n.startsWith("Missing Spade")));
+		assertTrue(mole.getNotes().stream().anyMatch(n -> n.startsWith("Missing Bullseye lantern")));
+
+		PrepPlan graardor = planner.plan(PrepPlanner.Request.builder().task("General Graardor").bestType(AttackType.CRUSH)
+			.owned(owned("Dragon warhammer", 1)).build());
+		assertTrue(graardor.getInventory().stream().anyMatch(l -> l.getName().equals("Dragon warhammer")));
+
+		PrepPlan venenatis = planner.plan(PrepPlanner.Request.builder().task("Venenatis").bestType(AttackType.RANGED)
+			.owned(owned()).build());
+		assertTrue(venenatis.getTips().stream().anyMatch(t -> t.contains("Wilderness")));
+
+		for (String boss : new String[]{"the abyssal sire", "cerberus", "zulrah", "vorkath", "the giant mole",
+			"barrows brothers", "general graardor", "venenatis", "sarachnis", "the leviathan"})
+		{
+			assertTrue(boss, data.allTasks().get(boss).safespots == null);
+			assertNotNull(boss, data.allTasks().get(boss).locations);
+		}
+	}
 }

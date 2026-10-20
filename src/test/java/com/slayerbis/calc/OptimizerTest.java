@@ -274,4 +274,23 @@ public class OptimizerTest
 			kept.getResult().getDps(), nameIn(kept, EquipmentSlot.NECK), gap * 100);
 		assertTrue(gap >= 0 && gap < 0.05);
 	}
+
+	@Test
+	public void bossesAreOfferedButNeverChosenAutomatically()
+	{
+		assertEquals("Hellhound", resolver.fromName("Hellhounds").getName());
+		List<Monster> choices = resolver.candidates("Hellhounds");
+		assertEquals("Hellhound", choices.get(0).getName());
+		assertEquals("Cerberus", choices.get(choices.size() - 1).getName());
+		assertTrue(TaskMonsterResolver.isTaskBoss("Cerberus"));
+		assertEquals("cerberus", TaskMonsterResolver.bossTask("Cerberus"));
+		assertEquals(null, TaskMonsterResolver.bossTask("Hellhound"));
+		// every listed boss exists in the monster data
+		for (String task : new String[]{"Abyssal demons", "Smoke devils", "Cave kraken", "Hydras", "Gargoyles", "Kalphites",
+			"Black dragons", "Dagannoth", "Greater demons", "Black demons", "Bears", "Spiders", "Scorpions", "Skeletons",
+			"Araxytes", "Aviansies"})
+		{
+			assertTrue(task, resolver.candidates(task).stream().anyMatch(m -> TaskMonsterResolver.isTaskBoss(m.getName())));
+		}
+	}
 }

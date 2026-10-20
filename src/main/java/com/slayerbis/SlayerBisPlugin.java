@@ -1097,13 +1097,23 @@ public class SlayerBisPlugin extends Plugin
 				choices = withCurrent;
 			}
 
+			// a boss picked on a regular task (Cerberus on hellhounds) uses the boss's own preparation
+			String prepTask = task;
+			String prepLocation = location;
+			String bossTask = TaskMonsterResolver.bossTask(monster.getName());
+			if (bossTask != null && (task == null || !bossTask.equalsIgnoreCase(task.trim())))
+			{
+				prepTask = bossTask;
+				prepLocation = null;
+			}
+
 			// gear the task requires; only enforce what you own, and flag the rest
 			Set<String> ownedGearNames = new HashSet<>();
 			for (Optimizer.Candidate c : candidates)
 			{
 				ownedGearNames.add(c.getItem().getName());
 			}
-			List<PrepPlan.Requirement> requirements = prep.requirements(task, location, owned, ownedGearNames);
+			List<PrepPlan.Requirement> requirements = prep.requirements(prepTask, prepLocation, owned, ownedGearNames);
 			Map<EquipmentSlot, Set<String>> required = new EnumMap<>(EquipmentSlot.class);
 			for (PrepPlan.Requirement r : requirements)
 			{
@@ -1125,7 +1135,7 @@ public class SlayerBisPlugin extends Plugin
 						settings.getPreferSlayerHelmet(), helmetCost));
 				}
 			}
-			if (settings.getBurstTargets() > 0 && prep.stacks(task))
+			if (settings.getBurstTargets() > 0 && prep.stacks(prepTask))
 			{
 				// casting Ancients by hand on a stack: magic on the Ancient spellbook, DPS times the targets
 				PlayerSetup burstSetup = setup.toBuilder().ancientSpellbook(true)
@@ -1159,8 +1169,8 @@ public class SlayerBisPlugin extends Plugin
 			}
 			PrepPlan plan = settings.isShowPreparation()
 				? prep.plan(PrepPlanner.Request.builder()
-				.task(task)
-				.location(location)
+				.task(prepTask)
+				.location(prepLocation)
 				.bestType(best == null ? null : best.getType())
 				.requirements(requirements)
 				.owned(owned)

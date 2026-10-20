@@ -73,7 +73,10 @@
     },
     "araxxor": {
       "venom": true,
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "Morytania Spider Cave"
+      ]
     },
     "araxytes": {
       "venom": true,
@@ -115,6 +118,19 @@
         {
           "location": "Catacombs of Kourend",
           "text": "Twisted banshees here can be safespotted and have better drops."
+        }
+      ]
+    },
+    "barrows brothers": {
+      "locations": [
+        "Barrows"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Spade"
+          ],
+          "note": "to dig into the crypts"
         }
       ]
     },
@@ -242,6 +258,14 @@
         "Catacombs of Kourend"
       ]
     },
+    "callisto": {
+      "locations": [
+        "Callisto's den (Wilderness)"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose."
+      ]
+    },
     "catablepon": {
       "locations": [
         "Stronghold of Security"
@@ -291,6 +315,14 @@
         "Dorgesh-Kaan South Dungeon"
       ]
     },
+    "cerberus": {
+      "locations": [
+        "Taverley Dungeon"
+      ],
+      "tips": [
+        "Cerberus' lair is past the hellhounds; Agility shortcuts make the walk much shorter."
+      ]
+    },
     "chaos druids": {
       "locations": [
         "Edgeville Dungeon",
@@ -314,6 +346,15 @@
         }
       ]
     },
+    "commander zilyana": {
+      "locations": [
+        "God Wars Dungeon"
+      ],
+      "tips": [
+        "You need a rope the first time you enter the God Wars Dungeon.",
+        "Saradomin's Encampment needs 70 Agility and two more ropes the first time."
+      ]
+    },
     "cows": {
       "locations": [
         "Around Lumbridge"
@@ -327,6 +368,14 @@
     "crawling hands": {
       "locations": [
         "Slayer Tower"
+      ]
+    },
+    "crazy archaeologists": {
+      "locations": [
+        "Bandit Camp (Wilderness)"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose."
       ]
     },
     "crocodiles": {
@@ -352,6 +401,14 @@
         }
       ]
     },
+    "dagannoth kings": {
+      "locations": [
+        "Waterbirth Island"
+      ],
+      "tips": [
+        "A rune thrownaxe opens the first door of the Waterbirth dungeon on your own."
+      ]
+    },
     "dark beasts": {
       "locations": [
         "Mourner Tunnels"
@@ -361,6 +418,32 @@
     "dark warriors": {
       "locations": [
         "Dark Warriors' Fortress"
+      ]
+    },
+    "deranged archaeologist": {
+      "locations": [
+        "Fossil Island"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Dragon axe",
+            "Crystal axe",
+            "Infernal axe",
+            "3rd age axe",
+            "Rune axe",
+            "Adamant axe",
+            "Mithril axe",
+            "Black axe",
+            "Steel axe",
+            "Iron axe",
+            "Bronze axe"
+          ],
+          "note": "to chop the swamp vine on Fossil Island"
+        }
+      ],
+      "tips": [
+        "A rake clears the smaller vines if you walk through the swamp."
       ]
     },
     "dogs": {
@@ -379,6 +462,11 @@
       },
       "locations": [
         "Karuulm Slayer Dungeon"
+      ]
+    },
+    "duke sucellus": {
+      "locations": [
+        "Ghorrock Dungeon"
       ]
     },
     "dust devils": {
@@ -493,6 +581,25 @@
         {
           "location": "Slayer Tower",
           "text": "Top floor: by the doorway in the south-west. Basement: the north-east corner behind the bucket."
+        }
+      ]
+    },
+    "general graardor": {
+      "locations": [
+        "God Wars Dungeon"
+      ],
+      "tips": [
+        "You need a rope the first time you enter the God Wars Dungeon."
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Hammer",
+            "Imcando hammer",
+            "Dragon warhammer",
+            "Elder maul"
+          ],
+          "note": "to bang the door to Bandos' Stronghold (70 Strength)"
         }
       ]
     },
@@ -652,6 +759,15 @@
         "Mos Le'Harmless island"
       ]
     },
+    "k'ril tsutsaroth": {
+      "locations": [
+        "God Wars Dungeon"
+      ],
+      "tips": [
+        "You need a rope the first time you enter the God Wars Dungeon.",
+        "Zamorak's Fortress needs 70 Hitpoints to enter."
+      ]
+    },
     "kalphites": {
       "locations": [
         "Kalphite Lair"
@@ -671,6 +787,23 @@
       ],
       "locations": [
         "Draynor Manor"
+      ]
+    },
+    "kree'arra": {
+      "locations": [
+        "God Wars Dungeon"
+      ],
+      "tips": [
+        "You need a rope the first time you enter the God Wars Dungeon.",
+        "You need a crossbow to fire the mithril grapple."
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Mith grapple"
+          ],
+          "note": "with any crossbow, to cross to Armadyl's Eyrie"
+        }
       ]
     },
     "kurask": {
@@ -933,6 +1066,14 @@
         "Insulated boots cut the electric attack from 4-7 to 1-2 damage a tick."
       ]
     },
+    "sarachnis": {
+      "locations": [
+        "Forthos Dungeon"
+      ],
+      "tips": [
+        "Bring a knife or a slash weapon for the webs, unless you wear Aranea boots."
+      ]
+    },
     "scabarites": {
       "locations": [
         "Sophanem Dungeon",
@@ -1033,6 +1174,11 @@
         "Tarn's Lair"
       ]
     },
+    "the abyssal sire": {
+      "locations": [
+        "Abyssal Nexus"
+      ]
+    },
     "the alchemical hydra": {
       "required": {
         "feet": [
@@ -1046,9 +1192,107 @@
       ],
       "comboEat": true
     },
+    "the cave kraken boss": {
+      "locations": [
+        "Kraken Cove"
+      ]
+    },
+    "the chaos elemental": {
+      "locations": [
+        "Rogues' Castle"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose."
+      ]
+    },
+    "the chaos fanatic": {
+      "locations": [
+        "Chaos Fanatic (Wilderness)"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose."
+      ]
+    },
+    "the giant mole": {
+      "locations": [
+        "Falador Park"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Spade"
+          ],
+          "note": "to dig into the mole hills"
+        },
+        {
+          "names": [
+            "Bullseye lantern",
+            "Sapphire lantern",
+            "Emerald lantern",
+            "Oil lantern",
+            "Candle lantern",
+            "Oil lamp",
+            "Lit torch",
+            "Lit candle",
+            "Lit black candle"
+          ],
+          "note": "a light source for the tunnels, unless you've lit the Fire of Eternal Light"
+        }
+      ],
+      "tips": [
+        "Bring a tinderbox: candles, torches and oil lamps can go out."
+      ]
+    },
+    "the grotesque guardians": {
+      "locations": [
+        "Slayer Tower"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Rock hammer",
+            "Rock thrownhammer",
+            "Granite hammer"
+          ],
+          "note": "to finish them off"
+        }
+      ],
+      "tips": [
+        "The rooftop needs unlocking once with a brittle key."
+      ]
+    },
+    "the kalphite queen": {
+      "locations": [
+        "Kalphite Lair"
+      ],
+      "tips": [
+        "You need two ropes the first time; after the hard Desert Diary they stay in place."
+      ]
+    },
     "the king black dragon": {
       "dragonfire": "dragon",
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "King Black Dragon Lair"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose."
+      ]
+    },
+    "the leviathan": {
+      "locations": [
+        "The Scar"
+      ]
+    },
+    "the phantom muspah": {
+      "locations": [
+        "Ghorrock Dungeon"
+      ]
+    },
+    "the shellbane gryphon": {
+      "locations": [
+        "The Great Conch"
+      ]
     },
     "the thermonuclear smoke devil": {
       "required": {
@@ -1062,6 +1306,11 @@
         "Smoke Devil Dungeon"
       ],
       "comboEat": true
+    },
+    "the whisperer": {
+      "locations": [
+        "Lassar Undercity"
+      ]
     },
     "trolls": {
       "locations": [
@@ -1087,10 +1336,25 @@
         "Mor Ul Rek"
       ]
     },
+    "tzkal-zuk": {
+      "locations": [
+        "Mor Ul Rek"
+      ]
+    },
+    "tztok-jad": {
+      "locations": [
+        "Mor Ul Rek"
+      ]
+    },
     "vampyres": {
       "locations": [
         "Darkmeyer",
         "Haunted Woods"
+      ]
+    },
+    "vardorvis": {
+      "locations": [
+        "Stranglewood"
       ]
     },
     "venators": {
@@ -1098,9 +1362,29 @@
         "Vampyrium"
       ]
     },
+    "venenatis": {
+      "locations": [
+        "Silk Chasm (Wilderness)"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose."
+      ]
+    },
+    "vet'ion": {
+      "locations": [
+        "Vet'ion's Rest (Wilderness)"
+      ],
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose.",
+        "Vet'ion's Rest has an entry fee of up to 50,000 coins."
+      ]
+    },
     "vorkath": {
       "dragonfire": "dragon",
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "Ungael"
+      ]
     },
     "wall beasts": {
       "required": {
@@ -1188,7 +1472,10 @@
     },
     "zulrah": {
       "venom": true,
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "Zul-Andra"
+      ]
     }
   },
   "locations": {
@@ -1963,6 +2250,211 @@
     "Rogues' Castle": [
       {
         "text": "Wilderness Obelisk to level 50, then walk west"
+      }
+    ],
+    "Abyssal Nexus": [
+      {
+        "text": "Fairy ring DIP"
+      }
+    ],
+    "Barrows": [
+      {
+        "text": "Barrows teleport tablet",
+        "items": [
+          "Barrows teleport"
+        ]
+      },
+      {
+        "text": "Barrows Teleport (Arceuus spellbook)"
+      },
+      {
+        "text": "Mort'ton teleport scroll, then walk east",
+        "items": [
+          "Mort'ton teleport"
+        ]
+      },
+      {
+        "text": "Fairy ring BIP, then walk north"
+      }
+    ],
+    "Callisto's den (Wilderness)": [
+      {
+        "text": "Annakarl teleport tablet, then walk south",
+        "items": [
+          "Annakarl teleport"
+        ]
+      },
+      {
+        "text": "Annakarl Teleport (Ancient Magicks), then walk south"
+      }
+    ],
+    "Chaos Fanatic (Wilderness)": [
+      {
+        "text": "Ghorrock teleport tablet",
+        "items": [
+          "Ghorrock teleport"
+        ]
+      },
+      {
+        "text": "Burning amulet: Lava Maze, then walk west",
+        "items": [
+          "Burning amulet"
+        ]
+      }
+    ],
+    "Ghorrock Dungeon": [
+      {
+        "text": "Ring of shadows: Ghorrock Dungeon (after the frozen tablet)",
+        "items": [
+          "Ring of shadows"
+        ]
+      },
+      {
+        "text": "Icy basalt: Weiss, then the Salt Mine",
+        "items": [
+          "Icy basalt"
+        ]
+      },
+      {
+        "text": "Fairy ring DKS, then Larry's boat to Weiss"
+      }
+    ],
+    "Falador Park": [
+      {
+        "text": "Ring of wealth: Falador Park",
+        "items": [
+          "Ring of wealth"
+        ]
+      },
+      {
+        "text": "Falador Teleport (standard spellbook), then walk east"
+      }
+    ],
+    "King Black Dragon Lair": [
+      {
+        "text": "Burning amulet: Lava Maze, then the ladder to the north-west",
+        "items": [
+          "Burning amulet"
+        ]
+      },
+      {
+        "text": "Wilderness obelisk to level 44 (hard Wilderness Diary)"
+      }
+    ],
+    "The Scar": [
+      {
+        "text": "Ring of shadows: the Scar (after the scarred tablet)",
+        "items": [
+          "Ring of shadows"
+        ]
+      },
+      {
+        "text": "Amulet of the eye: Temple of the Eye",
+        "items": [
+          "Amulet of the eye"
+        ]
+      },
+      {
+        "text": "Necklace of passage: Wizards' Tower, then the basement portal",
+        "items": [
+          "Necklace of passage"
+        ]
+      }
+    ],
+    "Stranglewood": [
+      {
+        "text": "Ring of shadows: the Stranglewood (after the strangled tablet)",
+        "items": [
+          "Ring of shadows"
+        ]
+      },
+      {
+        "text": "Fairy ring BLS, then the rowboat"
+      },
+      {
+        "text": "Xeric's talisman: Xeric's Honour, then the mountain guide and rowboat",
+        "items": [
+          "Xeric's talisman"
+        ]
+      }
+    ],
+    "Silk Chasm (Wilderness)": [
+      {
+        "text": "Wilderness crabs teleport",
+        "items": [
+          "Wilderness crabs teleport"
+        ]
+      },
+      {
+        "text": "Annakarl teleport tablet, then walk south-east",
+        "items": [
+          "Annakarl teleport"
+        ]
+      }
+    ],
+    "Vet'ion's Rest (Wilderness)": [
+      {
+        "text": "Revenant cave teleport, then walk south-east",
+        "items": [
+          "Revenant cave teleport"
+        ]
+      },
+      {
+        "text": "Carrallanger teleport tablet, then walk north-east",
+        "items": [
+          "Carrallanger teleport"
+        ]
+      }
+    ],
+    "Ungael": [
+      {
+        "text": "Enchanted lyre: Rellekka, then Torfinn's boat",
+        "items": [
+          "Enchanted lyre"
+        ]
+      },
+      {
+        "text": "Fremennik sea boots 4: Rellekka, then Torfinn's boat",
+        "items": [
+          "Fremennik sea boots 4"
+        ]
+      },
+      {
+        "text": "Rellekka teleport, then Torfinn's boat",
+        "items": [
+          "Rellekka teleport"
+        ]
+      }
+    ],
+    "Lassar Undercity": [
+      {
+        "text": "Ring of shadows: Lassar Undercity (after the sirenic tablet)",
+        "items": [
+          "Ring of shadows"
+        ]
+      },
+      {
+        "text": "Mind altar teleport, then walk south-east to Camdozaal",
+        "items": [
+          "Mind altar teleport"
+        ]
+      },
+      {
+        "text": "Lassar Teleport (Ancient Magicks)"
+      }
+    ],
+    "Zul-Andra": [
+      {
+        "text": "Zul-andra teleport scroll",
+        "items": [
+          "Zul-andra teleport"
+        ]
+      },
+      {
+        "text": "Fairy ring BJS, then the stepping stones (76 Agility)"
+      },
+      {
+        "text": "Charter ship to Port Tyras, then walk south"
       }
     ]
   },

@@ -103,6 +103,8 @@ The monster's stats come from, in order:
 3. a task monster currently near you, as reported by the Slayer plugin
 4. a match on your Slayer task's name, for example "Abyssal demons" becomes Abyssal demon
 
+On a task that a boss counts for, the picker also lists that boss, marked "(boss)": Cerberus on hellhounds, the Abyssal Sire on abyssal demons, the Kalphite Queen on kalphites and so on. It's never picked for you. Choosing it works out your gear against the boss and uses the boss's own preparation: its location and teleports, entry items such as a spade for Barrows or a mithril grapple for Kree'arra, and one-off unlocks as tips. Boss tasks get the same data. SlayerBIS gives no fight help for bosses: no safespots, attack or prayer advice, or anything during the fight.
+
 The Slayer plugin must be enabled. It is a RuneLite core plugin.
 
 ## Assumptions and limits

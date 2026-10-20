@@ -7,6 +7,7 @@ import com.slayerbis.calc.StyleResult;
 import com.slayerbis.data.AttackType;
 import com.slayerbis.data.EquipmentSlot;
 import com.slayerbis.data.Monster;
+import com.slayerbis.data.TaskMonsterResolver;
 import com.slayerbis.prep.OwnedItems;
 import com.slayerbis.prep.PrepPlan;
 import com.slayerbis.prep.PrepPlanner;
@@ -233,7 +234,7 @@ class SlayerBisPanel extends PluginPanel
 		for (Monster m : outcome.getMonsterChoices())
 		{
 			monsterIds.add(m.getId());
-			monsterSelect.addItem(m.displayName());
+			monsterSelect.addItem(m.displayName() + (TaskMonsterResolver.isTaskBoss(m.getName()) ? " (boss)" : ""));
 			if ("your choice".equals(outcome.getTargetSource()) && m.getId() == outcome.getMonster().getId())
 			{
 				selectedIndex = monsterIds.size();
