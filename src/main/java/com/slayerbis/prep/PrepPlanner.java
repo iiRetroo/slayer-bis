@@ -84,7 +84,8 @@ public final class PrepPlanner
 			{
 				String name = firstOwned(item.names, owned);
 				lines.add(new PrepPlan.InventoryLine(name != null ? name : item.names.get(0), 1,
-					name != null ? owned.count(name, false) : 0, item.note, true));
+					name != null ? owned.count(name, false) : 0, item.note, true,
+					name != null ? owned.anyId(name, false) : -1));
 				collect(name, false, owned, ids);
 				slots++;
 			}
@@ -162,7 +163,8 @@ public final class PrepPlanner
 				}
 				anyFood = true;
 				int take = Math.min(remaining, have);
-				lines.add(new PrepPlan.InventoryLine(food.name, take, have, "heals " + food.heal, false));
+				lines.add(new PrepPlan.InventoryLine(food.name, take, have, "heals " + food.heal, false,
+					owned.anyId(food.name, true)));
 				owned.collectBankIds(food.name, true, ids);
 				remaining -= take;
 				slots += take;
@@ -234,7 +236,7 @@ public final class PrepPlanner
 	{
 		int have = owned.count(name, false);
 		int take = Math.max(1, Math.min(quantity, have));
-		lines.add(new PrepPlan.InventoryLine(name, take, have, note, required));
+		lines.add(new PrepPlan.InventoryLine(name, take, have, note, required, owned.anyId(name, false)));
 		collect(name, false, owned, ids);
 		return take;
 	}

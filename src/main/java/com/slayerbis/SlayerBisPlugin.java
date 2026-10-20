@@ -440,19 +440,21 @@ public class SlayerBisPlugin extends Plugin
 
 		Map<String, Integer> quantitiesByName = new HashMap<>();
 		Map<String, Set<Integer>> bankIdsByName = new HashMap<>();
+		Map<String, Integer> anyIdByName = new HashMap<>();
 		for (Map.Entry<Integer, Integer> e : totals.entrySet())
 		{
 			String name = itemNames.get(e.getKey());
 			if (name != null)
 			{
 				quantitiesByName.merge(name, e.getValue(), Integer::sum);
+				anyIdByName.putIfAbsent(name, e.getKey());
 				if (bankItems.containsKey(e.getKey()))
 				{
 					bankIdsByName.computeIfAbsent(name, n -> new HashSet<>()).add(e.getKey());
 				}
 			}
 		}
-		OwnedItems owned = OwnedItems.of(quantitiesByName, bankIdsByName);
+		OwnedItems owned = OwnedItems.of(quantitiesByName, bankIdsByName, anyIdByName);
 
 		Map<Integer, Optimizer.Candidate> candidates = new LinkedHashMap<>();
 		// Uncharged, empty, inactive and broken items cannot be used as they are. Their working

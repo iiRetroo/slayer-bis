@@ -37,6 +37,8 @@ public class PrepPlan
 		int owned;
 		String note;
 		boolean required;
+		/** An owned item id to show the icon of, or -1 when none is owned. */
+		int itemId;
 	}
 
 	@Value

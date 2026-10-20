@@ -33,7 +33,7 @@ When you open your bank, the plugin reads your banked items (plus, optionally, w
 - teleports to the task location, ticked off when you own the item
 - what was assumed (levels, prayers, potions, spellbook)
 
-The chosen gear is outlined in your bank in one colour and the suggested supplies in another. Use the selectors in the panel to pick which monster to calculate against (some tasks cover several) and which style's set to show.
+The panel is laid out like the game: a tab per style with its DPS (best in green), the set in the worn-equipment layout with bank items outlined, a stats box, and the inventory as item icons with stack counts. "Other weapons", "Getting there" and "Details" fold away until you need them. The chosen gear is outlined in your bank in one colour and the suggested supplies in another. Use the picker at the top to choose which monster to calculate against (some tasks cover several).
 
 ## How the search works
 

@@ -12,11 +12,37 @@ public final class OwnedItems
 {
 	private final Map<String, Integer> quantities;
 	private final Map<String, Set<Integer>> bankIds;
+	/** One owned item id per name (from any source), for showing icons. */
+	private final Map<String, Integer> anyIds;
 
-	public OwnedItems(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds)
+	public OwnedItems(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds, Map<String, Integer> anyIds)
 	{
 		this.quantities = quantities;
 		this.bankIds = bankIds;
+		this.anyIds = anyIds;
+	}
+
+	/**
+	 * An owned item id whose name matches, preferring the base item itself, or -1.
+	 */
+	int anyId(String base, boolean exact)
+	{
+		Integer id = anyIds.get(base);
+		if (id != null)
+		{
+			return id;
+		}
+		if (!exact)
+		{
+			for (Map.Entry<String, Integer> e : anyIds.entrySet())
+			{
+				if (matches(e.getKey(), base))
+				{
+					return e.getValue();
+				}
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -67,8 +93,25 @@ public final class OwnedItems
 		}
 	}
 
-	public static OwnedItems of(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds)
+	public static OwnedItems of(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds,
+		Map<String, Integer> anyIds)
 	{
-		return new OwnedItems(new HashMap<>(quantities), new HashMap<>(bankIds));
+		return new OwnedItems(new HashMap<>(quantities), new HashMap<>(bankIds), new HashMap<>(anyIds));
+	}
+
+	/**
+	 * For tests: the bank ids double as the icon ids.
+	 */
+	static OwnedItems of(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds)
+	{
+		Map<String, Integer> anyIds = new HashMap<>();
+		for (Map.Entry<String, Set<Integer>> e : bankIds.entrySet())
+		{
+			if (!e.getValue().isEmpty())
+			{
+				anyIds.put(e.getKey(), e.getValue().iterator().next());
+			}
+		}
+		return of(quantities, bankIds, anyIds);
 	}
 }
