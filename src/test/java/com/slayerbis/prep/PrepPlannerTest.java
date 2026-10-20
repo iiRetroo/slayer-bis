@@ -685,4 +685,20 @@ public class PrepPlannerTest
 			.owned(owned()).combatPotions(1).build());
 		assertTrue(none.getNotes().contains("No melee boosting potion found."));
 	}
+
+	@Test
+	public void serpentineHelmReplacesAntiVenom()
+	{
+		assertTrue(planner.poisons("Hydras"));
+		assertTrue(planner.poisons("Vorkath"));
+		assertFalse(planner.poisons("Bloodveld"));
+		OwnedItems bank = owned("Anti-venom+(4)", 2);
+		PrepPlan without = planner.plan(PrepPlanner.Request.builder().task("Hydras").bestType(AttackType.RANGED)
+			.owned(bank).build());
+		assertTrue(without.getInventory().stream().anyMatch(l -> l.getName().equals("Anti-venom+")));
+		PrepPlan with = planner.plan(PrepPlanner.Request.builder().task("Hydras").bestType(AttackType.RANGED)
+			.owned(bank).venomImmune(true).build());
+		assertTrue(with.getInventory().stream().noneMatch(l -> l.getName().equals("Anti-venom+")));
+		assertTrue(with.getNotes().stream().noneMatch(n -> n.contains("anti-venom")));
+	}
 }

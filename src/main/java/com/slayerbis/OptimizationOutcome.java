@@ -46,6 +46,8 @@ class OptimizationOutcome
 	int minWeight;
 	/** Styles where nothing owned is heavy enough, so the best set shown is too light. */
 	Set<AttackType> tooLight;
+	/** Per style, the DPS given up to wear a Serpentine helm against poison; only where it was worn. */
+	Map<AttackType, Double> serpentineCost;
 
 	@Value
 	static class ChargeHint

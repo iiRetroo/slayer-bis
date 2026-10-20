@@ -118,6 +118,20 @@ public interface SlayerBisConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "serpentineHelm",
+		name = "Serpentine helm",
+		description = "On tasks where monsters poison or envenom you, wear a charged Serpentine, Tanzanite or Magma "
+			+ "helm instead of a Slayer helmet: always, only if the DPS is within 10%, or never. Saves the "
+			+ "anti-venom's inventory slot.",
+		section = sourcesSection,
+		position = 5
+	)
+	default SerpentineHelm serpentineHelm()
+	{
+		return SerpentineHelm.ALWAYS;
+	}
+
+	@ConfigItem(
 		keyName = "meleePrayer",
 		name = "Melee prayer",
 		description = "Melee prayer assumed to be active in the calculation",
@@ -544,6 +558,25 @@ public interface SlayerBisConfig extends Config
 		FULL("Full 28 slots");
 
 		private final String name;
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+
+	@Getter
+	@RequiredArgsConstructor
+	enum SerpentineHelm
+	{
+		ALWAYS("Always", Integer.MAX_VALUE),
+		CLOSE("If within 10%", 10),
+		OFF("Never", 0);
+
+		private final String name;
+		/** How much more DPS (percent) the best set without it may have; 0 is never. */
+		private final int percent;
 
 		@Override
 		public String toString()

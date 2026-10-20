@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles. 'locationNeeds' are what a location itself needs, whatever the task: worn items ('required'), carried items ('inventory') and 'tips'. They apply when the Slayer plugin reports that location, or the task lists only that one; otherwise their 'summary' becomes a tip. Task 'tips' are shown as they are. Inventory entries may set 'killsEach' (one item covers this many kills), 'maxCount', 'optional' (not flagged when missing) and 'exact' (match names exactly). 'minWeight' is the least the worn gear must weigh, in kg (gryphons knock lighter players back); the gear search only suggests sets at least that heavy.",
+  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'venom': true marks tasks whose monsters poison or envenom you. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles. 'locationNeeds' are what a location itself needs, whatever the task: worn items ('required'), carried items ('inventory') and 'tips'. They apply when the Slayer plugin reports that location, or the task lists only that one; otherwise their 'summary' becomes a tip. Task 'tips' are shown as they are. Inventory entries may set 'killsEach' (one item covers this many kills), 'maxCount', 'optional' (not flagged when missing) and 'exact' (match names exactly). 'minWeight' is the least the worn gear must weigh, in kg (gryphons knock lighter players back); the gear search only suggests sets at least that heavy.",
   "tasks": {
     "aberrant spectres": {
       "required": {
@@ -286,7 +286,8 @@
           "location": "Fremennik Slayer Dungeon",
           "text": "Use the rocks around the walls of the room."
         }
-      ]
+      ],
+      "venom": true
     },
     "cave horrors": {
       "required": {
@@ -313,7 +314,8 @@
       "locations": [
         "Lumbridge Swamp Caves",
         "Dorgesh-Kaan South Dungeon"
-      ]
+      ],
+      "venom": true
     },
     "cerberus": {
       "locations": [
@@ -713,7 +715,8 @@
       "locations": [
         "Karuulm Slayer Dungeon"
       ],
-      "comboEat": true
+      "comboEat": true,
+      "venom": true
     },
     "ice giants": {
       "locations": [
@@ -771,13 +774,15 @@
       "tips": [
         "You need a rope the first time you enter the God Wars Dungeon.",
         "Zamorak's Fortress needs 70 Hitpoints to enter."
-      ]
+      ],
+      "venom": true
     },
     "kalphites": {
       "locations": [
         "Kalphite Lair"
       ],
-      "cannon": true
+      "cannon": true,
+      "venom": true
     },
     "killerwatts": {
       "required": {
@@ -1098,17 +1103,20 @@
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose.",
         "Bring a knife or a slash weapon for the web if you use the lever."
-      ]
+      ],
+      "venom": true
     },
     "scorpions": {
       "locations": [
         "Al Kharid mine"
-      ]
+      ],
+      "venom": true
     },
     "sea snakes": {
       "locations": [
         "Miscellania and Etceteria Dungeon"
-      ]
+      ],
+      "venom": true
     },
     "shades": {
       "locations": [
@@ -1163,7 +1171,8 @@
       "locations": [
         "Around Lumbridge",
         "Stronghold of Security"
-      ]
+      ],
+      "venom": true
     },
     "spiritual creatures": {
       "locations": [
@@ -1200,7 +1209,8 @@
     "the abyssal sire": {
       "locations": [
         "Abyssal Nexus"
-      ]
+      ],
+      "venom": true
     },
     "the alchemical hydra": {
       "required": {
@@ -1213,7 +1223,8 @@
       "locations": [
         "Karuulm Slayer Dungeon"
       ],
-      "comboEat": true
+      "comboEat": true,
+      "venom": true
     },
     "the cave kraken boss": {
       "locations": [
@@ -1300,7 +1311,8 @@
       ],
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose."
-      ]
+      ],
+      "venom": true
     },
     "the leviathan": {
       "locations": [
@@ -1400,7 +1412,8 @@
       ],
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose."
-      ]
+      ],
+      "venom": true
     },
     "vet'ion": {
       "locations": [
@@ -1416,7 +1429,8 @@
       "comboEat": true,
       "locations": [
         "Ungael"
-      ]
+      ],
+      "venom": true
     },
     "wall beasts": {
       "required": {

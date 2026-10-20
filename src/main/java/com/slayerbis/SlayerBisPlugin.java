@@ -115,6 +115,8 @@ public class SlayerBisPlugin extends Plugin
 	private static final int MAX_DOSES = 4;
 	/** Items that give the Slayer helmet's on-task bonus, by canonical name. */
 	private static final Set<String> SLAYER_HELMS = Set.of("Slayer helmet", "Slayer helmet (i)", "Black mask", "Black mask (i)");
+	/** Helms that make you immune to poison and venom while charged. */
+	private static final Set<String> SERPENTINE_HELMS = Set.of("Serpentine helm", "Tanzanite helm", "Magma helm");
 
 	@Inject
 	private Client client;
@@ -961,7 +963,7 @@ public class SlayerBisPlugin extends Plugin
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
 			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster(), config.burstTargets(),
-			config.preferSlayerHelmet(), selectedFood);
+			config.preferSlayerHelmet(), selectedFood, config.serpentineHelm());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -1021,6 +1023,7 @@ public class SlayerBisPlugin extends Plugin
 		int burstTargets;
 		int preferSlayerHelmet;
 		String preferredFood;
+		SlayerBisConfig.SerpentineHelm serpentineHelm;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1165,7 +1168,9 @@ public class SlayerBisPlugin extends Plugin
 			Optimizer optimizer = new Optimizer(setup, monster, cancel);
 			Map<AttackType, StyleResult> results = new EnumMap<>(AttackType.class);
 			Map<AttackType, Double> helmetCost = new EnumMap<>(AttackType.class);
+			Map<AttackType, Double> serpentineCost = new EnumMap<>(AttackType.class);
 			int minWeight = prep.minWeight(prepTask);
+			boolean poisons = prep.poisons(prepTask);
 			Set<AttackType> tooLight = EnumSet.noneOf(AttackType.class);
 			for (AttackType type : AttackType.values())
 			{
@@ -1181,8 +1186,11 @@ public class SlayerBisPlugin extends Plugin
 							tooLight.add(type);
 						}
 					}
-					results.put(type, preferHelmet(optimizer, candidates, type, r, required, setup,
-						settings.getPreferSlayerHelmet(), helmetCost, tooLight.contains(type) ? 0 : minWeight));
+					int weight = tooLight.contains(type) ? 0 : minWeight;
+					StyleResult serp = poisons ? preferSerpentine(optimizer, candidates, type, r, required,
+						settings.getSerpentineHelm().getPercent(), serpentineCost, weight) : r;
+					results.put(type, serp != r ? serp : preferHelmet(optimizer, candidates, type, r, required, setup,
+						settings.getPreferSlayerHelmet(), helmetCost, weight));
 				}
 			}
 			if (settings.getBurstTargets() > 0 && prep.stacks(prepTask))
@@ -1236,13 +1244,15 @@ public class SlayerBisPlugin extends Plugin
 				.suggestSpecWeapon(settings.isSpecWeapon())
 				.slayerMaster(settings.getSlayerMaster() == SlayerMaster.NONE ? null : settings.getSlayerMaster().getName())
 				.preferredFood(settings.getPreferredFood())
+				.venomImmune(best != null && best.getGear()[EquipmentSlot.HEAD.ordinal()] != null
+					&& isChargedSerpentine(best.getGear()[EquipmentSlot.HEAD.ordinal()].getItem()))
 				.build())
 				: new PrepPlan(requirements, List.of(), List.of(), List.of(), List.of(), 0, Set.of(), List.of(), List.of());
 
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
 				settings.getBurstTargets(), helmetCost, optimizer.ammoOptions(results.get(AttackType.RANGED), candidates),
-				minWeight, tooLight);
+				minWeight, tooLight, serpentineCost);
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
@@ -1326,6 +1336,61 @@ public class SlayerBisPlugin extends Plugin
 		}
 		cost.put(type, bestDps - kept.getResult().getDps());
 		return kept;
+	}
+
+	/**
+	 * On tasks that poison or envenom, searches again with a charged Serpentine helm (or Tanzanite or
+	 * Magma helm) and uses that set when the setting allows the DPS it costs. Returns the original
+	 * result when it doesn't apply.
+	 */
+	private static StyleResult preferSerpentine(Optimizer optimizer, List<Optimizer.Candidate> candidates,
+		AttackType type, StyleResult best, Map<EquipmentSlot, Set<String>> required, int percent,
+		Map<AttackType, Double> cost, int minWeight)
+	{
+		if (percent <= 0 || !best.isValid() || required.containsKey(EquipmentSlot.HEAD))
+		{
+			return best;
+		}
+		Optimizer.Candidate head = best.getGear()[EquipmentSlot.HEAD.ordinal()];
+		if (head != null && isChargedSerpentine(head.getItem()))
+		{
+			return best;
+		}
+		Set<String> owned = new HashSet<>();
+		List<Optimizer.Candidate> usable = new ArrayList<>();
+		for (Optimizer.Candidate c : candidates)
+		{
+			if (SERPENTINE_HELMS.contains(c.getItem().getName()) && !isChargedSerpentine(c.getItem()))
+			{
+				continue; // uncharged: no protection
+			}
+			usable.add(c);
+			if (isChargedSerpentine(c.getItem()))
+			{
+				owned.add(c.getItem().getName());
+			}
+		}
+		if (owned.isEmpty())
+		{
+			return best;
+		}
+		Map<EquipmentSlot, Set<String>> withHelm = new EnumMap<>(EquipmentSlot.class);
+		withHelm.putAll(required);
+		withHelm.put(EquipmentSlot.HEAD, owned);
+		StyleResult kept = optimizer.optimise(usable, type, withHelm, minWeight);
+		double bestDps = best.getResult().getDps();
+		if (!kept.isValid() || (percent != Integer.MAX_VALUE
+			&& kept.getResult().getDps() * (100 + percent) < bestDps * 100))
+		{
+			return best;
+		}
+		cost.put(type, bestDps - kept.getResult().getDps());
+		return kept;
+	}
+
+	private static boolean isChargedSerpentine(GearItem item)
+	{
+		return SERPENTINE_HELMS.contains(item.getName()) && !"Uncharged".equals(item.getVersion());
 	}
 
 	/**

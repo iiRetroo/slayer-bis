@@ -127,6 +127,15 @@ public final class PrepPlanner
 		return info == null ? 0 : (int) Math.round(info.minWeight * 1000);
 	}
 
+	/**
+	 * Whether the task's monsters poison or envenom you.
+	 */
+	public boolean poisons(String task)
+	{
+		PrepData.TaskInfo info = data.task(task);
+		return info != null && info.venom;
+	}
+
 	public boolean stacks(String task)
 	{
 		PrepData.TaskInfo info = data.task(task);
@@ -166,6 +175,8 @@ public final class PrepPlanner
 		String slayerMaster;
 		/** Food picked in the panel to use first, or null for the best owned. */
 		String preferredFood;
+		/** The suggested set wears a charged Serpentine helm, so no anti-venom is needed. */
+		boolean venomImmune;
 	}
 
 	/**
@@ -276,7 +287,7 @@ public final class PrepPlanner
 			}
 		}
 
-		if (info != null && info.venom)
+		if (info != null && info.venom && !request.isVenomImmune())
 		{
 			String anti = firstOwned(s.antivenom, owned);
 			if (anti != null)

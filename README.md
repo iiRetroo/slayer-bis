@@ -92,6 +92,7 @@ Teleports cover common task locations only. When the Slayer plugin reports where
 - **Remembers your bank** between sessions (setting: *Remember bank*, on by default), so suggestions are ready as soon as you get a task. It's kept in your RuneLite settings for that account, like any other plugin setting; turning the setting off deletes it.
 - **Task time estimate** in the stats box: kills left x monster HP / DPS. It ignores walking, respawns and overkill, so treat it as a rough lower bound.
 - **Prefer Slayer helmet** (setting, 5% by default): on task, if the best set swaps your Slayer helmet or black mask for something else (say a Salve amulet with a Serpentine helm on undead), the plugin searches again with the helmet kept and uses that set when it's within this percentage. The panel says how much DPS that costs. 0 turns it off.
+- **Serpentine helm** (setting, *Always* by default): on tasks whose monsters poison or envenom you (hydras, Vorkath, Zulrah, kalphites, scorpions, spiders and others), the plan wears a charged Serpentine, Tanzanite or Magma helm instead of a Slayer helmet, and skips the anti-venom. Set it to *If within 10%* to only do that when the DPS cost is small, or *Never*. The panel shows the DPS it costs.
 - **Slayer helmet reminder** (setting, on by default): a chat message if you attack a task monster without your Slayer helmet or black mask on while you own one. Once per task, and only in your own chat box.
 
 The Bank Tags plugin, a RuneLite core plugin that's on by default, needs to be enabled for Show in bank.

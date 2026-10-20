@@ -287,6 +287,13 @@ class SlayerBisPanel extends PluginPanel
 					+ WEIGHT_FORMAT.format(outcome.getMinWeight() / 1000.0)
 					+ " kg, so you'll be knocked back. Wear heavier armour if you can.", WARN, true)));
 			}
+			Double serpentine = outcome.getSerpentineCost().get(shown.getType());
+			if (serpentine != null)
+			{
+				content.add(left(text(serpentine > 0.005
+					? "Serpentine helm worn against poison: " + DPS_FORMAT.format(serpentine) + " DPS less than without it."
+					: "Serpentine helm worn against poison: no DPS lost.", MUTED, true)));
+			}
 			Double helmet = outcome.getHelmetCost().get(shown.getType());
 			if (helmet != null)
 			{
