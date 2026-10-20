@@ -710,6 +710,14 @@
       }
     },
     "warped creatures": {
+      "inventory": [
+        {
+          "names": [
+            "Crystal chime"
+          ],
+          "note": "warped creatures can't be damaged without it in your inventory"
+        }
+      ],
       "locations": [
         "Poison Waste Dungeon"
       ],

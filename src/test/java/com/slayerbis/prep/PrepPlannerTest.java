@@ -477,9 +477,13 @@ public class PrepPlannerTest
 			.owned(owned("Ring of wealth (5)", 1)).build());
 		assertTrue(plan.getTeleports().stream().anyMatch(t -> t.getLocation().equals("Poison Waste Dungeon")));
 		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Ring of wealth")));
+		// the crystal chime is required, and flagged when missing
+		assertEquals("Crystal chime", plan.getInventory().get(0).getName());
+		assertTrue(plan.getInventory().get(0).isRequired());
+		assertTrue(plan.getNotes().stream().anyMatch(n -> n.contains("Missing Crystal chime")));
 		// an uncharged ring can't teleport
 		PrepPlan uncharged = planner.plan(PrepPlanner.Request.builder().task("Warped Creatures").bestType(AttackType.SLASH)
-			.owned(owned("Ring of wealth", 1)).build());
-		assertTrue(uncharged.getInventory().isEmpty());
+			.owned(owned("Ring of wealth", 1, "Crystal chime", 1)).build());
+		assertTrue(uncharged.getInventory().stream().noneMatch(l -> l.getName().equals("Ring of wealth")));
 	}
 }
