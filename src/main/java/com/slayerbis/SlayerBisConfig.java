@@ -311,11 +311,24 @@ public interface SlayerBisConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "inventoryView",
+		name = "Inventory view",
+		description = "Full shows all 28 slots like the game, which is taller and may need scrolling. Compact "
+			+ "shows one tile per item with how many to bring.",
+		section = displaySection,
+		position = 0
+	)
+	default InventoryView inventoryView()
+	{
+		return InventoryView.FULL;
+	}
+
+	@ConfigItem(
 		keyName = "highlightBank",
 		name = "Highlight in bank",
 		description = "Outline the chosen items in your bank",
 		section = displaySection,
-		position = 0
+		position = 1
 	)
 	default boolean highlightBank()
 	{
@@ -328,7 +341,7 @@ public interface SlayerBisConfig extends Config
 		name = "Highlight colour",
 		description = "Colour of the bank item outline",
 		section = displaySection,
-		position = 1
+		position = 2
 	)
 	default Color highlightColor()
 	{
@@ -445,6 +458,22 @@ public interface SlayerBisConfig extends Config
 		private final String name;
 		private final int flat;
 		private final int percent;
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+
+	@Getter
+	@RequiredArgsConstructor
+	enum InventoryView
+	{
+		COMPACT("Compact"),
+		FULL("Full 28 slots");
+
+		private final String name;
 
 		@Override
 		public String toString()

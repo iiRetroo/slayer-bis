@@ -295,6 +295,11 @@ public class SlayerBisPlugin extends Plugin
 		return supplyHighlightColor;
 	}
 
+	SlayerBisConfig.InventoryView inventoryView()
+	{
+		return config.inventoryView();
+	}
+
 	private void updateHighlightColors()
 	{
 		highlightColor = config.highlightBank() ? config.highlightColor() : null;
@@ -554,6 +559,17 @@ public class SlayerBisPlugin extends Plugin
 				|| "highlightSupplies".equals(key) || "supplyHighlightColor".equals(key))
 			{
 				updateHighlightColors();
+			}
+			else if ("inventoryView".equals(key))
+			{
+				// display only: redraw, no new search
+				SwingUtilities.invokeLater(() ->
+				{
+					if (panel != null)
+					{
+						panel.redraw();
+					}
+				});
 			}
 			else if ("rememberBank".equals(key) || "helmetReminder".equals(key))
 			{

@@ -202,6 +202,14 @@ class SlayerBisPanel extends PluginPanel
 	}
 
 	/**
+	 * Redraws with the current display settings.
+	 */
+	void redraw()
+	{
+		render();
+	}
+
+	/**
 	 * Kills left on the task, after a kill.
 	 */
 	void showRemaining(int remaining)
@@ -491,9 +499,47 @@ class SlayerBisPanel extends PluginPanel
 	 */
 	private boolean isPacked(PrepPlan.InventoryLine l)
 	{
+		return ready != null && packedCount(l) >= l.getQuantity();
+	}
+
+	/**
+	 * All 28 inventory slots as in the game. Each slot of an item is ticked off on its own, so 15 of
+	 * 22 sharks packed shows 15 green slots and 7 amber ones.
+	 */
+	private JComponent fullInventory(PrepPlan prep)
+	{
+		JPanel grid = new JPanel(new GridLayout(7, 4, 3, 3));
+		grid.setOpaque(false);
+		int slots = 0;
+		for (PrepPlan.InventoryLine l : prep.getInventory())
+		{
+			boolean missing = l.getOwned() == 0;
+			int packed = missing ? 0 : packedCount(l);
+			String tip = l.getName() + (l.getNote() == null ? "" : " - " + l.getNote()) + " (you have " + l.getOwned() + ")";
+			for (int i = 0; i < l.getQuantity() && slots < PrepPlanner.INVENTORY_SLOTS; i++, slots++)
+			{
+				boolean slotPacked = i < packed;
+				Color border = missing ? MISSING_BORDER : slotPacked ? READY_BORDER : ready != null ? BANK_BORDER : TILE_BORDER;
+				grid.add(tile(missing ? -1 : l.getItemId(), l.getName(), missing ? "Missing: " + tip
+					: slotPacked ? tip + " - packed" : tip, border));
+			}
+		}
+		for (; slots < PrepPlanner.INVENTORY_SLOTS; slots++)
+		{
+			grid.add(tile(-1, null, "Empty slot", TILE_BORDER));
+		}
+		grid.setMaximumSize(grid.getPreferredSize());
+		return grid;
+	}
+
+	/**
+	 * How many of this item are already in the inventory.
+	 */
+	private int packedCount(PrepPlan.InventoryLine l)
+	{
 		if (ready == null)
 		{
-			return false;
+			return 0;
 		}
 		int have = 0;
 		for (Map.Entry<String, Integer> e : ready.getInventoryByName().entrySet())
@@ -503,7 +549,7 @@ class SlayerBisPanel extends PluginPanel
 				have += e.getValue();
 			}
 		}
-		return have >= l.getQuantity();
+		return have;
 	}
 
 	/**
@@ -545,7 +591,11 @@ class SlayerBisPanel extends PluginPanel
 			return;
 		}
 		content.add(sectionTitle("Inventory  " + prep.getSlotsUsed() + "/" + PrepPlanner.INVENTORY_SLOTS));
-		if (!prep.getInventory().isEmpty())
+		if (!prep.getInventory().isEmpty() && plugin.inventoryView() == SlayerBisConfig.InventoryView.FULL)
+		{
+			content.add(centered(fullInventory(prep)));
+		}
+		else if (!prep.getInventory().isEmpty())
 		{
 			// one tile per item, with how many to bring shown like an in-game stack count
 			JPanel grid = new JPanel(new GridLayout(0, 5, 3, 3));
