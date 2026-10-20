@@ -59,6 +59,16 @@
           "location": "Forgotten Cemetery",
           "text": "Behind the south-west coffin, between the bone spawns (around level 30 Wilderness)."
         }
+      ],
+      "locations": [
+        "Stronghold Slayer Cave",
+        "Catacombs of Kourend",
+        "Stronghold of Security"
+      ]
+    },
+    "aquanites": {
+      "locations": [
+        "Ynysdail"
       ]
     },
     "araxxor": {
@@ -71,6 +81,19 @@
         {
           "text": "Along the east wall and in the south-east corner of the room."
         }
+      ],
+      "locations": [
+        "Morytania Spider Cave"
+      ]
+    },
+    "aviansies": {
+      "locations": [
+        "God Wars Dungeon"
+      ]
+    },
+    "bandits": {
+      "locations": [
+        "Bandit Camp (Wilderness)"
       ]
     },
     "banshees": {
@@ -110,6 +133,22 @@
           "location": "Fremennik Slayer Dungeon",
           "text": "From the southern entrance using the south-east wall, or behind the rocks on either side. You still need a mirror shield: their gaze is ranged."
         }
+      ]
+    },
+    "bats": {
+      "locations": [
+        "Haunted Woods",
+        "Taverley Dungeon"
+      ]
+    },
+    "bears": {
+      "locations": [
+        "North-east of Ardougne"
+      ]
+    },
+    "birds": {
+      "locations": [
+        "Around Lumbridge"
       ]
     },
     "black demons": {
@@ -191,8 +230,28 @@
         }
       ]
     },
+    "brine rats": {
+      "locations": [
+        "Brine Rat Cavern"
+      ]
+    },
     "bronze dragons": {
-      "dragonfire": "dragon"
+      "dragonfire": "dragon",
+      "locations": [
+        "Brimhaven Dungeon",
+        "Catacombs of Kourend"
+      ]
+    },
+    "catablepon": {
+      "locations": [
+        "Stronghold of Security"
+      ]
+    },
+    "cave bugs": {
+      "locations": [
+        "Lumbridge Swamp Caves",
+        "Dorgesh-Kaan South Dungeon"
+      ]
     },
     "cave crawlers": {
       "locations": [
@@ -226,6 +285,18 @@
         "Kraken Cove"
       ]
     },
+    "cave slimes": {
+      "locations": [
+        "Lumbridge Swamp Caves",
+        "Dorgesh-Kaan South Dungeon"
+      ]
+    },
+    "chaos druids": {
+      "locations": [
+        "Edgeville Dungeon",
+        "Taverley Dungeon"
+      ]
+    },
     "cockatrice": {
       "required": {
         "shield": [
@@ -243,9 +314,29 @@
         }
       ]
     },
+    "cows": {
+      "locations": [
+        "Around Lumbridge"
+      ]
+    },
+    "crabs": {
+      "locations": [
+        "Fossil Island"
+      ]
+    },
     "crawling hands": {
       "locations": [
         "Slayer Tower"
+      ]
+    },
+    "crocodiles": {
+      "locations": [
+        "Kharidian Desert (near Nardah)"
+      ]
+    },
+    "custodian stalkers": {
+      "locations": [
+        "Stalker Den"
       ]
     },
     "dagannoth": {
@@ -266,6 +357,17 @@
         "Mourner Tunnels"
       ],
       "comboEat": true
+    },
+    "dark warriors": {
+      "locations": [
+        "Dark Warriors' Fortress"
+      ]
+    },
+    "dogs": {
+      "locations": [
+        "Hosidius marketplace",
+        "Brimhaven Dungeon"
+      ]
     },
     "drakes": {
       "required": {
@@ -298,6 +400,28 @@
         }
       ]
     },
+    "dwarves": {
+      "locations": [
+        "Dwarven Mine",
+        "Ice Mountain"
+      ]
+    },
+    "earth warriors": {
+      "locations": [
+        "Edgeville Dungeon"
+      ]
+    },
+    "elves": {
+      "locations": [
+        "Iorwerth Dungeon",
+        "Lletya"
+      ]
+    },
+    "ents": {
+      "locations": [
+        "Woodcutting Guild"
+      ]
+    },
     "fever spiders": {
       "required": {
         "hands": [
@@ -308,6 +432,9 @@
         {
           "text": "South-west corner: trap them on the edges of the crates."
         }
+      ],
+      "locations": [
+        "Braindeath Island"
       ]
     },
     "fire giants": {
@@ -331,12 +458,22 @@
         }
       ]
     },
+    "fleshcrawlers": {
+      "locations": [
+        "Stronghold of Security"
+      ]
+    },
     "fossil island wyverns": {
       "dragonfire": "wyvern",
       "locations": [
         "Fossil Island"
       ],
       "comboEat": true
+    },
+    "frost dragons": {
+      "locations": [
+        "Grimstone Dungeon"
+      ]
     },
     "gargoyles": {
       "inventory": [
@@ -359,6 +496,22 @@
         }
       ]
     },
+    "ghosts": {
+      "locations": [
+        "Taverley Dungeon",
+        "Catacombs of Kourend"
+      ]
+    },
+    "ghouls": {
+      "locations": [
+        "North of Mort Myre Swamp"
+      ]
+    },
+    "goblins": {
+      "locations": [
+        "Around Lumbridge"
+      ]
+    },
     "greater demons": {
       "cannon": true,
       "safespots": [
@@ -366,10 +519,24 @@
           "location": "Demonic Ruins",
           "text": "Several spots to range them from (Wilderness)."
         }
+      ],
+      "locations": [
+        "Chasm of Fire",
+        "Catacombs of Kourend",
+        "Brimhaven Dungeon"
       ]
     },
     "green dragons": {
-      "dragonfire": "dragon"
+      "dragonfire": "dragon",
+      "locations": [
+        "Dark Warriors' Fortress",
+        "Wilderness Slayer Cave"
+      ]
+    },
+    "gryphons": {
+      "locations": [
+        "The Great Conch"
+      ]
     },
     "harpie bug swarms": {
       "required": {
@@ -381,6 +548,10 @@
         {
           "text": "Near fairy ring DKP: between the two trees to the south behind the small jungle plant, or on the beach by the fairy ring."
         }
+      ],
+      "locations": [
+        "Colossal Wyrm Remains",
+        "Tai Bwo Wannai"
       ]
     },
     "hellhounds": {
@@ -406,7 +577,18 @@
       ]
     },
     "hill giants": {
-      "cannon": true
+      "cannon": true,
+      "locations": [
+        "Catacombs of Kourend",
+        "Giant Pit",
+        "Edgeville Dungeon"
+      ]
+    },
+    "hobgoblins": {
+      "locations": [
+        "Crafting Guild peninsula",
+        "Edgeville Dungeon"
+      ]
     },
     "hydras": {
       "required": {
@@ -421,6 +603,22 @@
       ],
       "comboEat": true
     },
+    "ice giants": {
+      "locations": [
+        "Asgarnian Ice Dungeon",
+        "Wilderness Slayer Cave"
+      ]
+    },
+    "ice warriors": {
+      "locations": [
+        "Asgarnian Ice Dungeon"
+      ]
+    },
+    "icefiends": {
+      "locations": [
+        "Ice Mountain"
+      ]
+    },
     "infernal mages": {
       "locations": [
         "Slayer Tower"
@@ -428,7 +626,11 @@
     },
     "iron dragons": {
       "dragonfire": "dragon",
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "Brimhaven Dungeon",
+        "Catacombs of Kourend"
+      ]
     },
     "jellies": {
       "locations": [
@@ -443,6 +645,11 @@
           "location": "Catacombs of Kourend",
           "text": "From the east or west shore."
         }
+      ]
+    },
+    "jungle horrors": {
+      "locations": [
+        "Mos Le'Harmless island"
       ]
     },
     "kalphites": {
@@ -461,6 +668,9 @@
         {
           "text": "Use the clouds or holes so they can't get into melee range. They still attack with magic from range."
         }
+      ],
+      "locations": [
+        "Draynor Manor"
       ]
     },
     "kurask": {
@@ -488,10 +698,28 @@
         {
           "text": "Skeleton piles and edges on Lava Dragon Isle, or some southern spawns from outside the isle. Ranged or Magic only."
         }
+      ],
+      "locations": [
+        "Lava Dragon Isle"
       ]
     },
     "lesser demons": {
-      "cannon": true
+      "cannon": true,
+      "locations": [
+        "Chasm of Fire",
+        "Catacombs of Kourend",
+        "Crandor and Karamja Dungeon"
+      ]
+    },
+    "lesser nagua": {
+      "locations": [
+        "Neypotzli"
+      ]
+    },
+    "lizardmen": {
+      "locations": [
+        "Lizardman Canyon"
+      ]
     },
     "lizards": {
       "inventory": [
@@ -503,11 +731,36 @@
           "perKill": true,
           "stackable": true
         }
+      ],
+      "locations": [
+        "Kharidian Desert (near Nardah)",
+        "Karuulm Slayer Dungeon"
+      ]
+    },
+    "magic axes": {
+      "locations": [
+        "Magic axe hut"
+      ]
+    },
+    "mammoths": {
+      "locations": [
+        "Ferox Enclave"
       ]
     },
     "metal dragons": {
       "dragonfire": "dragon",
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "Brimhaven Dungeon",
+        "Catacombs of Kourend",
+        "Ancient Cavern",
+        "Lithkren Vault"
+      ]
+    },
+    "minotaurs": {
+      "locations": [
+        "Stronghold of Security"
+      ]
     },
     "mithril dragons": {
       "dragonfire": "dragon",
@@ -532,6 +785,9 @@
         {
           "text": "By the fairy ring, the STASH unit to the west, or along the shore."
         }
+      ],
+      "locations": [
+        "Mudskipper Point"
       ]
     },
     "molanisks": {
@@ -547,6 +803,21 @@
         {
           "text": "On the large rock down the path south of the fairy ring."
         }
+      ],
+      "locations": [
+        "Dorgesh-Kaan South Dungeon"
+      ]
+    },
+    "monkeys": {
+      "locations": [
+        "Karamja near the volcano"
+      ]
+    },
+    "moss giants": {
+      "locations": [
+        "Varrock Sewers",
+        "Catacombs of Kourend",
+        "Brimhaven Dungeon"
       ]
     },
     "mutated zygomites": {
@@ -568,6 +839,10 @@
           "optional": true,
           "exact": true
         }
+      ],
+      "locations": [
+        "Zanaris",
+        "Fossil Island"
       ]
     },
     "nechryael": {
@@ -576,6 +851,22 @@
         "Catacombs of Kourend"
       ],
       "stacks": true
+    },
+    "ogres": {
+      "locations": [
+        "West of Yanille",
+        "Corsair Cove Dungeon"
+      ]
+    },
+    "otherworldly beings": {
+      "locations": [
+        "Zanaris"
+      ]
+    },
+    "pirates": {
+      "locations": [
+        "Chaos Temple (Wilderness)"
+      ]
     },
     "pyrefiends": {
       "locations": [
@@ -587,6 +878,12 @@
         }
       ]
     },
+    "rats": {
+      "locations": [
+        "Around Lumbridge",
+        "Varrock Sewers"
+      ]
+    },
     "red dragons": {
       "dragonfire": "dragon",
       "safespots": [
@@ -594,6 +891,16 @@
           "location": "Brimhaven Dungeon",
           "text": "Next to the pipe shortcut to the black demons, or by the fire and stalagmite near the strange floor shortcut."
         }
+      ],
+      "locations": [
+        "Brimhaven Dungeon",
+        "Forthos Dungeon",
+        "Corsair Cove Dungeon"
+      ]
+    },
+    "revenants": {
+      "locations": [
+        "Revenant Caves"
       ]
     },
     "rockslugs": {
@@ -611,6 +918,11 @@
         "Fremennik Slayer Dungeon"
       ]
     },
+    "rogues": {
+      "locations": [
+        "Rogues' Castle"
+      ]
+    },
     "rune dragons": {
       "dragonfire": "dragon",
       "locations": [
@@ -621,12 +933,45 @@
         "Insulated boots cut the electric attack from 4-7 to 1-2 damage a tick."
       ]
     },
+    "scabarites": {
+      "locations": [
+        "Sophanem Dungeon",
+        "Uzer Mastaba"
+      ]
+    },
+    "scorpions": {
+      "locations": [
+        "Al Kharid mine"
+      ]
+    },
+    "sea snakes": {
+      "locations": [
+        "Miscellania and Etceteria Dungeon"
+      ]
+    },
+    "shades": {
+      "locations": [
+        "Mort'ton",
+        "Catacombs of Kourend"
+      ]
+    },
+    "shadow warriors": {
+      "locations": [
+        "Legends' Guild"
+      ]
+    },
     "skeletal wyverns": {
       "dragonfire": "wyvern",
       "locations": [
         "Asgarnian Ice Dungeon"
       ],
       "comboEat": true
+    },
+    "skeletons": {
+      "locations": [
+        "Edgeville Dungeon",
+        "Catacombs of Kourend"
+      ]
     },
     "smoke devils": {
       "required": {
@@ -648,7 +993,16 @@
           "Slayer helmet",
           "Slayer helmet (i)"
         ]
-      }
+      },
+      "locations": [
+        "Sourhog Cave"
+      ]
+    },
+    "spiders": {
+      "locations": [
+        "Around Lumbridge",
+        "Stronghold of Security"
+      ]
     },
     "spiritual creatures": {
       "locations": [
@@ -657,7 +1011,11 @@
     },
     "steel dragons": {
       "dragonfire": "dragon",
-      "comboEat": true
+      "comboEat": true,
+      "locations": [
+        "Brimhaven Dungeon",
+        "Catacombs of Kourend"
+      ]
     },
     "suqahs": {
       "cannon": true,
@@ -665,6 +1023,14 @@
         {
           "text": "Next to the hill in the north (works with a cannon), or by the trees in the quieter south."
         }
+      ],
+      "locations": [
+        "Lunar Isle"
+      ]
+    },
+    "terror dogs": {
+      "locations": [
+        "Tarn's Lair"
       ]
     },
     "the alchemical hydra": {
@@ -716,6 +1082,22 @@
         "Magic Dart with a Slayer's staff also works on them, but isn't counted in the DPS, so Magic shows nothing."
       ]
     },
+    "tzhaar": {
+      "locations": [
+        "Mor Ul Rek"
+      ]
+    },
+    "vampyres": {
+      "locations": [
+        "Darkmeyer",
+        "Haunted Woods"
+      ]
+    },
+    "venators": {
+      "locations": [
+        "Vampyrium"
+      ]
+    },
     "vorkath": {
       "dragonfire": "dragon",
       "comboEat": true
@@ -727,7 +1109,10 @@
           "Slayer helmet",
           "Slayer helmet (i)"
         ]
-      }
+      },
+      "locations": [
+        "Lumbridge Swamp Caves"
+      ]
     },
     "warped creatures": {
       "inventory": [
@@ -767,6 +1152,16 @@
         }
       ]
     },
+    "werewolves": {
+      "locations": [
+        "Canifis"
+      ]
+    },
+    "wolves": {
+      "locations": [
+        "Stronghold of Security"
+      ]
+    },
     "wyrms": {
       "required": {
         "feet": [
@@ -783,6 +1178,12 @@
           "location": "Karuulm Slayer Dungeon",
           "text": "Task-only area: lure a wyrm from the east alcove of the second island into the corner and range it."
         }
+      ]
+    },
+    "zombies": {
+      "locations": [
+        "Edgeville Dungeon",
+        "Chaos Temple (Wilderness)"
       ]
     },
     "zulrah": {
@@ -992,6 +1393,576 @@
       },
       {
         "text": "Lumbridge Graveyard Teleport (Arceuus spellbook)"
+      }
+    ],
+    "Chasm of Fire": [
+      {
+        "text": "Fairy ring DJR"
+      },
+      {
+        "text": "Chasm teleport scroll",
+        "items": [
+          "Chasm teleport scroll"
+        ]
+      }
+    ],
+    "Giant Pit": [
+      {
+        "text": "Fairy ring DJR, then walk south"
+      }
+    ],
+    "Crandor and Karamja Dungeon": [
+      {
+        "text": "Amulet of glory: Karamja, then climb down into the volcano",
+        "items": [
+          "Amulet of glory"
+        ]
+      },
+      {
+        "text": "Minigame Teleport: TzHaar Fight Pit, then through Mor Ul Rek and out the north cave"
+      }
+    ],
+    "Stronghold of Security": [
+      {
+        "text": "Skull sceptre: Stronghold of Security",
+        "items": [
+          "Skull sceptre"
+        ]
+      },
+      {
+        "text": "Amulet of glory: Edgeville, then walk east to Barbarian Village",
+        "items": [
+          "Amulet of glory"
+        ]
+      }
+    ],
+    "Edgeville Dungeon": [
+      {
+        "text": "Amulet of glory: Edgeville, then the trapdoor south of the bank",
+        "items": [
+          "Amulet of glory"
+        ]
+      },
+      {
+        "text": "Paddewwa Teleport (Ancient Magicks)"
+      }
+    ],
+    "Varrock Sewers": [
+      {
+        "text": "Varrock Teleport (standard spellbook), then the manhole east of the palace"
+      }
+    ],
+    "Morytania Spider Cave": [
+      {
+        "text": "Spider cave teleport scroll",
+        "items": [
+          "Spider cave teleport"
+        ]
+      },
+      {
+        "text": "Fairy ring ALQ, then walk south"
+      },
+      {
+        "text": "Ectophial, then walk south-west",
+        "items": [
+          "Ectophial"
+        ]
+      }
+    ],
+    "Braindeath Island": [
+      {
+        "text": "Ectophial, then Pirate Pete on the dock north-east of the Ectofuntus",
+        "items": [
+          "Ectophial"
+        ]
+      }
+    ],
+    "Draynor Manor": [
+      {
+        "text": "Draynor Manor teleport tablet",
+        "items": [
+          "Draynor manor teleport"
+        ]
+      },
+      {
+        "text": "Amulet of glory: Draynor Village, then walk north",
+        "items": [
+          "Amulet of glory"
+        ]
+      }
+    ],
+    "Sourhog Cave": [
+      {
+        "text": "Draynor Manor teleport tablet, then walk east",
+        "items": [
+          "Draynor manor teleport"
+        ]
+      },
+      {
+        "text": "Amulet of glory: Draynor Village, then walk north-east",
+        "items": [
+          "Amulet of glory"
+        ]
+      }
+    ],
+    "Mudskipper Point": [
+      {
+        "text": "Fairy ring AIQ"
+      }
+    ],
+    "Dorgesh-Kaan South Dungeon": [
+      {
+        "text": "Fairy ring AJQ"
+      }
+    ],
+    "Zanaris": [
+      {
+        "text": "Any fairy ring to Zanaris"
+      }
+    ],
+    "Lunar Isle": [
+      {
+        "text": "Moonclan Teleport (Lunar spellbook)"
+      },
+      {
+        "text": "Lunar Isle teleport scroll",
+        "items": [
+          "Lunar isle teleport"
+        ]
+      }
+    ],
+    "Colossal Wyrm Remains": [
+      {
+        "text": "Colossal wyrm teleport scroll",
+        "items": [
+          "Colossal wyrm teleport scroll"
+        ]
+      },
+      {
+        "text": "Fairy ring AJP, then walk south"
+      }
+    ],
+    "Tai Bwo Wannai": [
+      {
+        "text": "Fairy ring DKP"
+      },
+      {
+        "text": "Tai Bwo Wannai teleport scroll",
+        "items": [
+          "Tai bwo wannai teleport"
+        ]
+      }
+    ],
+    "Kharidian Desert (near Nardah)": [
+      {
+        "text": "Fairy ring DLQ"
+      },
+      {
+        "text": "Nardah teleport scroll",
+        "items": [
+          "Nardah teleport"
+        ]
+      }
+    ],
+    "Mor Ul Rek": [
+      {
+        "text": "Fairy ring BLP"
+      },
+      {
+        "text": "Minigame Teleport: TzHaar Fight Pit"
+      }
+    ],
+    "Sophanem Dungeon": [
+      {
+        "text": "Pharaoh's sceptre: Jalsavrah (Sophanem)",
+        "items": [
+          "Pharaoh's sceptre"
+        ]
+      },
+      {
+        "text": "Fairy ring AKP (needs 62 Agility for the river shortcut)"
+      },
+      {
+        "text": "Fairy ring DLQ, then walk south"
+      }
+    ],
+    "Uzer Mastaba": [
+      {
+        "text": "Fairy ring DLQ, then walk east"
+      },
+      {
+        "text": "Nardah teleport scroll, then walk north-east",
+        "items": [
+          "Nardah teleport"
+        ]
+      }
+    ],
+    "Al Kharid mine": [
+      {
+        "text": "Amulet of glory: Al Kharid, then walk north",
+        "items": [
+          "Amulet of glory"
+        ]
+      },
+      {
+        "text": "Ring of dueling: Emir's Arena, then walk north",
+        "items": [
+          "Ring of dueling"
+        ]
+      }
+    ],
+    "Miscellania and Etceteria Dungeon": [
+      {
+        "text": "Fairy ring CIP"
+      },
+      {
+        "text": "Ring of wealth: Miscellania",
+        "items": [
+          "Ring of wealth"
+        ]
+      }
+    ],
+    "Legends' Guild": [
+      {
+        "text": "Fairy ring BLR"
+      },
+      {
+        "text": "Ardougne Teleport (standard spellbook), then walk north-east"
+      }
+    ],
+    "Around Lumbridge": [
+      {
+        "text": "Lumbridge Teleport (standard spellbook)"
+      },
+      {
+        "text": "Home Teleport (if your spawn point is Lumbridge)"
+      }
+    ],
+    "Ice Mountain": [
+      {
+        "text": "Lassar Teleport (Ancient Magicks)"
+      },
+      {
+        "text": "Combat bracelet: Edgeville Monastery, then walk south-west",
+        "items": [
+          "Combat bracelet"
+        ]
+      }
+    ],
+    "Dwarven Mine": [
+      {
+        "text": "Skills necklace: Mining Guild",
+        "items": [
+          "Skills necklace"
+        ]
+      },
+      {
+        "text": "Falador Teleport (standard spellbook), then the Dwarven Mine stairs"
+      }
+    ],
+    "Mort'ton": [
+      {
+        "text": "Mort'ton teleport scroll",
+        "items": [
+          "Mort'ton teleport"
+        ]
+      },
+      {
+        "text": "Fairy ring BIP (needs 50 Agility), then walk south"
+      }
+    ],
+    "Tarn's Lair": [
+      {
+        "text": "Slayer ring: Tarn's Lair",
+        "items": [
+          "Slayer ring"
+        ]
+      },
+      {
+        "text": "Mort'ton teleport scroll, then walk to the Abandoned Mine",
+        "items": [
+          "Mort'ton teleport"
+        ]
+      }
+    ],
+    "Canifis": [
+      {
+        "text": "Fairy ring CKS"
+      },
+      {
+        "text": "Kharyrll Teleport (Ancient Magicks)"
+      }
+    ],
+    "North of Mort Myre Swamp": [
+      {
+        "text": "Fairy ring CKS, then walk west"
+      },
+      {
+        "text": "Kharyrll Teleport (Ancient Magicks), then walk west"
+      }
+    ],
+    "Haunted Woods": [
+      {
+        "text": "Fairy ring ALQ"
+      }
+    ],
+    "Darkmeyer": [
+      {
+        "text": "Drakan's medallion: Darkmeyer",
+        "items": [
+          "Drakan's medallion"
+        ]
+      }
+    ],
+    "Vampyrium": [
+      {
+        "text": "Drakan's medallion: Castle Drakan, then the portal",
+        "items": [
+          "Drakan's medallion"
+        ]
+      }
+    ],
+    "Brine Rat Cavern": [
+      {
+        "text": "Fairy ring DKS"
+      }
+    ],
+    "Woodcutting Guild": [
+      {
+        "text": "Skills necklace: Woodcutting Guild",
+        "items": [
+          "Skills necklace"
+        ]
+      },
+      {
+        "text": "Fairy ring AKR, then walk west"
+      }
+    ],
+    "Forthos Dungeon": [
+      {
+        "text": "Skills necklace: Woodcutting Guild, then walk north",
+        "items": [
+          "Skills necklace"
+        ]
+      },
+      {
+        "text": "Watson teleport scroll",
+        "items": [
+          "Watson teleport"
+        ]
+      },
+      {
+        "text": "Spirit tree to Hosidius, just south of the ruin"
+      }
+    ],
+    "Corsair Cove Dungeon": [
+      {
+        "text": "Mythical cape: Myths' Guild, then walk south",
+        "items": [
+          "Mythical cape"
+        ]
+      },
+      {
+        "text": "Spirit tree to Feldip Hills, then walk east"
+      }
+    ],
+    "West of Yanille": [
+      {
+        "text": "Watchtower Teleport (standard spellbook, Yanille after the hard Ardougne Diary)"
+      },
+      {
+        "text": "Teleport to House with your house in Yanille"
+      }
+    ],
+    "Lletya": [
+      {
+        "text": "Teleport crystal: Lletya",
+        "items": [
+          "Teleport crystal",
+          "Eternal teleport crystal"
+        ]
+      }
+    ],
+    "Mos Le'Harmless island": [
+      {
+        "text": "Mos Le'Harmless teleport scroll",
+        "items": [
+          "Mos le'harmless teleport"
+        ]
+      }
+    ],
+    "Karamja near the volcano": [
+      {
+        "text": "Amulet of glory: Karamja",
+        "items": [
+          "Amulet of glory"
+        ]
+      }
+    ],
+    "North-east of Ardougne": [
+      {
+        "text": "Ardougne Teleport (standard spellbook), then walk north-east"
+      }
+    ],
+    "Crafting Guild peninsula": [
+      {
+        "text": "Skills necklace: Crafting Guild, then walk west",
+        "items": [
+          "Skills necklace"
+        ]
+      }
+    ],
+    "Hosidius marketplace": [
+      {
+        "text": "Hosidius teleport tablet",
+        "items": [
+          "Hosidius teleport"
+        ]
+      },
+      {
+        "text": "Kourend Castle Teleport (standard spellbook), then walk south"
+      }
+    ],
+    "The Great Conch": [
+      {
+        "text": "Fairy ring CJQ"
+      }
+    ],
+    "Grimstone Dungeon": [
+      {
+        "text": "Fairy ring DLP (after mooring at Grimstone once)"
+      }
+    ],
+    "Stalker Den": [
+      {
+        "text": "Fairy ring BLS, then walk south"
+      },
+      {
+        "text": "Fairy ring AIS, then walk north-west (59 Agility entrance)"
+      }
+    ],
+    "Neypotzli": [
+      {
+        "text": "Calcified moth",
+        "items": [
+          "Calcified moth"
+        ]
+      },
+      {
+        "text": "Quetzal to Cam Torum, then walk north"
+      }
+    ],
+    "Ynysdail": [
+      {
+        "text": "Teleport crystal: Prifddinas, then the rowboat north of the city (once built)",
+        "items": [
+          "Teleport crystal",
+          "Eternal teleport crystal"
+        ]
+      }
+    ],
+    "Lizardman Canyon": [
+      {
+        "text": "Fairy ring DJR, then walk to the canyon"
+      }
+    ],
+    "Wilderness Slayer Cave": [
+      {
+        "text": "Ring of dueling: Ferox Enclave, then walk east",
+        "items": [
+          "Ring of dueling"
+        ]
+      },
+      {
+        "text": "Games necklace: Corporeal Beast, then walk east",
+        "items": [
+          "Games necklace"
+        ]
+      }
+    ],
+    "Ferox Enclave": [
+      {
+        "text": "Ring of dueling: Ferox Enclave",
+        "items": [
+          "Ring of dueling"
+        ]
+      }
+    ],
+    "Bandit Camp (Wilderness)": [
+      {
+        "text": "Burning amulet: Bandit Camp",
+        "items": [
+          "Burning amulet"
+        ]
+      },
+      {
+        "text": "Ring of dueling: Ferox Enclave, then walk north-west",
+        "items": [
+          "Ring of dueling"
+        ]
+      }
+    ],
+    "Dark Warriors' Fortress": [
+      {
+        "text": "Ring of dueling: Ferox Enclave, then walk west",
+        "items": [
+          "Ring of dueling"
+        ]
+      },
+      {
+        "text": "Dareeyak Teleport (Ancient Magicks), then walk south-east"
+      }
+    ],
+    "Chaos Temple (Wilderness)": [
+      {
+        "text": "Burning amulet: Chaos Temple",
+        "items": [
+          "Burning amulet"
+        ]
+      },
+      {
+        "text": "Ring of dueling: Ferox Enclave, then walk east",
+        "items": [
+          "Ring of dueling"
+        ]
+      }
+    ],
+    "Revenant Caves": [
+      {
+        "text": "Revenant cave teleport scroll",
+        "items": [
+          "Revenant cave teleport"
+        ]
+      },
+      {
+        "text": "Burning amulet: Bandit Camp, then walk east",
+        "items": [
+          "Burning amulet"
+        ]
+      }
+    ],
+    "Lava Dragon Isle": [
+      {
+        "text": "Revenant cave teleport scroll, then walk north-east",
+        "items": [
+          "Revenant cave teleport"
+        ]
+      },
+      {
+        "text": "Annakarl Teleport (Ancient Magicks), then walk south-west"
+      }
+    ],
+    "Magic axe hut": [
+      {
+        "text": "Lever in Edgeville or Ardougne to the Deserted Keep, then walk north and east"
+      },
+      {
+        "text": "Wilderness Obelisk to level 50, then walk west"
+      }
+    ],
+    "Rogues' Castle": [
+      {
+        "text": "Wilderness Obelisk to level 50, then walk west"
       }
     ]
   },
@@ -1237,6 +2208,17 @@
         "Brimhaven Dungeon costs 875 coins to enter, unless you've paid the one-off 1,000,000."
       ],
       "summary": "bring an axe for the vines and 875 coins to enter"
+    },
+    "Brine Rat Cavern": {
+      "inventory": [
+        {
+          "names": [
+            "Spade"
+          ],
+          "note": "to dig down into the cavern"
+        }
+      ],
+      "summary": "bring a spade to dig into the cavern"
     }
   }
 }

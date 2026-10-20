@@ -168,6 +168,59 @@ public class PrepPlannerTest
 	}
 
 	@Test
+	public void taskLocationsResolveToKnownKeys()
+	{
+		// common non-boss tasks, named as the Slayer plugin reports them
+		String[] common = {
+			"ankou", "aquanites", "araxytes", "aviansies", "bandits", "bats", "bears", "birds", "brine rats",
+			"bronze dragons", "catablepon", "cave bugs", "cave slimes", "chaos druids", "cows", "crabs", "crocodiles",
+			"custodian stalkers", "dark warriors", "dogs", "dwarves", "earth warriors", "elves", "ents",
+			"fever spiders", "fleshcrawlers", "frost dragons", "ghosts", "ghouls", "goblins", "greater demons",
+			"green dragons", "gryphons", "harpie bug swarms", "hill giants", "hobgoblins", "ice giants",
+			"ice warriors", "icefiends", "iron dragons", "jungle horrors", "killerwatts", "lava dragons",
+			"lesser demons", "lesser nagua", "lizardmen", "lizards", "magic axes", "mammoths", "metal dragons",
+			"minotaurs", "mogres", "molanisks", "monkeys", "moss giants", "mutated zygomites", "ogres",
+			"otherworldly beings", "pirates", "rats", "red dragons", "revenants", "rogues", "scabarites",
+			"scorpions", "sea snakes", "shades", "shadow warriors", "skeletons", "sourhogs", "spiders",
+			"steel dragons", "suqahs", "terror dogs", "tzhaar", "vampyres", "venators", "wall beasts",
+			"werewolves", "wolves", "zombies"};
+		for (String name : common)
+		{
+			PrepData.TaskInfo info = data.task(name);
+			assertNotNull(name + " is missing", info);
+			assertNotNull(name + " has no locations", info.locations);
+			assertFalse(name + " has no locations", info.locations.isEmpty());
+		}
+		for (Map.Entry<String, PrepData.TaskInfo> task : data.allTasks().entrySet())
+		{
+			if (task.getValue().locations == null)
+			{
+				continue;
+			}
+			for (String location : task.getValue().locations)
+			{
+				List<PrepData.Teleport> teleports = data.locations().get(location);
+				assertNotNull(task.getKey() + " lists unknown location " + location, teleports);
+				assertFalse(location + " has no teleports", teleports.isEmpty());
+				for (PrepData.Teleport t : teleports)
+				{
+					assertNotNull(location + " has a teleport without text", t.text);
+					assertFalse(location + " has a teleport without text", t.text.trim().isEmpty());
+				}
+			}
+		}
+		// a reported location is matched by substring, so no key may contain another
+		for (String a : data.locations().keySet())
+		{
+			for (String b : data.locations().keySet())
+			{
+				assertTrue(a + " overlaps " + b, a.equals(b)
+					|| !b.toLowerCase(java.util.Locale.ROOT).contains(a.toLowerCase(java.util.Locale.ROOT)));
+			}
+		}
+	}
+
+	@Test
 	public void lootToolsFollowTheMonstersDrops()
 	{
 		// abyssal demons drop herbs and items worth alching often, demonic ashes every kill
