@@ -48,7 +48,7 @@ Task requirements, task items and teleports live in `src/main/resources/com/slay
 
 The inventory plan fills 28 slots: required task items first, then antifire or anti-venom where the task calls for it, prayer potions (5 by default), a boosting potion for your best style, loot tools, a teleport item, and your best food for the rest. The counts are settings. Moving items between bank and inventory does not change the plan, so it stays put while you withdraw.
 
-- **Prayer:** prayer potions or super restores first. If you don't have enough, moonlight moth mixes make up the difference, two mixes per potion (so 10 mixes when you have no prayer potions). If you have none at all, the panel says so, and the same goes for a missing style potion.
+- **Prayer:** the *Prayer restore* setting picks the order. *Prayer potions first* (the default) brings prayer potions or super restores and tops up with moonlight moth mixes. *Moth mixes first* saves your prayer potions by bringing mixes first. *Prayer potions only* never suggests mixes. Two mixes count as one potion, so 5 prayer potions become 10 mixes. If you have none at all, the panel says so, and the same goes for a missing style potion.
 - **Potion storage:** potions in your bank's potion storage (from Mastering Mixology) count as banked, read the same way RuneLite's Bank Tags plugin reads them.
 - **Teleports:** one teleport item you own for the task location, such as a slayer ring. Worn teleports (Rada's blessing, Ghommal's hilt) are a tip instead, since they need no inventory slot.
 - **Combo eating:** for tasks that hit hard (metal dragons, wyverns, dark beasts, hydras, bosses and anything with 250+ HP), 4 karambwans to eat in the same tick as your main food.

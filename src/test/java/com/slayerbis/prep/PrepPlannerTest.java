@@ -355,4 +355,28 @@ public class PrepPlannerTest
 		assertTrue(plan.getInventory().stream().noneMatch(l -> l.getName().startsWith("Rada's")));
 		assertTrue(plan.getTips().stream().anyMatch(t -> t.contains("Rada's blessing")));
 	}
+
+	@Test
+	public void prayerRestoreSettingPicksTheOrder()
+	{
+		OwnedItems bank = owned("Prayer potion(4)", 20, "Moonlight moth mix (2)", 6);
+		PrepPlan mixesFirst = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(bank).prayerPotions(5).prayerRestore(PrayerRestore.MIXES_FIRST).build());
+		// 6 mixes cover 3 potions, so 2 prayer potions top it up
+		assertEquals("Moonlight moth mix", mixesFirst.getInventory().get(0).getName());
+		assertEquals(6, mixesFirst.getInventory().get(0).getQuantity());
+		assertEquals("Prayer potion", mixesFirst.getInventory().get(1).getName());
+		assertEquals(2, mixesFirst.getInventory().get(1).getQuantity());
+
+		PrepPlan potionsFirst = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(bank).prayerPotions(5).build());
+		assertEquals("Prayer potion", potionsFirst.getInventory().get(0).getName());
+		assertEquals(5, potionsFirst.getInventory().get(0).getQuantity());
+		assertTrue(potionsFirst.getInventory().stream().noneMatch(l -> l.getName().startsWith("Moonlight")));
+
+		PrepPlan potionsOnly = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Moonlight moth mix (2)", 20)).prayerPotions(5).prayerRestore(PrayerRestore.POTIONS_ONLY).build());
+		assertTrue(potionsOnly.getInventory().stream().noneMatch(l -> l.getName().startsWith("Moonlight")));
+		assertTrue(potionsOnly.getNotes().stream().anyMatch(n -> n.contains("No prayer potions or super restores")));
+	}
 }

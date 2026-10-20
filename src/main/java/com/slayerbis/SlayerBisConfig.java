@@ -1,5 +1,6 @@
 package com.slayerbis;
 
+import com.slayerbis.prep.PrayerRestore;
 import com.slayerbis.prep.PrepPlanner;
 import java.awt.Color;
 import lombok.Getter;
@@ -237,8 +238,8 @@ public interface SlayerBisConfig extends Config
 	@ConfigItem(
 		keyName = "prayerPotions",
 		name = "Prayer potions",
-		description = "How many prayer potions (or super restores) to suggest. Moonlight moth mixes make up "
-			+ "any shortfall, two mixes per potion.",
+		description = "How many prayer potions (or super restores) to suggest. Moonlight moth mixes count "
+			+ "as half a potion each; see Prayer restore.",
 		section = prepSection,
 		position = 1
 	)
@@ -247,13 +248,26 @@ public interface SlayerBisConfig extends Config
 		return 5;
 	}
 
+	@ConfigItem(
+		keyName = "prayerRestore",
+		name = "Prayer restore",
+		description = "Which prayer restores to suggest first. Moonlight moth mixes count as half a prayer "
+			+ "potion each, so 5 prayer potions become 10 mixes.",
+		section = prepSection,
+		position = 2
+	)
+	default PrayerRestore prayerRestore()
+	{
+		return PrayerRestore.POTIONS_FIRST;
+	}
+
 	@Range(max = 27)
 	@ConfigItem(
 		keyName = "combatPotions",
 		name = "Combat potions",
 		description = "How many boosting potions for your best style to suggest",
 		section = prepSection,
-		position = 2
+		position = 3
 	)
 	default int combatPotions()
 	{
@@ -265,7 +279,7 @@ public interface SlayerBisConfig extends Config
 		name = "Fill with food",
 		description = "Fill the rest of the inventory with your best food",
 		section = prepSection,
-		position = 3
+		position = 4
 	)
 	default boolean fillFood()
 	{
@@ -279,7 +293,7 @@ public interface SlayerBisConfig extends Config
 			+ "alchables, a bonecrusher for bones and so on. Common drops only counts loot that drops at "
 			+ "least once every " + 64 + " kills on average.",
 		section = prepSection,
-		position = 4
+		position = 5
 	)
 	default LootTools lootTools()
 	{
@@ -292,7 +306,7 @@ public interface SlayerBisConfig extends Config
 		description = "Suggest a Defence-lowering special attack weapon you own (Dragon warhammer, Bandos godsword "
 			+ "and so on) for monsters with lots of HP",
 		section = prepSection,
-		position = 5
+		position = 6
 	)
 	default boolean specWeapon()
 	{
@@ -304,7 +318,7 @@ public interface SlayerBisConfig extends Config
 		name = "Highlight supplies",
 		description = "Outline suggested supplies in your bank as well as gear",
 		section = prepSection,
-		position = 6
+		position = 7
 	)
 	default boolean highlightSupplies()
 	{
@@ -317,7 +331,7 @@ public interface SlayerBisConfig extends Config
 		name = "Supply highlight colour",
 		description = "Colour of the outline around suggested supplies",
 		section = prepSection,
-		position = 7
+		position = 8
 	)
 	default Color supplyHighlightColor()
 	{

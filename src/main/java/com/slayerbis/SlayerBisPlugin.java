@@ -14,6 +14,7 @@ import com.slayerbis.data.GearItem;
 import com.slayerbis.data.Monster;
 import com.slayerbis.data.TaskMonsterResolver;
 import com.slayerbis.prep.OwnedItems;
+import com.slayerbis.prep.PrayerRestore;
 import com.slayerbis.prep.PrepData;
 import com.slayerbis.prep.PrepPlan;
 import com.slayerbis.prep.PrepPlanner;
@@ -918,7 +919,7 @@ public class SlayerBisPlugin extends Plugin
 
 		PlayerSetup setup = buildSetup(task);
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
-			config.prayerPotions(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
+			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
 			slayerPluginService.getRemainingAmount(), config.specWeapon());
 
 		cancelRunning();
@@ -969,6 +970,7 @@ public class SlayerBisPlugin extends Plugin
 		Integer selectedMonsterId;
 		boolean showPreparation;
 		int prayerPotions;
+		PrayerRestore prayerRestore;
 		int combatPotions;
 		boolean fillFood;
 		int lootMaxKills;
@@ -1133,6 +1135,7 @@ public class SlayerBisPlugin extends Plugin
 				.requirements(requirements)
 				.owned(owned)
 				.prayerPotions(settings.getPrayerPotions())
+				.prayerRestore(settings.getPrayerRestore())
 				.combatPotions(settings.getCombatPotions())
 				.fillFood(settings.isFillFood())
 				.monsterName(monster.getName())

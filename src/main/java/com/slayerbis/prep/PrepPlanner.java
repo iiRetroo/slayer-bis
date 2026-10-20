@@ -102,6 +102,8 @@ public final class PrepPlanner
 		List<PrepPlan.Requirement> requirements = Collections.emptyList();
 		OwnedItems owned;
 		int prayerPotions;
+		@Builder.Default
+		PrayerRestore prayerRestore = PrayerRestore.POTIONS_FIRST;
 		int combatPotions;
 		boolean fillFood;
 		/** The monster being fought, for its drops. */
@@ -197,7 +199,7 @@ public final class PrepPlanner
 
 		if (prayerPotions > 0)
 		{
-			slots += addPrayer(lines, ids, owned, prayerPotions, notes);
+			slots += addPrayer(lines, ids, owned, prayerPotions, request.getPrayerRestore(), notes);
 		}
 
 		List<String> stylePotions = bestType == null ? Collections.emptyList()
@@ -332,42 +334,55 @@ public final class PrepPlanner
 	}
 
 	/**
-	 * Prayer potions first, then moonlight moth mixes for any shortfall, two mixes per potion.
+	 * Prayer potions and moonlight moth mixes in the chosen order, the second making up any
+	 * shortfall of the first. Two mixes count as one prayer potion.
 	 */
 	private int addPrayer(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, int wanted,
-		List<String> notes)
+		PrayerRestore mode, List<String> notes)
 	{
 		PrepData.Supplies s = data.supplies();
+		int[] missing = {wanted};
 		int slots = 0;
-		int missing = wanted;
-		if (s.prayerPotions != null)
+		if (mode == PrayerRestore.MIXES_FIRST)
 		{
-			for (String name : s.prayerPotions)
-			{
-				if (missing > 0 && owned.owns(name))
-				{
-					int take = addLine(lines, ids, owned, name, missing, "restores prayer points", false);
-					slots += take;
-					missing -= take;
-				}
-			}
+			slots += addPrayerItems(lines, ids, owned, s.prayerMixes, PRAYER_MIXES_PER_POTION, missing);
 		}
-		if (s.prayerMixes != null)
+		slots += addPrayerItems(lines, ids, owned, s.prayerPotions, 1, missing);
+		if (mode == PrayerRestore.POTIONS_FIRST)
 		{
-			for (String name : s.prayerMixes)
-			{
-				if (missing > 0 && owned.owns(name))
-				{
-					int take = addLine(lines, ids, owned, name, missing * PRAYER_MIXES_PER_POTION,
-						"restores prayer points; two stand in for one prayer potion", false);
-					slots += take;
-					missing -= (take + PRAYER_MIXES_PER_POTION - 1) / PRAYER_MIXES_PER_POTION;
-				}
-			}
+			slots += addPrayerItems(lines, ids, owned, s.prayerMixes, PRAYER_MIXES_PER_POTION, missing);
 		}
-		if (missing == wanted)
+		if (missing[0] == wanted)
 		{
-			notes.add("No prayer potions, super restores or moonlight moth mixes found.");
+			notes.add(mode == PrayerRestore.POTIONS_ONLY
+				? "No prayer potions or super restores found."
+				: "No prayer potions, super restores or moonlight moth mixes found.");
+		}
+		return slots;
+	}
+
+	/**
+	 * @param perPotion how many of these items stand in for one prayer potion
+	 * @param missing   prayer potions still wanted, updated in place
+	 */
+	private static int addPrayerItems(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned,
+		List<String> names, int perPotion, int[] missing)
+	{
+		int slots = 0;
+		if (names == null)
+		{
+			return 0;
+		}
+		for (String name : names)
+		{
+			if (missing[0] > 0 && owned.owns(name))
+			{
+				String note = perPotion == 1 ? "restores prayer points"
+					: "restores prayer points; " + perPotion + " count as one prayer potion";
+				int take = addLine(lines, ids, owned, name, missing[0] * perPotion, note, false);
+				slots += take;
+				missing[0] -= (take + perPotion - 1) / perPotion;
+			}
 		}
 		return slots;
 	}
