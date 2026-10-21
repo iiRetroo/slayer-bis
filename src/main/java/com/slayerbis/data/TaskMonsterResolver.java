@@ -119,6 +119,9 @@ public class TaskMonsterResolver
 		.put("araxytes", ImmutableList.of("Araxxor"))
 		.put("aviansies", ImmutableList.of("Kree'arra"))
 		.put("gryphons", ImmutableList.of("Shellbane gryphon"))
+		.put("fire giants", ImmutableList.of("Branda the Fire Queen"))
+		.put("ice giants", ImmutableList.of("Eldric the Ice King"))
+		.put("lesser nagua", ImmutableList.of("Amoxliatl"))
 		.build();
 
 	/** A boss's own Slayer task name (for its preparation data), by lower-case monster name. */
@@ -148,6 +151,12 @@ public class TaskMonsterResolver
 		.put("kree'arra", "kree'arra")
 		.put("vorkath", "vorkath")
 		.put("shellbane gryphon", "the shellbane gryphon")
+		.put("skotizo", "skotizo")
+		.put("scurrius", "scurrius")
+		.put("branda the fire queen", "royal titans")
+		.put("eldric the ice king", "royal titans")
+		.put("amoxliatl", "amoxliatl")
+		.put("maggot king", "maggot king")
 		.build();
 
 	private static final int MAX_CANDIDATES = 40;
@@ -188,6 +197,44 @@ public class TaskMonsterResolver
 	public TaskMonsterResolver(GameData data)
 	{
 		this.data = data;
+	}
+
+	/**
+	 * The monsters a boss's preparation data names, in order. An entry is either "Name (version)"
+	 * for one version, or "Name" for every version of that monster.
+	 */
+	public List<Monster> forBoss(List<String> entries)
+	{
+		List<Monster> out = new ArrayList<>();
+		if (entries == null)
+		{
+			return out;
+		}
+		for (String entry : entries)
+		{
+			String lower = entry.trim().toLowerCase(Locale.ROOT);
+			boolean found = false;
+			for (Monster m : data.getMonsters())
+			{
+				if (m.displayName().toLowerCase(Locale.ROOT).equals(lower) && !out.contains(m))
+				{
+					out.add(m);
+					found = true;
+				}
+			}
+			if (found)
+			{
+				continue;
+			}
+			for (Monster m : data.getMonsters())
+			{
+				if (out.size() < MAX_CANDIDATES && m.getName().toLowerCase(Locale.ROOT).equals(lower) && !out.contains(m))
+				{
+					out.add(m);
+				}
+			}
+		}
+		return out;
 	}
 
 	public Monster fromNpcIds(Collection<Integer> npcIds)

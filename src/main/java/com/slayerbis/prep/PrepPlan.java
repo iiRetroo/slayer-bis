@@ -53,6 +53,29 @@ public class PrepPlan
 		int itemId;
 	}
 
+	/**
+	 * A worn item recommended for a boss for reasons the DPS maths can't see.
+	 */
+	@Value
+	public static class Preference
+	{
+		EquipmentSlot slot;
+		List<String> items;
+		/** Kept when the best set without it is no more than this many percent better. */
+		int withinPercent;
+		String reason;
+	}
+
+	/**
+	 * A gear switch carried for another monster or phase of a boss fight.
+	 */
+	@Value
+	public static class Switch
+	{
+		String name;
+		String note;
+	}
+
 	@Value
 	public static class Safespot
 	{

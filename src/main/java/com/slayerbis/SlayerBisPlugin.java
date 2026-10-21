@@ -954,6 +954,7 @@ public class SlayerBisPlugin extends Plugin
 			}
 		}
 		OwnedItems owned = OwnedItems.of(quantitiesByName, bankIdsByName, anyIdByName);
+		Map<Integer, String> names = new HashMap<>(itemNames);
 
 		Map<Integer, Optimizer.Candidate> candidates = new LinkedHashMap<>();
 		// Uncharged, empty, inactive and broken items cannot be used as they are. Their working
@@ -1014,7 +1015,8 @@ public class SlayerBisPlugin extends Plugin
 		Settings settings = new Settings(config.targetOverride(), selectedMonsterId, config.showPreparation(),
 			config.prayerPotions(), config.prayerRestore(), config.combatPotions(), config.fillFood(), config.lootTools().getMaxKills(),
 			slayerPluginService.getRemainingAmount(), config.specWeapon(), config.slayerMaster(), config.burstTargets(),
-			config.preferSlayerHelmet(), selectedFood, config.serpentineHelm());
+			config.preferSlayerHelmet(), selectedFood, config.serpentineHelm(), config.planSwitches(),
+			config.switchTolerance(), config.wikiSwitches());
 
 		cancelRunning();
 		SwingUtilities.invokeLater(() ->
@@ -1029,7 +1031,7 @@ public class SlayerBisPlugin extends Plugin
 		AtomicBoolean cancel = new AtomicBoolean();
 		runningCancel = cancel;
 		running = executor.submit(() -> runOptimisation(res, prep, cancel, candidateList, chargeable, sources, owned,
-			worn, setup, task, location, targetIds, settings));
+			names, worn, setup, task, location, targetIds, settings));
 	}
 
 	private static void addSource(Map<Integer, Integer> items, ItemSource source, Map<Integer, Integer> totals,
@@ -1075,6 +1077,9 @@ public class SlayerBisPlugin extends Plugin
 		int preferSlayerHelmet;
 		String preferredFood;
 		SlayerBisConfig.SerpentineHelm serpentineHelm;
+		boolean planSwitches;
+		int switchTolerance;
+		boolean wikiSwitches;
 	}
 
 	private PlayerSetup buildSetup(String task)
@@ -1126,8 +1131,8 @@ public class SlayerBisPlugin extends Plugin
 	 */
 	private void runOptimisation(TaskMonsterResolver res, PrepPlanner prep, AtomicBoolean cancel,
 		List<Optimizer.Candidate> candidates, List<Optimizer.Candidate> chargeable, Map<Integer, ItemSource> sources,
-		OwnedItems owned, GearItem[] worn, PlayerSetup setup, String task, String location, List<Integer> targetIds,
-		Settings settings)
+		OwnedItems owned, Map<Integer, String> names, GearItem[] worn, PlayerSetup setup, String task, String location,
+		List<Integer> targetIds, Settings settings)
 	{
 		try
 		{
@@ -1222,6 +1227,9 @@ public class SlayerBisPlugin extends Plugin
 			Map<AttackType, Double> serpentineCost = new EnumMap<>(AttackType.class);
 			int minWeight = prep.minWeight(prepTask);
 			boolean poisons = prep.poisons(prepTask);
+			List<PrepPlan.Preference> preferences = prep.preferences(prepTask);
+			Map<AttackType, List<String>> keptNotes = new EnumMap<>(AttackType.class);
+			Map<AttackType, Double> keptCost = new EnumMap<>(AttackType.class);
 			Set<AttackType> tooLight = EnumSet.noneOf(AttackType.class);
 			for (AttackType type : AttackType.values())
 			{
@@ -1238,6 +1246,7 @@ public class SlayerBisPlugin extends Plugin
 						}
 					}
 					int weight = tooLight.contains(type) ? 0 : minWeight;
+					r = applyPreferences(optimizer, candidates, type, r, required, preferences, weight, keptNotes, keptCost);
 					StyleResult serp = poisons ? preferSerpentine(optimizer, candidates, type, r, required,
 						settings.getSerpentineHelm().getPercent(), serpentineCost, weight) : r;
 					results.put(type, serp != r ? serp : preferHelmet(optimizer, candidates, type, r, required, setup,
@@ -1266,8 +1275,11 @@ public class SlayerBisPlugin extends Plugin
 					r.isStoppedEarly(), r.getAlternatives()));
 			}
 
+			// compare charging with the best sets before any recommended items or Slayer helmet
+			Map<AttackType, Double> givenUp = new EnumMap<>(helmetCost);
+			keptCost.forEach((t, c) -> givenUp.merge(t, c, Double::sum));
 			Map<AttackType, OptimizationOutcome.ChargeHint> hints = chargeHints(optimizer, candidates, chargeable,
-				results, required, helmetCost);
+				results, required, givenUp);
 
 			OptimizationOutcome.CurrentGear current = currentGear(setup, monster, worn);
 
@@ -1279,6 +1291,22 @@ public class SlayerBisPlugin extends Plugin
 					best = r;
 				}
 			}
+			List<OptimizationOutcome.Phase> phases = new ArrayList<>();
+			List<PrepPlan.Switch> switches = new ArrayList<>();
+			Set<String> plannedWeapons = new HashSet<>();
+			List<String> fight = prep.wholeFight(prepTask);
+			if (settings.isPlanSwitches() && best != null && !fight.isEmpty())
+			{
+				List<Monster> fightMonsters = res.forBoss(fight);
+				fightMonsters.remove(monster);
+				if (!fightMonsters.isEmpty())
+				{
+					fightMonsters.add(0, monster);
+					planPhases(fightMonsters, monster, best, setup, cancel, candidates, required, preferences, minWeight,
+						settings.getSwitchTolerance(), names, phases, switches, plannedWeapons);
+				}
+			}
+
 			PrepPlan plan = settings.isShowPreparation()
 				? prep.plan(PrepPlanner.Request.builder()
 				.task(prepTask)
@@ -1291,6 +1319,10 @@ public class SlayerBisPlugin extends Plugin
 				.combatPotions(settings.getCombatPotions())
 				.fillFood(settings.isFillFood())
 				.monsterName(monster.getName())
+				.monsterVersion(monster.getVersion())
+				.switches(switches)
+				.wikiSwitches(settings.isWikiSwitches())
+				.plannedWeapons(plannedWeapons)
 				.lootMaxKills(settings.getLootMaxKills())
 				.taskRemaining(settings.getTaskRemaining())
 				.monsterHitpoints(monster.getHitpoints())
@@ -1307,7 +1339,7 @@ public class SlayerBisPlugin extends Plugin
 			OptimizationOutcome done = new OptimizationOutcome(task, monster, targetSource, choices, results, sources,
 				setup, candidates.size(), hints, current, plan, settings.getTaskRemaining(),
 				settings.getBurstTargets(), helmetCost, optimizer.ammoOptions(results.get(AttackType.RANGED), candidates),
-				minWeight, tooLight, serpentineCost, spellOptions);
+				minWeight, tooLight, serpentineCost, spellOptions, keptNotes, phases);
 			outcome = done;
 			updateHighlights();
 			clientThread.invokeLater(() ->
@@ -1338,6 +1370,224 @@ public class SlayerBisPlugin extends Plugin
 				}
 			});
 		}
+	}
+
+	/**
+	 * For a whole-fight plan: the best set against each of the fight's other monsters or phases,
+	 * and the items it adds to the main set, which become switches to carry. Worked out before the
+	 * trip from the monsters' stats only.
+	 *
+	 * @param switchTolerance how much DPS (percent) a phase may give up to carry fewer switches
+	 */
+	static void planPhases(List<Monster> choices, Monster main, StyleResult mainBest, PlayerSetup setup,
+		AtomicBoolean cancel, List<Optimizer.Candidate> candidates, Map<EquipmentSlot, Set<String>> required,
+		List<PrepPlan.Preference> preferences, int minWeight, int switchTolerance, Map<Integer, String> names,
+		List<OptimizationOutcome.Phase> phases, List<PrepPlan.Switch> switches, Set<String> plannedWeapons)
+	{
+		phases.add(new OptimizationOutcome.Phase(main, mainBest.getType(), mainBest.getResult().getDps(), List.of(),
+			0, 0));
+		Set<Integer> switchIds = new HashSet<>();
+		for (Monster m : choices)
+		{
+			if (m == main)
+			{
+				continue;
+			}
+			Optimizer optimizer = new Optimizer(setup, m, cancel);
+			StyleResult best = null;
+			for (AttackType type : AttackType.values())
+			{
+				if (type == AttackType.BURST)
+				{
+					continue;
+				}
+				StyleResult r = optimizer.optimise(candidates, type, required, minWeight);
+				if (!r.isValid())
+				{
+					r = optimizer.optimise(candidates, type, required);
+				}
+				r = applyPreferences(optimizer, candidates, type, r, required, preferences, 0,
+					new EnumMap<>(AttackType.class), new EnumMap<>(AttackType.class));
+				if (r.isValid() && (best == null || r.getResult().getDps() > best.getResult().getDps()))
+				{
+					best = r;
+				}
+			}
+			if (best == null)
+			{
+				continue;
+			}
+			int fullSwitches = switchesFrom(best, mainBest).size();
+			double fullDps = best.getResult().getDps();
+			// carry fewer switches where keeping the main set's items costs little DPS
+			best = fewerSwitches(optimizer, candidates, best, mainBest, required, minWeight, switchTolerance);
+			List<Optimizer.Candidate> extra = switchesFrom(best, mainBest);
+			for (Optimizer.Candidate c : extra)
+			{
+				String name = names.get(c.getOwnedItemId());
+				if (switchIds.add(c.getOwnedItemId()) && name != null)
+				{
+					switches.add(new PrepPlan.Switch(name, "switch for " + m.displayName()));
+				}
+				if (c.getItem().getSlot() == EquipmentSlot.WEAPON)
+				{
+					plannedWeapons.add(c.getItem().getName());
+				}
+			}
+			phases.add(new OptimizationOutcome.Phase(m, best.getType(), best.getResult().getDps(), extra,
+				fullSwitches - extra.size(), fullDps - best.getResult().getDps()));
+		}
+	}
+
+	/**
+	 * The items of a set that differ from the main set, which would have to be carried.
+	 */
+	private static List<Optimizer.Candidate> switchesFrom(StyleResult set, StyleResult mainBest)
+	{
+		List<Optimizer.Candidate> extra = new ArrayList<>();
+		for (EquipmentSlot slot : EquipmentSlot.values())
+		{
+			Optimizer.Candidate c = set.getGear()[slot.ordinal()];
+			Optimizer.Candidate mainItem = mainBest.getGear()[slot.ordinal()];
+			if (c != null && (mainItem == null || mainItem.getItem().getId() != c.getItem().getId()))
+			{
+				extra.add(c);
+			}
+		}
+		return extra;
+	}
+
+	/**
+	 * Trims a monster's best set down to fewer switches, giving up no more than {@code percent} of
+	 * its DPS. First tries the main set as it is (no switches at all), then keeps the main set's
+	 * item slot by slot, cheapest first, while the set stays within the allowance.
+	 */
+	private static StyleResult fewerSwitches(Optimizer optimizer, List<Optimizer.Candidate> candidates,
+		StyleResult best, StyleResult mainBest, Map<EquipmentSlot, Set<String>> required, int minWeight, int percent)
+	{
+		if (percent <= 0)
+		{
+			return best;
+		}
+		double floor = best.getResult().getDps() * 100 / (100 + percent);
+
+		Map<EquipmentSlot, Set<String>> all = keepSlots(required, mainBest, EnumSet.allOf(EquipmentSlot.class));
+		StyleResult asIs = optimizer.optimise(candidates, mainBest.getType(), all, minWeight);
+		if (asIs.isValid() && asIs.getResult().getDps() >= floor)
+		{
+			return asIs;
+		}
+
+		// slots whose switch could be dropped, cheapest first
+		List<EquipmentSlot> slots = new ArrayList<>();
+		Map<EquipmentSlot, Double> dpsKept = new EnumMap<>(EquipmentSlot.class);
+		for (Optimizer.Candidate c : switchesFrom(best, mainBest))
+		{
+			EquipmentSlot slot = c.getItem().getSlot();
+			if (mainBest.getGear()[slot.ordinal()] == null || required.containsKey(slot))
+			{
+				continue;
+			}
+			StyleResult r = optimizer.optimise(candidates, best.getType(), keepSlots(required, mainBest, EnumSet.of(slot)),
+				minWeight);
+			if (r.isValid() && r.getResult().getDps() >= floor)
+			{
+				slots.add(slot);
+				dpsKept.put(slot, r.getResult().getDps());
+			}
+		}
+		slots.sort((a, b) -> Double.compare(dpsKept.get(b), dpsKept.get(a)));
+
+		StyleResult current = best;
+		EnumSet<EquipmentSlot> kept = EnumSet.noneOf(EquipmentSlot.class);
+		for (EquipmentSlot slot : slots)
+		{
+			EnumSet<EquipmentSlot> trying = EnumSet.copyOf(kept);
+			trying.add(slot);
+			StyleResult r = optimizer.optimise(candidates, best.getType(), keepSlots(required, mainBest, trying), minWeight);
+			if (r.isValid() && r.getResult().getDps() >= floor
+				&& switchesFrom(r, mainBest).size() < switchesFrom(current, mainBest).size())
+			{
+				kept = trying;
+				current = r;
+			}
+		}
+		return current;
+	}
+
+	/**
+	 * The boss's required gear plus the main set's item in each of these slots.
+	 */
+	private static Map<EquipmentSlot, Set<String>> keepSlots(Map<EquipmentSlot, Set<String>> required,
+		StyleResult mainBest, Set<EquipmentSlot> slots)
+	{
+		Map<EquipmentSlot, Set<String>> keep = new EnumMap<>(EquipmentSlot.class);
+		keep.putAll(required);
+		for (EquipmentSlot slot : slots)
+		{
+			Optimizer.Candidate c = mainBest.getGear()[slot.ordinal()];
+			if (c != null && !keep.containsKey(slot))
+			{
+				keep.put(slot, Set.of(c.getItem().getName()));
+			}
+		}
+		return keep;
+	}
+
+	/**
+	 * Applies the boss's recommended items in order: for each, searches again with one of its items
+	 * kept and uses that set when the best set without it is no more than its percentage better.
+	 * Records what was kept and the DPS given up.
+	 */
+	static StyleResult applyPreferences(Optimizer optimizer, List<Optimizer.Candidate> candidates,
+		AttackType type, StyleResult best, Map<EquipmentSlot, Set<String>> required, List<PrepPlan.Preference> preferences,
+		int minWeight, Map<AttackType, List<String>> notes, Map<AttackType, Double> cost)
+	{
+		StyleResult result = best;
+		Map<EquipmentSlot, Set<String>> kept = new EnumMap<>(EquipmentSlot.class);
+		kept.putAll(required);
+		for (PrepPlan.Preference p : preferences)
+		{
+			if (!result.isValid() || kept.containsKey(p.getSlot()))
+			{
+				continue;
+			}
+			Optimizer.Candidate current = result.getGear()[p.getSlot().ordinal()];
+			if (current != null && p.getItems().contains(current.getItem().getName()))
+			{
+				kept.put(p.getSlot(), Set.of(current.getItem().getName()));
+				continue;
+			}
+			Set<String> owned = new HashSet<>();
+			for (Optimizer.Candidate c : candidates)
+			{
+				if (p.getItems().contains(c.getItem().getName()))
+				{
+					owned.add(c.getItem().getName());
+				}
+			}
+			if (owned.isEmpty())
+			{
+				continue;
+			}
+			Map<EquipmentSlot, Set<String>> with = new EnumMap<>(EquipmentSlot.class);
+			with.putAll(kept);
+			with.put(p.getSlot(), owned);
+			StyleResult r = optimizer.optimise(candidates, type, with, minWeight);
+			double dps = result.getResult().getDps();
+			if (!r.isValid() || r.getResult().getDps() * (100 + p.getWithinPercent()) < dps * 100)
+			{
+				continue;
+			}
+			double lost = dps - r.getResult().getDps();
+			cost.merge(type, lost, Double::sum);
+			String item = r.getGear()[p.getSlot().ordinal()].getItem().getName();
+			notes.computeIfAbsent(type, t -> new ArrayList<>()).add(item + " kept on (" + p.getReason() + ")"
+				+ (lost > 0.005 ? ": " + String.format("%.2f", lost) + " DPS less." : ": no DPS lost."));
+			kept.put(p.getSlot(), owned);
+			result = r;
+		}
+		return result;
 	}
 
 	private static String bestWeaponName(StyleResult best)

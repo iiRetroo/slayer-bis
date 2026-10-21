@@ -294,6 +294,10 @@ class SlayerBisPanel extends PluginPanel
 					? "Serpentine helm worn against poison: " + DPS_FORMAT.format(serpentine) + " DPS less than without it."
 					: "Serpentine helm worn against poison: no DPS lost.", MUTED, true)));
 			}
+			for (String kept : outcome.getKeptNotes().getOrDefault(shown.getType(), List.of()))
+			{
+				content.add(left(text(kept, MUTED, true)));
+			}
 			Double helmet = outcome.getHelmetCost().get(shown.getType());
 			if (helmet != null)
 			{
@@ -308,6 +312,11 @@ class SlayerBisPanel extends PluginPanel
 			}
 		}
 
+		if (!outcome.getPhases().isEmpty())
+		{
+			content.add(sectionTitle("Fight plan"));
+			content.add(fightPlan());
+		}
 		renderInventory();
 		if (shown != null && shown.isValid() && !shown.getAlternatives().isEmpty())
 		{
@@ -555,6 +564,42 @@ class SlayerBisPanel extends PluginPanel
 		JComponent row = statRow("Task", "~" + time + " (" + remaining + " left)");
 		row.setToolTipText("Rough: kills left x monster HP / DPS. Walking, respawns and overkill are not counted.");
 		return row;
+	}
+
+	/**
+	 * A boss's whole-fight plan: each monster or phase with its best style, DPS and the switches it
+	 * needs on top of the main set. Planned before the trip from the monsters' stats only.
+	 */
+	private JComponent fightPlan()
+	{
+		JPanel list = column();
+		for (OptimizationOutcome.Phase p : outcome.getPhases())
+		{
+			boolean main = p.getMonster() == outcome.getMonster();
+			list.add(left(text(p.getMonster().displayName() + ": " + p.getType().getDisplayName() + ", "
+				+ DPS_FORMAT.format(p.getDps()) + " DPS" + (main ? " (main set)" : p.getSwitches().isEmpty() ? " (no switches)" : ""),
+				main ? Color.WHITE : MUTED, true)));
+			if (!p.getSwitches().isEmpty())
+			{
+				JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 2));
+				row.setOpaque(false);
+				for (Optimizer.Candidate c : p.getSwitches())
+				{
+					boolean onYou = isOnPerson(c);
+					ItemSource source = onYou ? null : outcome.getSources().get(c.getOwnedItemId());
+					row.add(tile(c.getOwnedItemId(), c.getItem().getName(), "Switch: " + c.getItem().getName(),
+						onYou ? READY_BORDER : source == ItemSource.BANK ? BANK_BORDER : TILE_BORDER));
+				}
+				list.add(left(row));
+			}
+			if (p.getSwitchesSaved() > 0)
+			{
+				list.add(left(text(p.getSwitchesSaved() + " fewer switch" + (p.getSwitchesSaved() == 1 ? "" : "es")
+					+ " for " + DPS_FORMAT.format(p.getDpsGivenUp()) + " DPS less than its best set.", MUTED, true)));
+			}
+		}
+		list.add(left(text("The switches are included in the inventory below.", MUTED, true)));
+		return list;
 	}
 
 	private JComponent statRow(String name, String value)

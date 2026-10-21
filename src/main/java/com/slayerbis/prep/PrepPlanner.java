@@ -136,6 +136,38 @@ public final class PrepPlanner
 		return info != null && info.venom;
 	}
 
+	/**
+	 * Worn items the wiki recommends for a boss, with how much DPS each may cost.
+	 */
+	public List<PrepPlan.Preference> preferences(String task)
+	{
+		PrepData.TaskInfo info = data.task(task);
+		if (info == null || info.prefer == null)
+		{
+			return Collections.emptyList();
+		}
+		List<PrepPlan.Preference> out = new ArrayList<>();
+		for (PrepData.Preference p : info.prefer)
+		{
+			EquipmentSlot slot = EquipmentSlot.fromKey(p.slot);
+			if (slot != null && p.items != null && !p.items.isEmpty())
+			{
+				out.add(new PrepPlan.Preference(slot, p.items, p.withinPercent, p.reason));
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * A boss's monsters or phases when they're all fought each trip, so the plan can carry switches
+	 * for them; empty otherwise.
+	 */
+	public List<String> wholeFight(String task)
+	{
+		PrepData.TaskInfo info = data.task(task);
+		return info == null || !info.wholeFight || info.monsters == null ? Collections.emptyList() : info.monsters;
+	}
+
 	public boolean stacks(String task)
 	{
 		PrepData.TaskInfo info = data.task(task);
@@ -163,6 +195,8 @@ public final class PrepPlanner
 		boolean fillFood;
 		/** The monster being fought, for its drops. */
 		String monsterName;
+		/** Its version, such as "Awakened", for items only that version needs. */
+		String monsterVersion;
 		/** Suggest tools for loot that drops at least once per this many kills; 0 is off. */
 		int lootMaxKills;
 		/** Kills left on the task, for items used up per kill; 0 if unknown. */
@@ -180,6 +214,18 @@ public final class PrepPlanner
 		String preferredFood;
 		/** The suggested set wears a charged Serpentine helm, so no anti-venom is needed. */
 		boolean venomImmune;
+		/**
+		 * Gear switches for a boss's other monsters or phases, carried in the inventory. Each is an
+		 * owned item name and what it's for.
+		 */
+		@Builder.Default
+		List<PrepPlan.Switch> switches = Collections.emptyList();
+		/** Also carry the swaps the wiki recommends for part of a boss fight, when owned. */
+		@Builder.Default
+		boolean wikiSwitches = true;
+		/** Weapons in the planned switches, so they are not suggested again as a spec weapon. */
+		@Builder.Default
+		Set<String> plannedWeapons = Collections.emptySet();
 	}
 
 	/**
@@ -242,8 +288,17 @@ public final class PrepPlanner
 				locationTips.add("If you go to " + key + ": " + needs.summary + ".");
 			}
 		}
+		String version = request.getMonsterVersion() == null ? "" : request.getMonsterVersion().toLowerCase(Locale.ROOT);
+		carried.removeIf(item -> item.onlyFor != null && !version.contains(item.onlyFor.toLowerCase(Locale.ROOT)));
+		List<PrepData.InventoryItem> wikiSwitches = new ArrayList<>();
 		for (PrepData.InventoryItem item : carried)
 		{
+			if (item.switchItem)
+			{
+				// after the gear switches, below
+				wikiSwitches.add(item);
+				continue;
+			}
 			String name = item.exact ? firstOwnedExact(item.names, owned) : firstOwned(item.names, owned);
 			// already worn in the planned set: nothing to carry
 			boolean worn = item.names.stream().anyMatch(request.getWornNames()::contains);
@@ -273,6 +328,28 @@ public final class PrepPlanner
 			{
 				notes.add("You need " + need + " " + name + " for " + need + " kills but have " + have + ".");
 			}
+		}
+
+		for (PrepPlan.Switch sw : request.getSwitches())
+		{
+			if (!listed(lines, sw.getName()))
+			{
+				slots += addLine(lines, ids, owned, sw.getName(), 1, sw.getNote(), false);
+			}
+		}
+
+		// swaps the wiki recommends for part of a boss fight: only ones you own, and not already planned
+		for (PrepData.InventoryItem item : request.isWikiSwitches() ? wikiSwitches : List.<PrepData.InventoryItem>of())
+		{
+			String name = item.exact ? firstOwnedExact(item.names, owned) : firstOwned(item.names, owned);
+			boolean worn = item.names.stream().anyMatch(request.getWornNames()::contains);
+			if (name == null || worn || item.names.stream().anyMatch(n -> listed(lines, n)))
+			{
+				continue;
+			}
+			slots += item.stackable
+				? addStack(lines, ids, owned, name, "wiki switch: " + item.note)
+				: addLine(lines, ids, owned, name, 1, "wiki switch: " + item.note, false);
 		}
 
 		if (info != null && "dragon".equals(info.dragonfire))
@@ -346,7 +423,8 @@ public final class PrepPlanner
 		{
 			for (PrepData.SpecWeapon spec : s.specWeapons)
 			{
-				if (owned.owns(spec.name) && !spec.name.equals(request.getBestWeapon()))
+				if (owned.owns(spec.name) && !spec.name.equals(request.getBestWeapon())
+					&& !request.getPlannedWeapons().contains(spec.name) && !listed(lines, spec.name))
 				{
 					slots += addLine(lines, ids, owned, spec.name, 1, "special attack: " + spec.note, false);
 					break;

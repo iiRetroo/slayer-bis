@@ -277,6 +277,21 @@ public class OptimizerTest
 	}
 
 	@Test
+	public void newTaskBossesAreOffered()
+	{
+		// the Royal Titans count for giant tasks, each for its own; Amoxliatl for lesser nagua
+		assertTrue(resolver.candidates("Fire giants").stream().anyMatch(m -> m.getName().equals("Branda the Fire Queen")));
+		assertTrue(resolver.candidates("Ice giants").stream().anyMatch(m -> m.getName().equals("Eldric the Ice King")));
+		assertTrue(resolver.candidates("Lesser nagua").stream().anyMatch(m -> m.getName().equals("Amoxliatl")));
+		assertEquals("royal titans", TaskMonsterResolver.bossTask("Branda the Fire Queen"));
+		assertEquals("royal titans", TaskMonsterResolver.bossTask("Eldric the Ice King"));
+		assertEquals("Fire giant", resolver.fromName("Fire giants").getName());
+		// a boss's monsters, by version or every version
+		assertEquals(1, resolver.forBoss(List.of("Vorkath (Post-quest)")).size());
+		assertEquals(3, resolver.forBoss(List.of("Zulrah")).size());
+	}
+
+	@Test
 	public void bossesAreOfferedButNeverChosenAutomatically()
 	{
 		assertEquals("Hellhound", resolver.fromName("Hellhounds").getName());

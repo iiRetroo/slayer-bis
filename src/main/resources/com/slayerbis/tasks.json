@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'venom': true marks tasks whose monsters poison or envenom you. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles. 'locationNeeds' are what a location itself needs, whatever the task: worn items ('required'), carried items ('inventory') and 'tips'. They apply when the Slayer plugin reports that location, or the task lists only that one; otherwise their 'summary' becomes a tip. Task 'tips' are shown as they are. Inventory entries may set 'killsEach' (one item covers this many kills), 'maxCount', 'optional' (not flagged when missing) and 'exact' (match names exactly). 'minWeight' is the least the worn gear must weigh, in kg (gryphons knock lighter players back); the gear search only suggests sets at least that heavy.",
+  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'venom': true marks tasks whose monsters poison or envenom you. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles. 'locationNeeds' are what a location itself needs, whatever the task: worn items ('required'), carried items ('inventory') and 'tips'. They apply when the Slayer plugin reports that location, or the task lists only that one; otherwise their 'summary' becomes a tip. Task 'tips' are shown as they are. Inventory entries may set 'killsEach' (one item covers this many kills), 'maxCount', 'optional' (not flagged when missing) and 'exact' (match names exactly). 'minWeight' is the least the worn gear must weigh, in kg (gryphons knock lighter players back); the gear search only suggests sets at least that heavy. Boss entries may also have 'monsters' (the boss's monsters or phases, 'Name (version)' or 'Name'), 'wholeFight': true (every listed monster is fought each trip, so the plan carries switches for the others), 'prefer' (worn items the wiki recommends: {'slot', 'items', 'withinPercent', 'reason'}, kept when the best set without them is no more than withinPercent better), inventory entries with 'switch': true (a swap the wiki recommends for part of the fight, carried when owned and the Wiki switches setting is on) and 'onlyFor' (only for that version of the boss, e.g. 'Awakened'). Reasons may mention a mechanic or prayer effect, as the wiki does, but never say what to do in the fight: no prayer instructions, timing or positioning.",
   "tasks": {
     "aberrant spectres": {
       "required": {
@@ -72,6 +72,43 @@
       ]
     },
     "araxxor": {
+      "monsters": [
+        "Araxxor"
+      ],
+      "prefer": [
+        {
+          "slot": "feet",
+          "items": [
+            "Aranea boots"
+          ],
+          "withinPercent": 15,
+          "reason": "the wiki recommends them: they block some of Araxxor's ranged attacks"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Noxious halberd"
+          ],
+          "note": "kills the araxytes safely, from a distance",
+          "switch": true
+        },
+        {
+          "names": [
+            "Heavy ballista"
+          ],
+          "note": "with dragon javelins, kills mirrorback araxytes in one shot",
+          "switch": true
+        },
+        {
+          "names": [
+            "Dragon javelin"
+          ],
+          "note": "for the heavy ballista",
+          "switch": true,
+          "stackable": true
+        }
+      ],
       "venom": true,
       "comboEat": true,
       "locations": [
@@ -122,16 +159,43 @@
       ]
     },
     "barrows brothers": {
-      "locations": [
-        "Barrows"
+      "monsters": [
+        "Dharok the Wretched",
+        "Guthan the Infested",
+        "Karil the Tainted",
+        "Torag the Corrupted",
+        "Verac the Defiled",
+        "Ahrim the Blighted"
       ],
+      "wholeFight": true,
       "inventory": [
         {
           "names": [
             "Spade"
           ],
           "note": "to dig into the crypts"
+        },
+        {
+          "names": [
+            "Strange old lockpick"
+          ],
+          "note": "opens locked doors in the tunnels (uses a charge)",
+          "optional": true
+        },
+        {
+          "names": [
+            "Ghommal's hilt 6",
+            "Ghommal's hilt 5",
+            "Ghommal's hilt 4",
+            "Ghommal's hilt 3",
+            "Ghommal's hilt 2"
+          ],
+          "note": "stops the prayer drain in the Barrows tunnels once equipped (the wiki recommends it)",
+          "optional": true
         }
+      ],
+      "locations": [
+        "Barrows"
       ]
     },
     "basilisks": {
@@ -259,11 +323,25 @@
       ]
     },
     "callisto": {
-      "locations": [
-        "Callisto's den (Wilderness)"
+      "monsters": [
+        "Callisto",
+        "Artio"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        }
       ],
       "tips": [
-        "This boss is in the Wilderness: only bring what you're willing to lose."
+        "This boss is in the Wilderness: only bring what you're willing to lose.",
+        "Callisto needs the medium Wilderness Diary."
+      ],
+      "locations": [
+        "Callisto's den (Wilderness)"
       ]
     },
     "catablepon": {
@@ -318,11 +396,30 @@
       "venom": true
     },
     "cerberus": {
-      "locations": [
-        "Taverley Dungeon"
+      "monsters": [
+        "Cerberus"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Spectral spirit shield"
+          ],
+          "note": "halves the prayer drain from the Summoned Souls",
+          "switch": true
+        },
+        {
+          "names": [
+            "Bracelet of slaughter"
+          ],
+          "note": "can extend your Slayer task",
+          "switch": true
+        }
       ],
       "tips": [
         "Cerberus' lair is past the hellhounds; Agility shortcuts make the walk much shorter."
+      ],
+      "locations": [
+        "Cerberus' lair"
       ]
     },
     "chaos druids": {
@@ -349,12 +446,16 @@
       ]
     },
     "commander zilyana": {
-      "locations": [
-        "God Wars Dungeon"
+      "monsters": [
+        "Commander Zilyana"
       ],
       "tips": [
         "You need a rope the first time you enter the God Wars Dungeon.",
-        "Saradomin's Encampment needs 70 Agility and two more ropes the first time."
+        "Saradomin's Encampment needs 70 Agility and two more ropes the first time.",
+        "Wear an item of each god whose followers you walk past; they won't attack you."
+      ],
+      "locations": [
+        "God Wars Dungeon"
       ]
     },
     "cows": {
@@ -373,11 +474,23 @@
       ]
     },
     "crazy archaeologists": {
-      "locations": [
-        "Bandit Camp (Wilderness)"
+      "monsters": [
+        "Crazy archaeologist"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        }
       ],
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose."
+      ],
+      "locations": [
+        "Bandit Camp (Wilderness)"
       ]
     },
     "crocodiles": {
@@ -404,11 +517,38 @@
       ]
     },
     "dagannoth kings": {
+      "monsters": [
+        "Dagannoth Rex",
+        "Dagannoth Prime",
+        "Dagannoth Supreme"
+      ],
+      "wholeFight": true,
+      "inventory": [
+        {
+          "names": [
+            "Rune thrownaxe"
+          ],
+          "note": "opens the first door of the Waterbirth dungeon (not needed with the 85 Agility shortcut)",
+          "optional": true
+        },
+        {
+          "names": [
+            "Pet rock"
+          ],
+          "note": "holds a door plate in the Waterbirth dungeon (not needed with the 85 Agility shortcut)",
+          "optional": true
+        },
+        {
+          "names": [
+            "Falador shield 4"
+          ],
+          "note": "its daily prayer restore helps your prayer last (a wiki tip)",
+          "optional": true
+        }
+      ],
+      "venom": true,
       "locations": [
         "Waterbirth Island"
-      ],
-      "tips": [
-        "A rune thrownaxe opens the first door of the Waterbirth dungeon on your own."
       ]
     },
     "dark beasts": {
@@ -423,8 +563,8 @@
       ]
     },
     "deranged archaeologist": {
-      "locations": [
-        "Fossil Island"
+      "monsters": [
+        "Deranged archaeologist"
       ],
       "inventory": [
         {
@@ -442,10 +582,28 @@
             "Bronze axe"
           ],
           "note": "to chop the swamp vine on Fossil Island"
+        },
+        {
+          "names": [
+            "Antidote++",
+            "Antidote+",
+            "Superantipoison",
+            "Antipoison",
+            "Anti-venom+",
+            "Anti-venom"
+          ],
+          "note": "one dose for the spined mushroom on the path through the swamp"
+        },
+        {
+          "names": [
+            "Rake"
+          ],
+          "note": "clears the smaller vines (not needed with the Mycelium mushtrees)",
+          "optional": true
         }
       ],
-      "tips": [
-        "A rake clears the smaller vines if you walk through the swamp."
+      "locations": [
+        "Fossil Island"
       ]
     },
     "dogs": {
@@ -467,6 +625,71 @@
       ]
     },
     "duke sucellus": {
+      "monsters": [
+        "Duke Sucellus (Post-quest, Awake)",
+        "Duke Sucellus (Awakened, Awake)"
+      ],
+      "prefer": [
+        {
+          "slot": "head",
+          "items": [
+            "Slayer helmet (i)",
+            "Slayer helmet",
+            "Gas mask"
+          ],
+          "withinPercent": 15,
+          "reason": "the wiki recommends one: it reduces the gas damage"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Awakener's orb"
+          ],
+          "note": "needed for the awakened fight",
+          "onlyFor": "Awakened"
+        },
+        {
+          "names": [
+            "Pestle and mortar"
+          ],
+          "note": "to make the poison in the asylum"
+        },
+        {
+          "names": [
+            "Crystal pickaxe",
+            "Dragon pickaxe",
+            "Infernal pickaxe",
+            "3rd age pickaxe",
+            "Rune pickaxe",
+            "Adamant pickaxe",
+            "Mithril pickaxe",
+            "Black pickaxe",
+            "Steel pickaxe",
+            "Iron pickaxe",
+            "Bronze pickaxe"
+          ],
+          "note": "speeds up mining the salt (there's an iron pickaxe on the asylum wall)",
+          "optional": true
+        },
+        {
+          "names": [
+            "Bandos godsword"
+          ],
+          "note": "lowers Duke Sucellus' Defence (the wiki's swap without Oathplate)",
+          "switch": true
+        },
+        {
+          "names": [
+            "Lightbearer"
+          ],
+          "note": "a ring swap for more special attacks",
+          "switch": true
+        }
+      ],
+      "tips": [
+        "Needs Desert Treasure II - The Fallen Empire."
+      ],
       "locations": [
         "Ghorrock Dungeon"
       ]
@@ -591,11 +814,8 @@
       ]
     },
     "general graardor": {
-      "locations": [
-        "God Wars Dungeon"
-      ],
-      "tips": [
-        "You need a rope the first time you enter the God Wars Dungeon."
+      "monsters": [
+        "General Graardor"
       ],
       "inventory": [
         {
@@ -607,6 +827,13 @@
           ],
           "note": "to bang the door to Bandos' Stronghold (70 Strength)"
         }
+      ],
+      "tips": [
+        "You need a rope the first time you enter the God Wars Dungeon.",
+        "Wear an item of each god whose followers you walk past; they won't attack you."
+      ],
+      "locations": [
+        "God Wars Dungeon"
       ]
     },
     "ghosts": {
@@ -777,14 +1004,44 @@
       ]
     },
     "k'ril tsutsaroth": {
-      "locations": [
-        "God Wars Dungeon"
+      "monsters": [
+        "K'ril Tsutsaroth"
       ],
+      "prefer": [
+        {
+          "slot": "shield",
+          "items": [
+            "Spectral spirit shield"
+          ],
+          "withinPercent": 15,
+          "reason": "the wiki recommends it: it halves the prayer drain of K'ril's special attack"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Scorching bow"
+          ],
+          "note": "its special attack binds K'ril in place",
+          "switch": true
+        },
+        {
+          "names": [
+            "Lightbearer"
+          ],
+          "note": "with the Scorching bow, for more special attacks",
+          "switch": true
+        }
+      ],
+      "venom": true,
       "tips": [
         "You need a rope the first time you enter the God Wars Dungeon.",
-        "Zamorak's Fortress needs 70 Hitpoints to enter."
+        "Zamorak's Fortress needs 70 Hitpoints to enter.",
+        "Wear an item of each god whose followers you walk past; they won't attack you."
       ],
-      "venom": true
+      "locations": [
+        "God Wars Dungeon"
+      ]
     },
     "kalphites": {
       "locations": [
@@ -809,12 +1066,8 @@
       ]
     },
     "kree'arra": {
-      "locations": [
-        "God Wars Dungeon"
-      ],
-      "tips": [
-        "You need a rope the first time you enter the God Wars Dungeon.",
-        "You need a crossbow to fire the mithril grapple."
+      "monsters": [
+        "Kree'arra"
       ],
       "inventory": [
         {
@@ -822,7 +1075,41 @@
             "Mith grapple"
           ],
           "note": "with any crossbow, to cross to Armadyl's Eyrie"
+        },
+        {
+          "names": [
+            "Bronze crossbow",
+            "Blurite crossbow",
+            "Iron crossbow",
+            "Steel crossbow",
+            "Mithril crossbow",
+            "Adamant crossbow",
+            "Rune crossbow",
+            "Dragon crossbow",
+            "Hunters' crossbow",
+            "Dorgeshuun crossbow",
+            "Phoenix crossbow",
+            "Armadyl crossbow",
+            "Dragon hunter crossbow",
+            "Zaryte crossbow"
+          ],
+          "note": "any crossbow, to fire the mith grapple"
+        },
+        {
+          "names": [
+            "Toxic blowpipe"
+          ],
+          "note": "for the minions",
+          "switch": true,
+          "exact": true
         }
+      ],
+      "tips": [
+        "You need a rope the first time you enter the God Wars Dungeon.",
+        "Wear an item of each god whose followers you walk past; they won't attack you."
+      ],
+      "locations": [
+        "God Wars Dungeon"
       ]
     },
     "kurask": {
@@ -1092,11 +1379,24 @@
       ]
     },
     "sarachnis": {
-      "locations": [
-        "Forthos Dungeon"
+      "monsters": [
+        "Sarachnis"
+      ],
+      "prefer": [
+        {
+          "slot": "feet",
+          "items": [
+            "Aranea boots"
+          ],
+          "withinPercent": 15,
+          "reason": "the wiki recommends them"
+        }
       ],
       "tips": [
         "Bring a knife or a slash weapon for the webs, unless you wear Aranea boots."
+      ],
+      "locations": [
+        "Forthos Dungeon"
       ]
     },
     "scabarites": {
@@ -1106,14 +1406,26 @@
       ]
     },
     "scorpia": {
-      "locations": [
-        "Scorpion Pit (Wilderness)"
+      "monsters": [
+        "Scorpia"
       ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        }
+      ],
+      "venom": true,
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose.",
         "Bring a knife or a slash weapon for the web if you use the lever."
       ],
-      "venom": true
+      "locations": [
+        "Scorpion Pit (Wilderness)"
+      ]
     },
     "scorpions": {
       "locations": [
@@ -1216,12 +1528,40 @@
       ]
     },
     "the abyssal sire": {
+      "monsters": [
+        "Abyssal Sire"
+      ],
+      "wholeFight": true,
+      "inventory": [
+        {
+          "names": [
+            "Scorching bow"
+          ],
+          "note": "kills the respiratory systems without a full gear swap",
+          "switch": true
+        },
+        {
+          "names": [
+            "Bronze arrow"
+          ],
+          "note": "cheap arrows for the Scorching bow",
+          "switch": true,
+          "stackable": true
+        }
+      ],
+      "venom": true,
       "locations": [
         "Abyssal Nexus"
-      ],
-      "venom": true
+      ]
     },
     "the alchemical hydra": {
+      "monsters": [
+        "Alchemical Hydra (Serpentine)",
+        "Alchemical Hydra (Electric)",
+        "Alchemical Hydra (Fire)",
+        "Alchemical Hydra (Extinguished)"
+      ],
+      "wholeFight": true,
       "required": {
         "feet": [
           "Boots of stone",
@@ -1229,36 +1569,125 @@
           "Granite boots"
         ]
       },
+      "inventory": [
+        {
+          "names": [
+            "Bonecrusher necklace",
+            "Dragonbone necklace"
+          ],
+          "note": "restores prayer from the bones, for longer trips",
+          "switch": true
+        },
+        {
+          "names": [
+            "Noxious halberd"
+          ],
+          "note": "its special attack cures poison (half your special attack energy)",
+          "switch": true
+        },
+        {
+          "names": [
+            "Bracelet of slaughter"
+          ],
+          "note": "can extend your Slayer task",
+          "switch": true
+        }
+      ],
+      "venom": true,
+      "comboEat": true,
       "locations": [
         "Karuulm Slayer Dungeon"
-      ],
-      "comboEat": true,
-      "venom": true
+      ]
     },
     "the cave kraken boss": {
+      "monsters": [
+        "Kraken (Kraken)"
+      ],
+      "prefer": [
+        {
+          "slot": "weapon",
+          "items": [
+            "Sanguinesti staff"
+          ],
+          "withinPercent": 10,
+          "reason": "the wiki recommends it: its healing means less food"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Fishing explosive"
+          ],
+          "note": "used on the large whirlpool, it starts the fight at once",
+          "stackable": true,
+          "optional": true
+        },
+        {
+          "names": [
+            "Bracelet of slaughter"
+          ],
+          "note": "can extend your Slayer task",
+          "switch": true
+        }
+      ],
+      "tips": [
+        "A private instance costs 25,000 coins."
+      ],
       "locations": [
         "Kraken Cove"
       ]
     },
     "the chaos elemental": {
-      "locations": [
-        "Rogues' Castle"
+      "monsters": [
+        "Chaos Elemental"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        }
       ],
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose."
+      ],
+      "locations": [
+        "Rogues' Castle"
       ]
     },
     "the chaos fanatic": {
-      "locations": [
-        "Chaos Fanatic (Wilderness)"
+      "monsters": [
+        "Chaos Fanatic"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        },
+        {
+          "names": [
+            "Ghorrock teleport"
+          ],
+          "stackable": true,
+          "optional": true,
+          "note": "bring at least two: a free inventory slot lets the Fanatic unequip your gear"
+        }
       ],
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose."
+      ],
+      "locations": [
+        "Chaos Fanatic (Wilderness)"
       ]
     },
     "the giant mole": {
-      "locations": [
-        "Falador Park"
+      "monsters": [
+        "Giant Mole"
       ],
       "inventory": [
         {
@@ -1280,16 +1709,29 @@
             "Lit black candle"
           ],
           "note": "a light source for the tunnels, unless you've lit the Fire of Eternal Light"
+        },
+        {
+          "names": [
+            "Falador shield 4",
+            "Falador shield 3"
+          ],
+          "note": "locates the mole after it burrows (the wiki recommends it)",
+          "optional": true
         }
       ],
       "tips": [
         "Bring a tinderbox: candles, torches and oil lamps can go out."
+      ],
+      "locations": [
+        "Falador Park"
       ]
     },
     "the grotesque guardians": {
-      "locations": [
-        "Slayer Tower"
+      "monsters": [
+        "Dusk",
+        "Dawn"
       ],
+      "wholeFight": true,
       "inventory": [
         {
           "names": [
@@ -1298,69 +1740,240 @@
             "Granite hammer"
           ],
           "note": "to finish them off"
+        },
+        {
+          "names": [
+            "Nose peg",
+            "Slayer helmet (i)",
+            "Slayer helmet"
+          ],
+          "note": "for the aberrant spectres on the way up the tower",
+          "optional": true
+        },
+        {
+          "names": [
+            "Noxious halberd"
+          ],
+          "note": "melee on Dawn (the wiki says other halberds are too slow)",
+          "switch": true
         }
       ],
       "tips": [
         "The rooftop needs unlocking once with a brittle key."
+      ],
+      "locations": [
+        "Slayer Tower"
       ]
     },
     "the kalphite queen": {
-      "locations": [
-        "Kalphite Lair"
+      "monsters": [
+        "Kalphite Queen (Crawling)",
+        "Kalphite Queen (Airborne)"
       ],
+      "wholeFight": true,
+      "prefer": [
+        {
+          "slot": "ring",
+          "items": [
+            "Ring of suffering (i)",
+            "Ring of suffering",
+            "Ring of recoil"
+          ],
+          "withinPercent": 10,
+          "reason": "the wiki recommends a ring with a recoil effect"
+        }
+      ],
+      "venom": true,
       "tips": [
         "You need two ropes the first time; after the hard Desert Diary they stay in place."
+      ],
+      "locations": [
+        "Kalphite Lair"
       ]
     },
     "the king black dragon": {
-      "dragonfire": "dragon",
-      "comboEat": true,
-      "locations": [
-        "King Black Dragon Lair"
+      "monsters": [
+        "King Black Dragon"
       ],
+      "prefer": [
+        {
+          "slot": "shield",
+          "items": [
+            "Dragonfire ward",
+            "Anti-dragon shield",
+            "Dragonfire shield",
+            "Ancient wyvern shield"
+          ],
+          "withinPercent": 20,
+          "reason": "the wiki recommends one even with a super antifire"
+        }
+      ],
+      "dragonfire": "dragon",
+      "venom": true,
+      "comboEat": true,
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose."
       ],
-      "venom": true
+      "locations": [
+        "King Black Dragon Lair"
+      ]
     },
     "the leviathan": {
+      "monsters": [
+        "The Leviathan (Post-quest)",
+        "The Leviathan (Awakened)"
+      ],
+      "prefer": [
+        {
+          "slot": "ring",
+          "items": [
+            "Lightbearer"
+          ],
+          "withinPercent": 10,
+          "reason": "the wiki recommends it, so special attack energy is back for the next kill"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Awakener's orb"
+          ],
+          "note": "needed for the awakened fight",
+          "onlyFor": "Awakened"
+        },
+        {
+          "names": [
+            "Webweaver bow"
+          ],
+          "note": "its special attack (the wiki's ranged swap)",
+          "switch": true
+        },
+        {
+          "names": [
+            "Toxic blowpipe"
+          ],
+          "note": "the wiki's faster-attacking swap",
+          "switch": true,
+          "exact": true
+        },
+        {
+          "names": [
+            "Thammaron's sceptre"
+          ],
+          "note": "casts the shadow spells that stun the Leviathan",
+          "switch": true
+        }
+      ],
+      "tips": [
+        "Needs Desert Treasure II - The Fallen Empire."
+      ],
       "locations": [
         "The Scar"
       ]
     },
     "the phantom muspah": {
+      "monsters": [
+        "Phantom Muspah"
+      ],
+      "wholeFight": true,
+      "inventory": [
+        {
+          "names": [
+            "Sapphire dragon bolts (e)",
+            "Sapphire bolts (e)"
+          ],
+          "note": "for a crossbow: they drain the Muspah's prayer shield (the wiki recommends them)",
+          "optional": true
+        }
+      ],
+      "tips": [
+        "Reaching the Muspah needs Secrets of the North."
+      ],
       "locations": [
         "Ghorrock Dungeon"
       ]
     },
     "the shellbane gryphon": {
-      "locations": [
-        "The Great Conch"
+      "monsters": [
+        "Shellbane gryphon"
       ],
-      "minWeight": 40,
       "required": {
         "cape": [
           "Tortugan shield"
         ]
       },
+      "minWeight": 40,
       "tips": [
         "The Tortugan shield (cape slot) stops the boss's melee hits being devastating."
+      ],
+      "locations": [
+        "The Great Conch"
       ]
     },
     "the thermonuclear smoke devil": {
+      "monsters": [
+        "Thermonuclear smoke devil"
+      ],
       "required": {
         "head": [
           "Facemask",
           "Slayer helmet",
-          "Slayer helmet (i)"
+          "Slayer helmet (i)",
+          "Gas mask"
         ]
       },
+      "comboEat": true,
       "locations": [
         "Smoke Devil Dungeon"
-      ],
-      "comboEat": true
+      ]
     },
     "the whisperer": {
+      "monsters": [
+        "The Whisperer (Post-quest)",
+        "The Whisperer (Awakened)"
+      ],
+      "prefer": [
+        {
+          "slot": "weapon",
+          "items": [
+            "Eldritch Nightmare staff"
+          ],
+          "withinPercent": 10,
+          "reason": "the wiki recommends it: it restores prayer on a hit"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Awakener's orb"
+          ],
+          "note": "needed for the awakened fight",
+          "onlyFor": "Awakened"
+        },
+        {
+          "names": [
+            "Blackstone fragment"
+          ],
+          "note": "starts the fight and takes you into the Shadow Realm"
+        },
+        {
+          "names": [
+            "Venator bow"
+          ],
+          "note": "clears the Lost Souls (with cheap arrows)",
+          "switch": true
+        },
+        {
+          "names": [
+            "Blisterwood stake"
+          ],
+          "note": "clears the most important Lost Souls",
+          "switch": true
+        }
+      ],
+      "tips": [
+        "Needs Desert Treasure II - The Fallen Empire."
+      ],
       "locations": [
         "Lassar Undercity"
       ]
@@ -1390,11 +2003,21 @@
       ]
     },
     "tzkal-zuk": {
+      "monsters": [
+        "TzKal-Zuk (Normal)"
+      ],
+      "tips": [
+        "The TzHaar won't let you into the Inferno until you've given up a fire cape.",
+        "Mor Ul Rek's inner city needs a fire cape shown once."
+      ],
       "locations": [
         "Mor Ul Rek"
       ]
     },
     "tztok-jad": {
+      "monsters": [
+        "TzTok-Jad"
+      ],
       "locations": [
         "Mor Ul Rek"
       ]
@@ -1406,6 +2029,22 @@
       ]
     },
     "vardorvis": {
+      "monsters": [
+        "Vardorvis (Post-quest)",
+        "Vardorvis (Awakened)"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Awakener's orb"
+          ],
+          "note": "needed for the awakened fight",
+          "onlyFor": "Awakened"
+        }
+      ],
+      "tips": [
+        "Needs Desert Treasure II - The Fallen Empire."
+      ],
       "locations": [
         "Stranglewood"
       ]
@@ -1416,30 +2055,106 @@
       ]
     },
     "venenatis": {
+      "monsters": [
+        "Venenatis",
+        "Spindel"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        },
+        {
+          "names": [
+            "Dinh's bulwark"
+          ],
+          "note": "hits several spiderlings at once",
+          "switch": true
+        },
+        {
+          "names": [
+            "Black chinchompa",
+            "Red chinchompa",
+            "Chinchompa"
+          ],
+          "note": "for the spiderlings",
+          "switch": true,
+          "stackable": true
+        },
+        {
+          "names": [
+            "Phoenix necklace"
+          ],
+          "note": "emergency healing (the wiki suggests one)",
+          "optional": true
+        }
+      ],
+      "venom": true,
+      "tips": [
+        "This boss is in the Wilderness: only bring what you're willing to lose.",
+        "Venenatis needs the medium Wilderness Diary and Spindel the hard one, unless you're on a Slayer task for them."
+      ],
       "locations": [
         "Silk Chasm (Wilderness)"
-      ],
-      "tips": [
-        "This boss is in the Wilderness: only bring what you're willing to lose."
-      ],
-      "venom": true
+      ]
     },
     "vet'ion": {
-      "locations": [
-        "Vet'ion's Rest (Wilderness)"
+      "monsters": [
+        "Vet'ion (Normal)",
+        "Calvar'ion (Normal)"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Looting bag"
+          ],
+          "note": "carries extra loot (its contents are lost if you die)",
+          "optional": true
+        }
       ],
       "tips": [
         "This boss is in the Wilderness: only bring what you're willing to lose.",
         "Vet'ion's Rest has an entry fee of up to 50,000 coins."
+      ],
+      "locations": [
+        "Vet'ion's Rest (Wilderness)"
       ]
     },
     "vorkath": {
+      "monsters": [
+        "Vorkath (Post-quest)"
+      ],
+      "prefer": [
+        {
+          "slot": "shield",
+          "items": [
+            "Dragonfire ward",
+            "Anti-dragon shield",
+            "Dragonfire shield"
+          ],
+          "withinPercent": 20,
+          "reason": "the wiki recommends one even with a super antifire"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Slayer's staff",
+            "Dust battlestaff"
+          ],
+          "note": "to cast Crumble Undead (the wiki recommends one)",
+          "optional": true
+        }
+      ],
       "dragonfire": "dragon",
+      "venom": true,
       "comboEat": true,
       "locations": [
         "Ungael"
-      ],
-      "venom": true
+      ]
     },
     "wall beasts": {
       "required": {
@@ -1526,10 +2241,186 @@
       ]
     },
     "zulrah": {
+      "monsters": [
+        "Zulrah (Serpentine)",
+        "Zulrah (Magma)",
+        "Zulrah (Tanzanite)"
+      ],
+      "wholeFight": true,
+      "prefer": [
+        {
+          "slot": "ring",
+          "items": [
+            "Ring of suffering (i)",
+            "Ring of suffering",
+            "Ring of recoil"
+          ],
+          "withinPercent": 10,
+          "reason": "the wiki highly recommends a ring with a recoil effect, which kills the snakelings"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Magus ring"
+          ],
+          "note": "the magic setup's ring, carried with the recoil ring",
+          "switch": true
+        }
+      ],
       "venom": true,
       "comboEat": true,
       "locations": [
         "Zul-Andra"
+      ]
+    },
+    "skotizo": {
+      "monsters": [
+        "Skotizo"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Dark totem"
+          ],
+          "note": "use it on the altar in the centre of the Catacombs; one totem per attempt"
+        },
+        {
+          "names": [
+            "Emberlight",
+            "Arclight",
+            "Toxic blowpipe"
+          ],
+          "note": "disables the altars (Emberlight or Arclight in one hit)",
+          "switch": true
+        }
+      ],
+      "locations": [
+        "Catacombs of Kourend"
+      ]
+    },
+    "scurrius": {
+      "monsters": [
+        "Scurrius (Solo)",
+        "Scurrius (Group)"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Bone mace",
+            "Bone shortbow",
+            "Bone staff"
+          ],
+          "note": "hits the summoned rats with no attack delay",
+          "switch": true
+        }
+      ],
+      "tips": [
+        "Pick a private instance at the broken bars; the public Scurrius is stronger."
+      ],
+      "locations": [
+        "Varrock Sewers"
+      ]
+    },
+    "royal titans": {
+      "monsters": [
+        "Branda the Fire Queen",
+        "Eldric the Ice King"
+      ],
+      "wholeFight": true,
+      "prefer": [
+        {
+          "slot": "weapon",
+          "items": [
+            "Twinflame staff"
+          ],
+          "withinPercent": 10,
+          "reason": "the wiki recommends it: it switches between fire and water spells by itself"
+        }
+      ],
+      "tips": [
+        "Branda counts for a fire giant Slayer task and Eldric for an ice giant one.",
+        "The fight is made for two players, but can be done solo."
+      ],
+      "locations": [
+        "Royal Titans' lair"
+      ]
+    },
+    "amoxliatl": {
+      "monsters": [
+        "Amoxliatl (Post-quest)"
+      ],
+      "tips": [
+        "Needs The Heart of Darkness. After it, the Tower of Ascension's lift is a shortcut."
+      ],
+      "locations": [
+        "Ruins of Tapoyauik"
+      ]
+    },
+    "maggot king": {
+      "monsters": [
+        "Maggot King"
+      ],
+      "prefer": [
+        {
+          "slot": "hands",
+          "items": [
+            "Inoculation bracelet"
+          ],
+          "withinPercent": 15,
+          "reason": "the wiki recommends it: it makes you immune to the sticky bile"
+        }
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Venator bow"
+          ],
+          "note": "its bounces hit several ur-maggot larvae at once",
+          "switch": true
+        },
+        {
+          "names": [
+            "Magic shortbow (i)",
+            "Magic shortbow",
+            "Rune crossbow"
+          ],
+          "note": "kills the ur-maggot larvae",
+          "switch": true
+        },
+        {
+          "names": [
+            "Elder maul",
+            "Bandos godsword",
+            "Dharok's greataxe"
+          ],
+          "note": "a slow melee weapon for the melee punishes",
+          "switch": true
+        },
+        {
+          "names": [
+            "Eye of Ayak",
+            "Accursed sceptre"
+          ],
+          "note": "special attack lowers its magic defence",
+          "switch": true
+        },
+        {
+          "names": [
+            "Amulet of blood fury"
+          ],
+          "note": "heals some of the damage you take",
+          "switch": true
+        }
+      ],
+      "venom": true,
+      "tips": [
+        "Needs The Blood Moon Rises. Solo only.",
+        "It can also be a Slayer task (Konar, Nieve or Duradel).",
+        "A hammer, saw, magic stone, 2 cupronickel bars, 2 adamantite bars and 4 ironwood planks build the bank chest in Sangvesti (once)."
+      ],
+      "locations": [
+        "Maggot King's lair"
       ]
     }
   },
@@ -1567,6 +2458,12 @@
     "Catacombs of Kourend": [
       {
         "text": "Kourend Castle Teleport (standard spellbook)"
+      },
+      {
+        "text": "Xeric's talisman: Xeric's Heart, then the Catacombs entrance",
+        "items": [
+          "Xeric's talisman"
+        ]
       }
     ],
     "Karuulm Slayer Dungeon": [
@@ -1602,6 +2499,9 @@
         "items": [
           "Ring of dueling"
         ]
+      },
+      {
+        "text": "Fairy ring BKP, then walk north-east"
       }
     ],
     "Ancient Cavern": [
@@ -1809,6 +2709,12 @@
         "items": [
           "Ectophial"
         ]
+      },
+      {
+        "text": "Hallowed crystal shard: Hallowed Sepulchre, then the wall shortcut south-east (63 Agility, two long ropes)",
+        "items": [
+          "Hallowed crystal shard"
+        ]
       }
     ],
     "Braindeath Island": [
@@ -1912,6 +2818,20 @@
       },
       {
         "text": "Minigame Teleport: TzHaar Fight Pit"
+      },
+      {
+        "text": "Ghommal's hilt 4 or better: Mor Ul Rek",
+        "items": [
+          "Ghommal's hilt 6",
+          "Ghommal's hilt 5",
+          "Ghommal's hilt 4"
+        ]
+      },
+      {
+        "text": "Achievement diary cape: TzHaar-Mej",
+        "items": [
+          "Achievement diary cape"
+        ]
       }
     ],
     "Sophanem Dungeon": [
@@ -2095,6 +3015,12 @@
       },
       {
         "text": "Spirit tree to Hosidius, just south of the ruin"
+      },
+      {
+        "text": "Xeric's talisman: Xeric's Glade, then walk west to the dungeon",
+        "items": [
+          "Xeric's talisman"
+        ]
       }
     ],
     "Corsair Cove Dungeon": [
@@ -2341,6 +3267,18 @@
       },
       {
         "text": "Annakarl Teleport (Ancient Magicks), then walk south"
+      },
+      {
+        "text": "Games necklace: Corporeal Beast, then walk north",
+        "items": [
+          "Games necklace"
+        ]
+      },
+      {
+        "text": "Wilderness sword 4: Fountain of Rune (hard Wilderness Diary)",
+        "items": [
+          "Wilderness sword 4"
+        ]
       }
     ],
     "Chaos Fanatic (Wilderness)": [
@@ -2431,6 +3369,12 @@
         "items": [
           "Xeric's talisman"
         ]
+      },
+      {
+        "text": "Rada's blessing: Kourend Woodland, then the Lovakengj minecart",
+        "items": [
+          "Rada's blessing"
+        ]
       }
     ],
     "Silk Chasm (Wilderness)": [
@@ -2445,6 +3389,18 @@
         "items": [
           "Annakarl teleport"
         ]
+      },
+      {
+        "text": "Games necklace: Corporeal Beast, then head north-east",
+        "items": [
+          "Games necklace"
+        ]
+      },
+      {
+        "text": "Wilderness sword 4: Fountain of Rune, then run south-west (hard Wilderness Diary)",
+        "items": [
+          "Wilderness sword 4"
+        ]
       }
     ],
     "Vet'ion's Rest (Wilderness)": [
@@ -2458,6 +3414,12 @@
         "text": "Carrallanger teleport tablet, then walk north-east",
         "items": [
           "Carrallanger teleport"
+        ]
+      },
+      {
+        "text": "Games necklace: Corporeal Beast, then walk to Vet'ion's Rest",
+        "items": [
+          "Games necklace"
         ]
       }
     ],
@@ -2518,6 +3480,50 @@
       },
       {
         "text": "Wilderness obelisk to level 50, then walk west past Rogues' Castle"
+      }
+    ],
+    "Cerberus' lair": [
+      {
+        "text": "Key master teleport scroll: right by Cerberus' lair",
+        "items": [
+          "Key master teleport"
+        ]
+      },
+      {
+        "text": "Falador Teleport (standard spellbook), then walk west"
+      }
+    ],
+    "Maggot King's lair": [
+      {
+        "text": "Drakan's medallion: Castle Drakan, then into Vampyrium and east (the aranei scout's route is quicker once rescued)",
+        "items": [
+          "Drakan's medallion"
+        ]
+      }
+    ],
+    "Royal Titans' lair": [
+      {
+        "text": "Giantsoul amulet: Royal Titans",
+        "items": [
+          "Giantsoul amulet"
+        ]
+      },
+      {
+        "text": "Fairy ring AIQ, then the Asgarnian Ice Dungeon (north past the pirates, then west; or the 60 Agility shortcut west of the ladder)"
+      }
+    ],
+    "Ruins of Tapoyauik": [
+      {
+        "text": "Pendant of Ates: Twilight Temple, near the lift",
+        "items": [
+          "Pendant of Ates"
+        ]
+      },
+      {
+        "text": "Quetzal to Salvager Overlook, then walk south to the Twilight Temple"
+      },
+      {
+        "text": "Quetzal to Quetzacalli Gorge, then north-east and south around the Proudspire"
       }
     ]
   },

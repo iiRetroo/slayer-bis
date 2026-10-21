@@ -50,6 +50,10 @@ class OptimizationOutcome
 	Map<AttackType, Double> serpentineCost;
 	/** Magic and Burst: the set with each spell it can cast, best first. */
 	Map<AttackType, List<StyleResult.Alternative>> spellOptions;
+	/** Per style, the boss's recommended items that were kept on, and what they cost. */
+	Map<AttackType, List<String>> keptNotes;
+	/** Boss whole fight only: the picked monster first, then each other monster or phase with its switches. */
+	List<Phase> phases;
 
 	@Value
 	static class ChargeHint
@@ -57,6 +61,23 @@ class OptimizationOutcome
 		double dps;
 		/** Names of the owned items that would need charging or repairing. */
 		List<String> items;
+	}
+
+	/**
+	 * One monster or phase of a boss fight, with the style and DPS of its best set and the items that
+	 * set adds to the main one.
+	 */
+	@Value
+	static class Phase
+	{
+		Monster monster;
+		AttackType type;
+		double dps;
+		List<Optimizer.Candidate> switches;
+		/** Switches left out because keeping the main set's items cost little DPS. */
+		int switchesSaved;
+		/** DPS given up against this monster to carry fewer switches. */
+		double dpsGivenUp;
 	}
 
 	@Value

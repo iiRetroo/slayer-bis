@@ -3,6 +3,7 @@ package com.slayerbis.prep;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,6 +38,24 @@ public final class PrepData
 		List<String> tips;
 		List<String> locations;
 		List<Safespot> safespots;
+		/** A boss's monsters or phases, "Name (version)" or "Name". */
+		List<String> monsters;
+		/** Every listed monster is fought each trip, so the plan carries switches for the others. */
+		boolean wholeFight;
+		/** Worn items the wiki recommends for reasons the DPS maths can't see. */
+		List<Preference> prefer;
+	}
+
+	/**
+	 * A worn item the wiki recommends for a boss; kept when the best set without it is no more than
+	 * withinPercent better.
+	 */
+	static final class Preference
+	{
+		String slot;
+		List<String> items;
+		int withinPercent;
+		String reason;
 	}
 
 	static final class InventoryItem
@@ -55,6 +74,14 @@ public final class PrepData
 		boolean optional;
 		/** Match names exactly ("Fungicide" must not match "Fungicide spray"). */
 		boolean exact;
+		/**
+		 * A swap the wiki recommends for part of a boss fight, carried only when owned and when the
+		 * Wiki switches setting is on. The note says what it's for, never when to use it.
+		 */
+		@SerializedName("switch")
+		boolean switchItem;
+		/** Only for this version of the boss (matched in its version, e.g. "Awakened"), or null for all. */
+		String onlyFor;
 	}
 
 	/** What a location needs whatever the task. */

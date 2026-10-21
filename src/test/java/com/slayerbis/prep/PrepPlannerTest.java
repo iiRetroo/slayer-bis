@@ -795,4 +795,70 @@ public class PrepPlannerTest
 			.owned(owned()).build());
 		assertTrue(none.getNotes().stream().noneMatch(n -> n.contains("Tortugan")));
 	}
+	private static PrepPlanner.Request.RequestBuilder boss(String task, AttackType best, OwnedItems owned)
+	{
+		return PrepPlanner.Request.builder().task(task).bestType(best).owned(owned).prayerPotions(4)
+			.combatPotions(1).fillFood(true);
+	}
+
+	@Test
+	public void bossDataFromBossingBis()
+	{
+		// recommended items and whole fights
+		assertEquals(EquipmentSlot.SHIELD, planner.preferences("Vorkath").get(0).getSlot());
+		assertEquals(EquipmentSlot.RING, planner.preferences("Zulrah").get(0).getSlot());
+		assertEquals(List.of("Dagannoth Rex", "Dagannoth Prime", "Dagannoth Supreme"), planner.wholeFight("Dagannoth Kings"));
+		assertEquals(List.of("Branda the Fire Queen", "Eldric the Ice King"), planner.wholeFight("royal titans"));
+		assertTrue(planner.wholeFight("Bloodveld").isEmpty());
+		// wiki switches, only when owned, and only with the setting on
+		OwnedItems bank = owned("Toxic blowpipe", 1, "Mith grapple", 1, "Rune crossbow", 1, "Shark", 50);
+		assertTrue(names(planner.plan(boss("Kree'arra", AttackType.RANGED, bank).build())).contains("Toxic blowpipe"));
+		assertFalse(names(planner.plan(boss("Kree'arra", AttackType.RANGED, bank).wikiSwitches(false).build()))
+			.contains("Toxic blowpipe"));
+		// the awakener's orb only for awakened fights
+		OwnedItems orb = owned("Awakener's orb", 1, "Pestle and mortar", 1, "Shark", 50);
+		assertFalse(names(planner.plan(boss("Duke Sucellus", AttackType.CRUSH, orb).monsterVersion("Post-quest, Awake")
+			.build())).contains("Awakener's orb"));
+		assertTrue(names(planner.plan(boss("Duke Sucellus", AttackType.CRUSH, orb).monsterVersion("Awakened, Awake")
+			.build())).contains("Awakener's orb"));
+		// planned switches come before supplies
+		PrepPlan kings = planner.plan(boss("Dagannoth Kings", AttackType.MAGIC, owned("Rune crossbow", 1, "Shark", 50))
+			.switches(List.of(new PrepPlan.Switch("Rune crossbow", "switch for Dagannoth Prime"))).build());
+		assertEquals("Rune crossbow", kings.getInventory().get(0).getName());
+	}
+
+	@Test
+	public void bossRoutesDontChangeOtherTasks()
+	{
+		// the key master scroll is for Cerberus, not every task in Taverley Dungeon
+		PrepPlan cerberus = planner.plan(boss("Cerberus", AttackType.SLASH, owned("Key master teleport", 3)).build());
+		assertTrue(cerberus.getTeleports().stream().anyMatch(t -> t.getText().startsWith("Key master")));
+		PrepPlan blueDragons = planner.plan(boss("Blue dragons", AttackType.RANGED, owned("Key master teleport", 3)).build());
+		assertTrue(blueDragons.getTeleports().stream().noneMatch(t -> t.getText().startsWith("Key master")));
+	}
+
+	/**
+	 * Boss preparation must stay a plan for before the trip: reasons may mention a mechanic, as the
+	 * wiki does, but never say what to do in the fight.
+	 */
+	@Test
+	public void bossDataHasNoFightHelp()
+	{
+		Gson gson = new Gson();
+		for (Map.Entry<String, PrepData.TaskInfo> e : data.allTasks().entrySet())
+		{
+			if (e.getValue().monsters == null)
+			{
+				continue;
+			}
+			String text = gson.toJson(e.getValue()).toLowerCase(java.util.Locale.ROOT);
+			for (String banned : new String[]{"safespot", "safe spot", "stand ", "standing", "tile", "dodge",
+				"protect from", "pray against", "switch prayer", "turn on", "activate", "piety", "rigour", "augury",
+				"flinch", "next attack", "when it", "when he", "when she", "when the", "as soon as", "swap to"})
+			{
+				assertFalse(e.getKey() + " mentions \"" + banned + "\"", text.contains(banned));
+			}
+			assertTrue(e.getKey() + " has safespots", e.getValue().safespots == null);
+		}
+	}
 }

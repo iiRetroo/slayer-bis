@@ -383,11 +383,53 @@ public interface SlayerBisConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "planSwitches",
+		name = "Plan boss switches",
+		description = "For a boss picked in the panel that has several phases or monsters (Dagannoth Kings, Zulrah, "
+			+ "the Royal Titans and so on), also work out the best set for each and carry the items that differ "
+			+ "as switches",
+		section = prepSection,
+		position = 8
+	)
+	default boolean planSwitches()
+	{
+		return true;
+	}
+
+	@Range(max = 50)
+	@ConfigItem(
+		keyName = "switchTolerance",
+		name = "Fewer switches (%)",
+		description = "Carry fewer boss switches when it costs little: against each other monster or phase, keep "
+			+ "your main set's items if that loses no more than this many percent of the DPS. 0 always uses the "
+			+ "best set for each.",
+		section = prepSection,
+		position = 9
+	)
+	default int switchTolerance()
+	{
+		return 10;
+	}
+
+	@ConfigItem(
+		keyName = "wikiSwitches",
+		name = "Wiki switches",
+		description = "For a boss picked in the panel, also carry swaps the OSRS Wiki's strategy pages recommend "
+			+ "for part of the fight (such as a weapon for its minions), when you own them",
+		section = prepSection,
+		position = 10
+	)
+	default boolean wikiSwitches()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "highlightSupplies",
 		name = "Highlight supplies",
 		description = "Outline suggested supplies in your bank as well as gear",
 		section = prepSection,
-		position = 8
+		position = 11
 	)
 	default boolean highlightSupplies()
 	{
@@ -400,7 +442,7 @@ public interface SlayerBisConfig extends Config
 		name = "Supply highlight colour",
 		description = "Colour of the outline around suggested supplies",
 		section = prepSection,
-		position = 9
+		position = 12
 	)
 	default Color supplyHighlightColor()
 	{
