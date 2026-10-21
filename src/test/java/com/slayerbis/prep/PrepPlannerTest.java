@@ -701,4 +701,21 @@ public class PrepPlannerTest
 		assertTrue(with.getInventory().stream().noneMatch(l -> l.getName().equals("Anti-venom+")));
 		assertTrue(with.getNotes().stream().noneMatch(n -> n.contains("anti-venom")));
 	}
+
+	@Test
+	public void tortuganShieldCarriedForDireGryphons()
+	{
+		OwnedItems bank = owned("Tortugan shield", 1);
+		PrepPlan carried = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
+			.owned(bank).build());
+		assertTrue(carried.getInventory().stream().anyMatch(l -> l.getName().equals("Tortugan shield") && !l.isRequired()));
+		// already worn in the suggested set: not listed twice
+		PrepPlan worn = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
+			.owned(bank).wornNames(new HashSet<>(Collections.singletonList("Tortugan shield"))).build());
+		assertTrue(worn.getInventory().stream().noneMatch(l -> l.getName().equals("Tortugan shield")));
+		// not owned: optional, so not flagged
+		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
+			.owned(owned()).build());
+		assertTrue(none.getNotes().stream().noneMatch(n -> n.contains("Tortugan")));
+	}
 }

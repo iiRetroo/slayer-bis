@@ -650,7 +650,16 @@
       "locations": [
         "The Great Conch"
       ],
-      "minWeight": 30
+      "minWeight": 30,
+      "inventory": [
+        {
+          "names": [
+            "Tortugan shield"
+          ],
+          "note": "swap it into your cape slot if a dire gryphon (the superior) appears",
+          "optional": true
+        }
+      ]
     },
     "harpie bug swarms": {
       "required": {

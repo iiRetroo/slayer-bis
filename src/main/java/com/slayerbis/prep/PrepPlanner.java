@@ -170,6 +170,9 @@ public final class PrepPlanner
 		int monsterHitpoints;
 		/** The weapon in the best set, so it is not suggested again as a spec weapon. */
 		String bestWeapon;
+		/** Names of the items in the suggested worn set, so they aren't also listed to carry. */
+		@Builder.Default
+		Set<String> wornNames = Collections.emptySet();
 		boolean suggestSpecWeapon;
 		/** The Slayer master to teleport back to, or null. */
 		String slayerMaster;
@@ -242,7 +245,7 @@ public final class PrepPlanner
 		for (PrepData.InventoryItem item : carried)
 		{
 			String name = item.exact ? firstOwnedExact(item.names, owned) : firstOwned(item.names, owned);
-			if (name == null && item.optional)
+			if ((name == null && item.optional) || (name != null && request.getWornNames().contains(name)))
 			{
 				continue;
 			}

@@ -1295,6 +1295,7 @@ public class SlayerBisPlugin extends Plugin
 				.taskRemaining(settings.getTaskRemaining())
 				.monsterHitpoints(monster.getHitpoints())
 				.bestWeapon(bestWeaponName(best))
+				.wornNames(wornNames(best))
 				.suggestSpecWeapon(settings.isSpecWeapon())
 				.slayerMaster(settings.getSlayerMaster() == SlayerMaster.NONE ? null : settings.getSlayerMaster().getName())
 				.preferredFood(settings.getPreferredFood())
@@ -1440,6 +1441,22 @@ public class SlayerBisPlugin extends Plugin
 		}
 		cost.put(type, bestDps - kept.getResult().getDps());
 		return kept;
+	}
+
+	private static Set<String> wornNames(StyleResult best)
+	{
+		Set<String> names = new HashSet<>();
+		if (best != null && best.isValid())
+		{
+			for (Optimizer.Candidate c : best.getGear())
+			{
+				if (c != null)
+				{
+					names.add(c.getItem().getName());
+				}
+			}
+		}
+		return names;
 	}
 
 	private static boolean isChargedSerpentine(GearItem item)
