@@ -371,4 +371,27 @@ public class OptimizerTest
 			assertEquals(colour.substring(0, 1).toUpperCase() + colour.substring(1) + " dragon", choices.get(0).getName());
 		}
 	}
+
+	@Test
+	public void taskVariantsAndSuperiorsAreOffered()
+	{
+		String[][] cases = {
+			{"Lizardmen", "Lizardman", "Lizardman shaman"},
+			{"Fleshcrawlers", "Flesh Crawler", "Flesh Crawler"},
+			{"Trolls", "Mountain troll", "Ice troll"},
+			{"Custodian stalkers", "Juvenile custodian stalker", "Elder custodian stalker"},
+			{"Dust devils", "Dust devil", "Choke devil"},
+			{"Aberrant spectres", "Aberrant spectre", "Deviant spectre"},
+			{"Nechryael", "Nechryael", "Greater Nechryael"},
+			{"Jellies", "Jelly", "Warped Jelly"},
+			{"Monkeys", "Monkey (monster)", "Maniacal monkey"},
+			{"The Grotesque Guardians", "Dusk", "Dusk"},
+		};
+		for (String[] c : cases)
+		{
+			List<Monster> choices = resolver.candidates(c[0]);
+			assertEquals(c[0], c[1], choices.get(0).getName());
+			assertTrue(c[0], choices.stream().anyMatch(m -> m.getName().equals(c[2])));
+		}
+	}
 }
