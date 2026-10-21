@@ -188,6 +188,10 @@ public final class PrepData
 		Map<String, Integer> runePouches;
 		/** Runes per High Alchemy cast. */
 		Map<String, Integer> alchemyRunes;
+		/** Worn items that provide unlimited runes, with the runes each gives. */
+		Map<String, List<String>> runeStaves;
+		/** Combination runes, with the runes each counts as. */
+		Map<String, List<String>> comboRunes;
 	}
 
 	private static final class TasksFile

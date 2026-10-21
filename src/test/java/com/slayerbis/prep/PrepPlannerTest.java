@@ -224,7 +224,8 @@ public class PrepPlannerTest
 	public void lootToolsFollowTheMonstersDrops()
 	{
 		// abyssal demons drop herbs and items worth alching often, demonic ashes every kill
-		OwnedItems bank = owned("Herb sack", 1, "Rune pouch", 1, "Ash sanctifier", 1, "Seed box", 1, "Shark", 100);
+		OwnedItems bank = owned("Herb sack", 1, "Rune pouch", 1, "Nature rune", 100, "Fire rune", 500, "Ash sanctifier", 1,
+			"Seed box", 1, "Shark", 100);
 		PrepPlan plan = planner.plan("Abyssal demons", null, AttackType.SLASH, Collections.emptyList(), bank, 0, 0,
 			true, "Abyssal demon", PrepPlanner.COMMON_DROP_KILLS);
 		List<String> names = new java.util.ArrayList<>();
@@ -247,7 +248,7 @@ public class PrepPlannerTest
 		Integer alch = drops.get("alchables");
 		assertNotNull(alch);
 		assertTrue("test needs a rare loot type", alch > PrepPlanner.COMMON_DROP_KILLS);
-		OwnedItems bank = owned("Rune pouch", 1);
+		OwnedItems bank = owned("Rune pouch", 1, "Nature rune", 100, "Fire rune", 500);
 		PrepPlan common = planner.plan("Rockslugs", null, AttackType.RANGED, Collections.emptyList(), bank, 0, 0,
 			false, "Rockslug", PrepPlanner.COMMON_DROP_KILLS);
 		PrepPlan all = planner.plan("Rockslugs", null, AttackType.RANGED, Collections.emptyList(), bank, 0, 0,
@@ -944,5 +945,34 @@ public class PrepPlannerTest
 		PrepPlan noStaff = planner.plan(PrepPlanner.Request.builder().task("Kalphites").location("Kalphite Lair")
 			.bestType(AttackType.STAB).owned(owned("Ardougne cloak 1", 1)).build());
 		assertFalse(names(noStaff).contains("Ardougne cloak"));
+	}
+	@Test
+	public void elementalStavesAndCombinationRunes()
+	{
+		PrepPlanner.Request.RequestBuilder catacombs = PrepPlanner.Request.builder().task("Abyssal demons")
+			.location("Catacombs of Kourend").bestType(AttackType.SLASH).monsterName("Abyssal demon")
+			.lootMaxKills(PrepPlanner.COMMON_DROP_KILLS).spellbook("standard").magicLevel(99)
+			.finishedQuests(Set.of("CLIENT_OF_KOUREND"));
+		// steam runes count as fire and water: Kourend Castle Teleport can be cast, and law, steam and
+		// nature fit one rune pouch, with nothing loose
+		PrepPlan steam = planner.plan(catacombs.owned(owned("Rune pouch", 1, "Law rune", 100, "Steam rune", 100,
+			"Nature rune", 100)).build());
+		PrepPlan.InventoryLine pouch = steam.getInventory().stream().filter(l -> l.getName().equals("Rune pouch"))
+			.findFirst().orElse(null);
+		assertNotNull(pouch);
+		assertTrue(pouch.getNote(), pouch.getNote().contains("steam"));
+		assertEquals(0, steam.getInventory().stream().filter(l -> l.getName().endsWith(" rune")).count());
+		// a worn steam battlestaff gives the fire and water: only law and nature runes are carried
+		PrepPlan staff = planner.plan(catacombs.owned(owned("Rune pouch", 1, "Law rune", 100, "Nature rune", 100))
+			.wornNames(Set.of("Steam battlestaff")).build());
+		pouch = staff.getInventory().stream().filter(l -> l.getName().equals("Rune pouch")).findFirst().orElse(null);
+		assertNotNull(pouch);
+		assertTrue(pouch.getNote(), pouch.getNote().contains("your staff gives the fire and water"));
+		assertFalse(pouch.getNote(), pouch.getNote().contains("steam"));
+		// without the staff or the runes, no spell; a note says the alchemy runes are missing
+		PrepPlan none = planner.plan(catacombs.owned(owned("Rune pouch", 1, "Law rune", 100)).wornNames(Set.of()).build());
+		assertTrue(none.getTeleports().stream().filter(t -> t.getText().startsWith("Kourend Castle"))
+			.allMatch(t -> Boolean.FALSE.equals(t.getOwned())));
+		assertTrue(none.getNotes().stream().anyMatch(n -> n.startsWith("No nature and fire runes found for High Alchemy")));
 	}
 }

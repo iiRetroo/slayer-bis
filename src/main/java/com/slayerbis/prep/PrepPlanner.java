@@ -5,6 +5,7 @@ import com.slayerbis.data.EquipmentSlot;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -532,7 +533,7 @@ public final class PrepPlanner
 		{
 			slots += addMasterTeleport(lines, ids, owned, request.getSlayerMaster(), masterTeleports, tips);
 		}
-		slots += addRunes(lines, ids, owned, runes);
+		slots += addRunes(lines, ids, owned, runes, request, notes);
 
 		if (fillFood)
 		{
@@ -753,26 +754,15 @@ public final class PrepPlanner
 			uses.values().forEach(r -> types.addAll(r.keySet()));
 			return new ArrayList<>(types);
 		}
-
-		String purposesOf(String rune)
-		{
-			List<String> out = new ArrayList<>();
-			uses.forEach((purpose, r) ->
-			{
-				if (r.containsKey(rune))
-				{
-					out.add(purpose);
-				}
-			});
-			return String.join("; ", out);
-		}
 	}
 
 	/**
 	 * The runes: in your best rune pouch when you own one, with what each is for; any types it can't
-	 * hold, or all of them without a pouch, as stacks of their own.
+	 * hold, or all of them without a pouch, as stacks of their own. A worn elemental staff covers its
+	 * runes, and combination runes stand in for the runes they count as.
 	 */
-	private int addRunes(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, RunePlan runes)
+	private int addRunes(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, RunePlan runes,
+		Request request, List<String> notes)
 	{
 		if (runes.isEmpty())
 		{
@@ -780,7 +770,30 @@ public final class PrepPlanner
 		}
 		PrepData.Supplies s = data.supplies();
 		String pouch = s.runePouches == null ? null : firstOwned(new ArrayList<>(s.runePouches.keySet()), owned);
-		List<String> types = runes.runeTypes();
+		Map<String, String> sources = runeSources(runes.runeTypes(), request, owned);
+		// what's carried, in order, and what each carried rune is for
+		Map<String, Set<String>> carried = new LinkedHashMap<>();
+		runes.uses.forEach((purpose, r) ->
+		{
+			List<String> missing = new ArrayList<>();
+			for (String rune : r.keySet())
+			{
+				String source = sources.get(rune);
+				if (source == null)
+				{
+					missing.add(shortName(rune));
+				}
+				else if (!source.isEmpty())
+				{
+					carried.computeIfAbsent(source, k -> new LinkedHashSet<>()).add(purpose);
+				}
+			}
+			if (!missing.isEmpty())
+			{
+				notes.add("No " + joinAnd(missing) + " runes found for " + purpose + ".");
+			}
+		});
+		List<String> types = new ArrayList<>(carried.keySet());
 		List<String> loose = types;
 		int slots = 0;
 		if (pouch != null)
@@ -791,17 +804,24 @@ public final class PrepPlanner
 			List<String> parts = new ArrayList<>();
 			runes.uses.forEach((purpose, r) ->
 			{
-				List<String> these = new ArrayList<>();
+				Set<String> these = new LinkedHashSet<>();
+				List<String> fromStaff = new ArrayList<>();
 				for (String rune : r.keySet())
 				{
-					if (inPouch.contains(rune))
+					String source = sources.get(rune);
+					if (source != null && source.isEmpty())
 					{
-						these.add(rune.replace(" rune", "").toLowerCase(Locale.ROOT));
+						fromStaff.add(shortName(rune));
+					}
+					else if (source != null && inPouch.contains(source))
+					{
+						these.add(shortName(source));
 					}
 				}
 				if (!these.isEmpty())
 				{
-					parts.add(joinAnd(these) + " runes (" + purpose + ")");
+					parts.add(joinAnd(new ArrayList<>(these)) + " runes (" + purpose
+						+ (fromStaff.isEmpty() ? "" : "; your staff gives the " + joinAnd(fromStaff)) + ")");
 				}
 			});
 			for (String other : runes.other)
@@ -815,12 +835,17 @@ public final class PrepPlanner
 		}
 		for (String rune : loose)
 		{
-			if (owned.count(rune, true) > 0 && !listed(lines, rune))
+			if (!listed(lines, rune))
 			{
-				slots += addStack(lines, ids, owned, rune, "for " + runes.purposesOf(rune));
+				slots += addStack(lines, ids, owned, rune, "for " + String.join("; ", carried.get(rune)));
 			}
 		}
 		return slots;
+	}
+
+	private static String shortName(String rune)
+	{
+		return rune.replace(" rune", "").toLowerCase(Locale.ROOT);
 	}
 
 	private static String joinAnd(List<String> parts)
@@ -851,9 +876,9 @@ public final class PrepPlanner
 
 	/**
 	 * Whether the player can cast a teleport spell now: on its spellbook, with the Magic level, the
-	 * quest done, and the runes for one cast.
+	 * quest done, and the runes for one cast (a worn elemental staff or combination runes count).
 	 */
-	private static boolean canCast(PrepData.TeleportSpell spell, Request request, OwnedItems owned)
+	private boolean canCast(PrepData.TeleportSpell spell, Request request, OwnedItems owned)
 	{
 		if (request.getSpellbook() == null || !request.getSpellbook().equals(spell.spellbook)
 			|| request.getMagicLevel() < spell.level
@@ -861,14 +886,99 @@ public final class PrepPlanner
 		{
 			return false;
 		}
+		Map<String, String> sources = runeSources(spell.runes.keySet(), request, owned);
+		// a combination rune counts as one of each of its runes, so it needs the most of either
+		Map<String, Integer> needed = new HashMap<>();
 		for (Map.Entry<String, Integer> rune : spell.runes.entrySet())
 		{
-			if (owned.count(rune.getKey(), true) < rune.getValue())
+			String source = sources.get(rune.getKey());
+			if (source == null)
+			{
+				return false;
+			}
+			if (!source.isEmpty())
+			{
+				needed.merge(source, rune.getValue(), Math::max);
+			}
+		}
+		for (Map.Entry<String, Integer> e : needed.entrySet())
+		{
+			if (owned.count(e.getKey(), true) < e.getValue())
 			{
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * The runes the planned worn set provides without carrying any: an elemental staff's.
+	 */
+	private Set<String> staffRunes(Request request)
+	{
+		Set<String> out = new HashSet<>();
+		Map<String, List<String>> staves = data.supplies().runeStaves;
+		if (staves != null)
+		{
+			for (Map.Entry<String, List<String>> e : staves.entrySet())
+			{
+				if (request.getWornNames().contains(e.getKey()))
+				{
+					out.addAll(e.getValue());
+				}
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * Which owned rune to carry for each needed rune: "" when a worn staff provides it; a
+	 * combination rune that covers two of the needed runes (one pouch slot instead of two); the rune
+	 * itself; any combination rune that covers it; null when the player has none.
+	 */
+	private Map<String, String> runeSources(Collection<String> needed, Request request, OwnedItems owned)
+	{
+		Map<String, String> chosen = new HashMap<>();
+		Set<String> free = staffRunes(request);
+		List<String> remaining = new ArrayList<>();
+		for (String rune : needed)
+		{
+			if (free.contains(rune))
+			{
+				chosen.put(rune, "");
+			}
+			else
+			{
+				remaining.add(rune);
+			}
+		}
+		Map<String, List<String>> combos = data.supplies().comboRunes;
+		combos = combos == null ? Collections.emptyMap() : combos;
+		for (Map.Entry<String, List<String>> combo : combos.entrySet())
+		{
+			List<String> covered = new ArrayList<>(combo.getValue());
+			covered.retainAll(remaining);
+			if (covered.size() >= 2 && owned.count(combo.getKey(), true) > 0)
+			{
+				covered.forEach(rune -> chosen.put(rune, combo.getKey()));
+				remaining.removeAll(covered);
+			}
+		}
+		for (String rune : remaining)
+		{
+			String source = owned.count(rune, true) > 0 ? rune : null;
+			for (Map.Entry<String, List<String>> combo : combos.entrySet())
+			{
+				if (source == null && combo.getValue().contains(rune) && owned.count(combo.getKey(), true) > 0)
+				{
+					source = combo.getKey();
+				}
+			}
+			chosen.put(rune, source);
+		}
+		Map<String, String> out = new LinkedHashMap<>();
+		needed.forEach(rune -> out.put(rune, chosen.get(rune)));
+		return out;
 	}
 
 	private static String fairyRingCode(String text)
