@@ -117,6 +117,18 @@ public final class PrepData
 		List<String> items;
 	}
 
+	/**
+	 * A teleport spell: its spellbook, Magic level, runes per cast and the quest that unlocks it.
+	 */
+	static final class TeleportSpell
+	{
+		String spellbook;
+		int level;
+		Map<String, Integer> runes;
+		/** A RuneLite Quest name, or null when it needs none. */
+		String quest;
+	}
+
 	static final class Food
 	{
 		String name;
@@ -158,7 +170,6 @@ public final class PrepData
 		List<String> wyvernShields;
 		/** Loot type (herbs, seeds, gems, bones, ashes, alchables) to the items that collect it. */
 		Map<String, List<String>> lootTools;
-		List<String> alchRunes;
 		/** Cheap throwing weapons to tag monsters and gather them into a stack before bursting, cheapest first. */
 		List<String> lureWeapons;
 		List<String> cannonParts;
@@ -167,6 +178,16 @@ public final class PrepData
 		List<SpecWeapon> specWeapons;
 		/** A spec weapon is suggested for monsters with at least this much HP. */
 		int specMinHitpoints;
+		/** Teleport spells by name, as they start a route's text. */
+		Map<String, TeleportSpell> teleportSpells;
+		/** Staffs that let you use fairy rings. */
+		List<String> fairyRingStaffs;
+		/** Ways to reach a fairy ring, best first. */
+		List<Teleport> fairyRingAccess;
+		/** Rune pouches, best first, with how many rune types each holds. */
+		Map<String, Integer> runePouches;
+		/** Runes per High Alchemy cast. */
+		Map<String, Integer> alchemyRunes;
 	}
 
 	private static final class TasksFile
@@ -264,6 +285,25 @@ public final class PrepData
 	Supplies supplies()
 	{
 		return supplies;
+	}
+
+	/**
+	 * The quests that unlock the teleport spells, as RuneLite Quest names, for the plugin to check.
+	 */
+	public java.util.Set<String> spellQuests()
+	{
+		java.util.Set<String> out = new java.util.HashSet<>();
+		if (supplies.teleportSpells != null)
+		{
+			for (TeleportSpell spell : supplies.teleportSpells.values())
+			{
+				if (spell.quest != null)
+				{
+					out.add(spell.quest);
+				}
+			}
+		}
+		return out;
 	}
 
 	/**

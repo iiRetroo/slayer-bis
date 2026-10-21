@@ -32,7 +32,7 @@ When you open your bank, the plugin reads your banked items (plus, optionally, w
 - the best set with each of your other strong weapons, in case you would rather use one of those
 - gear the task requires, such as a mirror shield for basilisks or boots of stone for Karuulm, which is kept in every suggested set
 - a suggested inventory: task items (rock hammer, bag of salt), antifire or anti-venom where needed, prayer potions or moonlight moth mixes, a boosting potion for your best style (for melee: a super combat, else super attack and super strength, else a combat potion, else attack and strength potions), loot tools, a teleport item, and your best food (with karambwans for combo eating on hard-hitting tasks)
-- teleports to the task location, ticked off when you own the item
+- teleports to the task location, ticked off when you can use them, and the best usable one in the inventory. The route goes in the inventory too: the best one you can use, in the list's order. That's a teleport item you own, a spell you can cast (on its spellbook, with the Magic level, quest and runes; the runes go in your rune pouch), or a fairy ring (your Dramen or Lunar staff, unless you've done the elite Lumbridge Diary, plus your best way to a ring, such as an Ardougne cloak). The rune pouch line says which runes are for what: teleports, High Alchemy for alchable drops, bursting. Runes already in your pouch count as owned. Picking cheaper ammo or a spell that makes another style the best plans the inventory again for that style.
 - where to safespot the task's monsters, as short text descriptions
 - what was assumed (levels, prayers, potions, spellbook)
 

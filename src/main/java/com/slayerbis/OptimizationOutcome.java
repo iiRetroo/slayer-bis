@@ -55,6 +55,12 @@ class OptimizationOutcome
 	/** Boss whole fight only: the picked monster first, then each other monster or phase with its switches. */
 	List<Phase> phases;
 
+	/**
+	 * The style the inventory was planned for: the best with the ammo and spell picked at the
+	 * time. A pick that changes the best style plans again.
+	 */
+	AttackType plannedType;
+
 	@Value
 	static class ChargeHint
 	{
@@ -114,10 +120,19 @@ class OptimizationOutcome
 	 */
 	StyleResult best(Integer ammoId, String spell)
 	{
+		return best(results, ammoId, spell, ammoOptions, spellOptions);
+	}
+
+	/**
+	 * The best style with the ammo and spell picked in the panel, before an outcome exists.
+	 */
+	static StyleResult best(Map<AttackType, StyleResult> results, Integer ammoId, String spell,
+		List<StyleResult.Alternative> ammoOptions, Map<AttackType, List<StyleResult.Alternative>> spellOptions)
+	{
 		StyleResult best = null;
-		for (AttackType type : results.keySet())
+		for (StyleResult result : results.values())
 		{
-			StyleResult r = adjusted(type, ammoId, spell);
+			StyleResult r = withSpell(withAmmo(result, ammoId, ammoOptions), spell, spellOptions);
 			if (r.isValid() && (best == null || r.getResult().getDps() > best.getResult().getDps()))
 			{
 				best = r;
@@ -148,6 +163,11 @@ class OptimizationOutcome
 	 */
 	StyleResult withSpell(StyleResult r, String spell)
 	{
+		return withSpell(r, spell, spellOptions);
+	}
+
+	static StyleResult withSpell(StyleResult r, String spell, Map<AttackType, List<StyleResult.Alternative>> spellOptions)
+	{
 		if (r == null || spell == null)
 		{
 			return r;
@@ -169,6 +189,11 @@ class OptimizationOutcome
 	 * chosen or it isn't one of the options.
 	 */
 	StyleResult withAmmo(StyleResult r, Integer ammoId)
+	{
+		return withAmmo(r, ammoId, ammoOptions);
+	}
+
+	static StyleResult withAmmo(StyleResult r, Integer ammoId, List<StyleResult.Alternative> ammoOptions)
 	{
 		if (r == null || ammoId == null || r.getType() != AttackType.RANGED)
 		{

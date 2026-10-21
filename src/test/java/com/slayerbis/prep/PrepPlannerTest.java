@@ -897,4 +897,52 @@ public class PrepPlannerTest
 		assertTrue(planner.plan(boss("demonic gorillas", AttackType.SLASH, owned("Royal seed pod", 1)).build())
 			.getTeleports().stream().anyMatch(t -> t.getText().startsWith("Royal seed pod") && Boolean.TRUE.equals(t.getOwned())));
 	}
+	@Test
+	public void bestUsableTeleportGoesInTheInventory()
+	{
+		// Kourend Castle Teleport is the Catacombs' first route: its runes go in the rune pouch,
+		// with the High Alchemy runes for an abyssal demon's drops
+		OwnedItems bank = owned("Rune pouch", 1, "Law rune", 100, "Fire rune", 500, "Water rune", 100,
+			"Nature rune", 100, "Xeric's talisman", 1);
+		PrepPlanner.Request.RequestBuilder catacombs = PrepPlanner.Request.builder().task("Abyssal demons")
+			.location("Catacombs of Kourend").bestType(AttackType.SLASH).owned(bank).monsterName("Abyssal demon")
+			.lootMaxKills(PrepPlanner.COMMON_DROP_KILLS).spellbook("standard").magicLevel(99);
+		PrepPlan cast = planner.plan(catacombs.finishedQuests(Set.of("CLIENT_OF_KOUREND")).build());
+		PrepPlan.InventoryLine pouch = cast.getInventory().stream().filter(l -> l.getName().equals("Rune pouch"))
+			.findFirst().orElse(null);
+		assertNotNull(pouch);
+		assertTrue(pouch.getNote(), pouch.getNote().contains("teleport to Catacombs of Kourend")
+			&& pouch.getNote().contains("High Alchemy"));
+		assertFalse(names(cast).contains("Xeric's talisman"));
+		// law, fire, water and nature: one more type than a rune pouch holds, so one goes loose
+		assertEquals(1, cast.getInventory().stream().filter(l -> l.getName().endsWith(" rune")).count());
+		assertTrue(cast.getTeleports().stream().anyMatch(t -> t.getText().startsWith("Kourend Castle Teleport")
+			&& Boolean.TRUE.equals(t.getOwned())));
+		// without the quest the spell can't be cast, so the next route is used
+		PrepPlan noQuest = planner.plan(catacombs.finishedQuests(Set.of()).build());
+		assertTrue(names(noQuest).contains("Xeric's talisman"));
+		// the wrong spellbook too
+		assertTrue(names(planner.plan(catacombs.finishedQuests(Set.of("CLIENT_OF_KOUREND")).spellbook("ancient").build()))
+			.contains("Xeric's talisman"));
+	}
+
+	@Test
+	public void fairyRingRoutesCarryTheStaffAndAWayToARing()
+	{
+		OwnedItems bank = owned("Dramen staff", 1, "Ardougne cloak 1", 1);
+		PrepPlanner.Request.RequestBuilder lair = PrepPlanner.Request.builder().task("Kalphites").location("Kalphite Lair")
+			.bestType(AttackType.STAB).owned(bank);
+		PrepPlan ring = planner.plan(lair.build());
+		assertTrue(names(ring).containsAll(List.of("Dramen staff", "Ardougne cloak")));
+		assertTrue(ring.getTeleports().stream().anyMatch(t -> t.getText().startsWith("Fairy ring")
+			&& Boolean.TRUE.equals(t.getOwned())));
+		// the elite Lumbridge Diary: no staff needed
+		PrepPlan elite = planner.plan(lair.fairyRingsWithoutStaff(true).build());
+		assertFalse(names(elite).contains("Dramen staff"));
+		assertTrue(names(elite).contains("Ardougne cloak"));
+		// no staff: the fairy ring can't be used
+		PrepPlan noStaff = planner.plan(PrepPlanner.Request.builder().task("Kalphites").location("Kalphite Lair")
+			.bestType(AttackType.STAB).owned(owned("Ardougne cloak 1", 1)).build());
+		assertFalse(names(noStaff).contains("Ardougne cloak"));
+	}
 }

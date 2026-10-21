@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,6 +46,11 @@ public final class PrepPlanner
 	public PrepPlanner(PrepData data)
 	{
 		this.data = data;
+	}
+
+	public PrepData data()
+	{
+		return data;
 	}
 
 	/**
@@ -250,6 +257,15 @@ public final class PrepPlanner
 		String preferredFood;
 		/** The suggested set wears a charged Serpentine helm, so no anti-venom is needed. */
 		boolean venomImmune;
+		/** The player's spellbook (standard, ancient, lunar or arceuus), or null if unknown. */
+		String spellbook;
+		/** The player's Magic level, for teleport spells. */
+		int magicLevel;
+		/** Finished quests that unlock teleport spells, as RuneLite Quest names. */
+		@Builder.Default
+		Set<String> finishedQuests = Collections.emptySet();
+		/** The elite Lumbridge Diary is done, so fairy rings need no staff. */
+		boolean fairyRingsWithoutStaff;
 		/**
 		 * Gear switches for a boss's other monsters or phases, carried in the inventory. Each is an
 		 * owned item name and what it's for.
@@ -293,6 +309,7 @@ public final class PrepPlanner
 		Set<Integer> ids = new HashSet<>();
 		int slots = 0;
 
+		RunePlan runes = new RunePlan();
 		List<PrepData.InventoryItem> carried = new ArrayList<>();
 		if (info != null && info.inventory != null)
 		{
@@ -470,7 +487,7 @@ public final class PrepPlanner
 
 		if (lootMaxKills > 0)
 		{
-			slots += addLootTools(lines, ids, owned, monsterName, lootMaxKills);
+			slots += addLootTools(lines, ids, owned, monsterName, lootMaxKills, runes);
 		}
 
 		List<String> tips = new ArrayList<>(locationTips);
@@ -498,11 +515,7 @@ public final class PrepPlanner
 				? "Monsters stack here, so bursting or barraging (Ancient Magicks) works well."
 				: "Monsters stack in the " + String.join(" or the ", info.stacksAt)
 				+ ", so bursting or barraging (Ancient Magicks) works well there.");
-			String pouch = firstOwned(s.lootTools == null ? null : s.lootTools.get("alchables"), owned);
-			if (pouch != null && !listed(lines, pouch))
-			{
-				slots += addLine(lines, ids, owned, pouch, 1, "with burst or barrage runes", false);
-			}
+			runes.other.add("bursting or barraging");
 			String lure = bestType == AttackType.BURST ? firstOwned(s.lureWeapons, owned) : null;
 			if (lure != null)
 			{
@@ -511,13 +524,15 @@ public final class PrepPlanner
 		}
 
 		List<String> locationKeys = locationKeys(info, request.getLocation());
-		slots += addTeleports(lines, ids, owned, locationKeys, locationKnown(request.getLocation(), locationKeys), tips);
+		slots += addTeleports(lines, ids, owned, locationKeys, locationKnown(request.getLocation(), locationKeys), tips,
+			request, runes);
 		List<PrepData.Teleport> masterTeleports = request.getSlayerMaster() == null ? null
 			: data.masters().get(request.getSlayerMaster());
 		if (masterTeleports != null)
 		{
 			slots += addMasterTeleport(lines, ids, owned, request.getSlayerMaster(), masterTeleports, tips);
 		}
+		slots += addRunes(lines, ids, owned, runes);
 
 		if (fillFood)
 		{
@@ -541,10 +556,10 @@ public final class PrepPlanner
 			}
 		}
 
-		List<PrepPlan.TeleportOption> teleports = teleports(locationKeys, owned);
+		List<PrepPlan.TeleportOption> teleports = teleports(locationKeys, owned, request);
 		if (masterTeleports != null)
 		{
-			addOptions(teleports, "Back to " + request.getSlayerMaster(), masterTeleports, owned);
+			addOptions(teleports, "Back to " + request.getSlayerMaster(), masterTeleports, owned, request);
 		}
 		return new PrepPlan(requirements, lines, teleports, notes, tips, slots,
 			Collections.unmodifiableSet(ids), safespots(info, locationKeys, locationKnown(request.getLocation(), locationKeys)),
@@ -555,7 +570,7 @@ public final class PrepPlanner
 	 * Items that collect or make use of what the monster drops, for the ones the player owns.
 	 */
 	private int addLootTools(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned,
-		String monsterName, int lootMaxKills)
+		String monsterName, int lootMaxKills, RunePlan runes)
 	{
 		Map<String, Integer> drops = data.drops(monsterName);
 		PrepData.Supplies s = data.supplies();
@@ -568,22 +583,20 @@ public final class PrepPlanner
 				continue;
 			}
 			String often = kills <= 1 ? "every kill" : "about 1 in " + kills + " kills";
+			if ("alchables".equals(type[0]))
+			{
+				// the runes go in the rune pouch with any others; without one, nature runes and a fire staff
+				boolean pouch = s.runePouches != null && firstOwned(new ArrayList<>(s.runePouches.keySet()), owned) != null;
+				String purpose = "High Alchemy: " + monsterName + " drops " + type[1] + ", " + often;
+				runes.uses.put(pouch ? purpose : purpose + "; bring a fire staff",
+					pouch ? s.alchemyRunes : Map.of("Nature rune", s.alchemyRunes.get("Nature rune")));
+				continue;
+			}
 			String tool = firstOwned(s.lootTools.get(type[0]), owned);
 			if (tool != null)
 			{
-				String note = monsterName + " drops " + type[1] + " (" + often + ")"
-					+ ("alchables".equals(type[0]) ? "; fill it with nature and fire runes for High Alchemy" : "");
+				String note = monsterName + " drops " + type[1] + " (" + often + ")";
 				slots += addLine(lines, ids, owned, tool, 1, note, false);
-			}
-			else if ("alchables".equals(type[0]))
-			{
-				// no rune pouch: nature runes still take just one slot
-				String runes = firstOwned(s.alchRunes, owned);
-				if (runes != null)
-				{
-					slots += addStack(lines, ids, owned, runes, monsterName + " drops " + type[1] + " (" + often
-						+ "); bring a fire staff for High Alchemy");
-				}
 			}
 		}
 		return slots;
@@ -692,13 +705,12 @@ public final class PrepPlanner
 	}
 
 	/**
-	 * One owned teleport item per location (just one in all when the location isn't known), so
-	 * the plan doesn't carry several ways to the same task. Worn teleports become a tip instead.
+	 * The best route the player can use per location (just one in all when the location isn't
+	 * known), so the plan doesn't carry several ways to the same task.
 	 */
 	private int addTeleports(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned,
-		List<String> keys, boolean locationKnown, List<String> tips)
+		List<String> keys, boolean locationKnown, List<String> tips, Request request, RunePlan runes)
 	{
-		PrepData.Supplies s = data.supplies();
 		int slots = 0;
 		for (String key : keys)
 		{
@@ -707,34 +719,279 @@ public final class PrepPlanner
 			{
 				continue;
 			}
-			boolean added = false;
-			for (PrepData.Teleport t : list)
+			int added = addRoute(lines, ids, owned, key, list, tips, request, runes);
+			if (added >= 0)
+			{
+				slots += added;
+				if (!locationKnown)
+				{
+					break;
+				}
+			}
+		}
+		return slots;
+	}
+
+	/**
+	 * The runes the plan carries, by what they're for, so they share one rune pouch.
+	 */
+	private static final class RunePlan
+	{
+		/** Purpose to the runes it needs per cast, in the order they were added. */
+		final Map<String, Map<String, Integer>> uses = new LinkedHashMap<>();
+		/** Purposes whose runes aren't listed (bursting or barraging). */
+		final List<String> other = new ArrayList<>();
+
+		boolean isEmpty()
+		{
+			return uses.isEmpty() && other.isEmpty();
+		}
+
+		List<String> runeTypes()
+		{
+			Set<String> types = new LinkedHashSet<>();
+			uses.values().forEach(r -> types.addAll(r.keySet()));
+			return new ArrayList<>(types);
+		}
+
+		String purposesOf(String rune)
+		{
+			List<String> out = new ArrayList<>();
+			uses.forEach((purpose, r) ->
+			{
+				if (r.containsKey(rune))
+				{
+					out.add(purpose);
+				}
+			});
+			return String.join("; ", out);
+		}
+	}
+
+	/**
+	 * The runes: in your best rune pouch when you own one, with what each is for; any types it can't
+	 * hold, or all of them without a pouch, as stacks of their own.
+	 */
+	private int addRunes(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, RunePlan runes)
+	{
+		if (runes.isEmpty())
+		{
+			return 0;
+		}
+		PrepData.Supplies s = data.supplies();
+		String pouch = s.runePouches == null ? null : firstOwned(new ArrayList<>(s.runePouches.keySet()), owned);
+		List<String> types = runes.runeTypes();
+		List<String> loose = types;
+		int slots = 0;
+		if (pouch != null)
+		{
+			int capacity = s.runePouches.get(pouch);
+			List<String> inPouch = types.subList(0, Math.min(capacity, types.size()));
+			loose = types.subList(inPouch.size(), types.size());
+			List<String> parts = new ArrayList<>();
+			runes.uses.forEach((purpose, r) ->
+			{
+				List<String> these = new ArrayList<>();
+				for (String rune : r.keySet())
+				{
+					if (inPouch.contains(rune))
+					{
+						these.add(rune.replace(" rune", "").toLowerCase(Locale.ROOT));
+					}
+				}
+				if (!these.isEmpty())
+				{
+					parts.add(joinAnd(these) + " runes (" + purpose + ")");
+				}
+			});
+			for (String other : runes.other)
+			{
+				parts.add("runes for " + other);
+			}
+			if (!parts.isEmpty() && !listed(lines, pouch))
+			{
+				slots += addLine(lines, ids, owned, pouch, 1, "with " + joinAnd(parts), false);
+			}
+		}
+		for (String rune : loose)
+		{
+			if (owned.count(rune, true) > 0 && !listed(lines, rune))
+			{
+				slots += addStack(lines, ids, owned, rune, "for " + runes.purposesOf(rune));
+			}
+		}
+		return slots;
+	}
+
+	private static String joinAnd(List<String> parts)
+	{
+		return parts.size() <= 1 ? String.join("", parts)
+			: String.join(", ", parts.subList(0, parts.size() - 1)) + " and " + parts.get(parts.size() - 1);
+	}
+
+	/**
+	 * The teleport spell a route starts with, or null when it isn't one.
+	 */
+	private PrepData.TeleportSpell spellFor(String text)
+	{
+		Map<String, PrepData.TeleportSpell> spells = data.supplies().teleportSpells;
+		if (text == null || spells == null)
+		{
+			return null;
+		}
+		for (Map.Entry<String, PrepData.TeleportSpell> e : spells.entrySet())
+		{
+			if (text.startsWith(e.getKey()))
+			{
+				return e.getValue();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether the player can cast a teleport spell now: on its spellbook, with the Magic level, the
+	 * quest done, and the runes for one cast.
+	 */
+	private static boolean canCast(PrepData.TeleportSpell spell, Request request, OwnedItems owned)
+	{
+		if (request.getSpellbook() == null || !request.getSpellbook().equals(spell.spellbook)
+			|| request.getMagicLevel() < spell.level
+			|| (spell.quest != null && !request.getFinishedQuests().contains(spell.quest)))
+		{
+			return false;
+		}
+		for (Map.Entry<String, Integer> rune : spell.runes.entrySet())
+		{
+			if (owned.count(rune.getKey(), true) < rune.getValue())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static String fairyRingCode(String text)
+	{
+		return text != null && text.startsWith("Fairy ring ") && text.length() >= 14 ? text.substring(11, 14) : null;
+	}
+
+	/**
+	 * The fairy ring staff to carry: "" when none is needed (elite Lumbridge Diary), null when the
+	 * player has none.
+	 */
+	private String fairyRingStaff(Request request, OwnedItems owned)
+	{
+		return request.isFairyRingsWithoutStaff() ? "" : firstOwned(data.supplies().fairyRingStaffs, owned);
+	}
+
+	/**
+	 * The best way the player has to reach a fairy ring, or null.
+	 */
+	private PrepData.Teleport fairyRingAccess(OwnedItems owned)
+	{
+		List<PrepData.Teleport> access = data.supplies().fairyRingAccess;
+		if (access != null)
+		{
+			for (PrepData.Teleport t : access)
+			{
+				if (ownedTeleport(t.items, owned) != null)
+				{
+					return t;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether the player can use a route now: an owned teleport item, a spell they can cast, or a
+	 * fairy ring they can reach and use; null for routes that need nothing to carry.
+	 */
+	private Boolean usable(PrepData.Teleport t, Request request, OwnedItems owned)
+	{
+		if (t.items != null && !t.items.isEmpty())
+		{
+			return ownedTeleport(t.items, owned) != null;
+		}
+		PrepData.TeleportSpell spell = spellFor(t.text);
+		if (spell != null)
+		{
+			return canCast(spell, request, owned);
+		}
+		if (fairyRingCode(t.text) != null)
+		{
+			return fairyRingStaff(request, owned) != null && fairyRingAccess(owned) != null;
+		}
+		return null;
+	}
+
+	/**
+	 * The best route to a place the player can use, in the data's best-first order: carries the
+	 * teleport item, plans the spell's runes, or carries the fairy ring staff and the way to a ring.
+	 * Worn teleports become a tip. Returns the slots used, or -1 when no route can be planned.
+	 */
+	private int addRoute(List<PrepPlan.InventoryLine> lines, Set<Integer> ids, OwnedItems owned, String key,
+		List<PrepData.Teleport> list, List<String> tips, Request request, RunePlan runes)
+	{
+		PrepData.Supplies s = data.supplies();
+		for (PrepData.Teleport t : list)
+		{
+			if (t.items != null && !t.items.isEmpty())
 			{
 				String name = ownedTeleport(t.items, owned);
 				if (name == null)
 				{
 					continue;
 				}
-				added = true;
 				if (matchesAny(name, s.wornTeleports))
 				{
 					tips.add("Wear your " + name + " to teleport to " + key + ".");
+					return 0;
 				}
-				else if (!listed(lines, name))
+				if (listed(lines, name))
 				{
-					String note = "teleport to " + key;
-					slots += matchesAny(name, s.stackableTeleports)
-						? addStack(lines, ids, owned, name, note)
-						: addLine(lines, ids, owned, name, 1, note, false);
+					return 0;
 				}
-				break;
+				String note = "teleport to " + key;
+				return matchesAny(name, s.stackableTeleports)
+					? addStack(lines, ids, owned, name, note)
+					: addLine(lines, ids, owned, name, 1, note, false);
 			}
-			if (added && !locationKnown)
+			PrepData.TeleportSpell spell = spellFor(t.text);
+			if (spell != null)
 			{
-				break;
+				if (!canCast(spell, request, owned))
+				{
+					continue;
+				}
+				runes.uses.put("teleport to " + key, spell.runes);
+				return 0;
+			}
+			String code = fairyRingCode(t.text);
+			if (code != null)
+			{
+				String staff = fairyRingStaff(request, owned);
+				PrepData.Teleport access = fairyRingAccess(owned);
+				if (staff == null || access == null)
+				{
+					continue;
+				}
+				int slots = 0;
+				if (!staff.isEmpty() && !listed(lines, staff) && !request.getWornNames().contains(staff))
+				{
+					slots += addLine(lines, ids, owned, staff, 1, "to use the fairy ring " + code + " to " + key, false);
+				}
+				String item = ownedTeleport(access.items, owned);
+				if (!listed(lines, item))
+				{
+					slots += addLine(lines, ids, owned, item, 1, "to reach a fairy ring (" + access.text + "), then "
+						+ code + " to " + key, false);
+				}
+				return slots;
 			}
 		}
-		return slots;
+		return -1;
 	}
 
 	/**
@@ -906,7 +1163,7 @@ public final class PrepPlanner
 		return location != null && !location.trim().isEmpty() && !keys.isEmpty();
 	}
 
-	private List<PrepPlan.TeleportOption> teleports(List<String> keys, OwnedItems owned)
+	private List<PrepPlan.TeleportOption> teleports(List<String> keys, OwnedItems owned, Request request)
 	{
 		List<PrepPlan.TeleportOption> out = new ArrayList<>();
 		for (String key : keys)
@@ -916,18 +1173,17 @@ public final class PrepPlanner
 			{
 				continue;
 			}
-			addOptions(out, key, list, owned);
+			addOptions(out, key, list, owned, request);
 		}
 		return out;
 	}
 
 	private void addOptions(List<PrepPlan.TeleportOption> out, String location, List<PrepData.Teleport> list,
-		OwnedItems owned)
+		OwnedItems owned, Request request)
 	{
 		for (PrepData.Teleport t : list)
 		{
-			Boolean has = t.items == null || t.items.isEmpty() ? null : ownedTeleport(t.items, owned) != null;
-			out.add(new PrepPlan.TeleportOption(location, t.text, has));
+			out.add(new PrepPlan.TeleportOption(location, t.text, usable(t, request, owned)));
 		}
 	}
 

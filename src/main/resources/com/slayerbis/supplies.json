@@ -55,7 +55,6 @@
     "ashes": ["Ash sanctifier"],
     "alchables": ["Divine rune pouch", "Rune pouch"]
   },
-  "alchRunes": ["Nature rune"],
   "lureWeapons": ["Bronze knife", "Iron knife", "Bronze dart", "Iron dart", "Steel knife", "Steel dart", "Black knife", "Mithril knife", "Mithril dart"],
   "specWeapons": [
     {"name": "Elder maul", "note": "lowers Defence by 35% on hit"},
@@ -70,5 +69,12 @@
   "cannonballs": ["Granite cannonball", "Cannonball"],
 
   "dragonfireShields": ["Dragonfire shield", "Dragonfire ward", "Ancient wyvern shield", "Anti-dragon shield"],
-  "wyvernShields": ["Ancient wyvern shield", "Dragonfire shield", "Dragonfire ward", "Elemental shield", "Mind shield"]
+  "wyvernShields": ["Ancient wyvern shield", "Dragonfire shield", "Dragonfire ward", "Elemental shield", "Mind shield"],
+
+  "_travelComment": "Teleport spells by name, as they start a route's text: spellbook (standard, ancient, lunar, arceuus), Magic level, runes per cast, and the quest that unlocks it (a RuneLite Quest name). A route starting 'Fairy ring' needs a fairy ring staff (or the elite Lumbridge Diary) and one of the ways to reach a ring, best first.",
+  "teleportSpells": {"Varrock Teleport": {"spellbook": "standard", "level": 25, "runes": {"Law rune": 1, "Air rune": 3, "Fire rune": 1}}, "Lumbridge Teleport": {"spellbook": "standard", "level": 31, "runes": {"Law rune": 1, "Air rune": 3, "Earth rune": 1}}, "Falador Teleport": {"spellbook": "standard", "level": 37, "runes": {"Law rune": 1, "Air rune": 3, "Water rune": 1}}, "Kourend Castle Teleport": {"spellbook": "standard", "level": 48, "runes": {"Law rune": 2, "Fire rune": 1, "Water rune": 1}, "quest": "CLIENT_OF_KOUREND"}, "Ardougne Teleport": {"spellbook": "standard", "level": 51, "runes": {"Law rune": 2, "Water rune": 2}, "quest": "PLAGUE_CITY"}, "Civitas illa Fortis Teleport": {"spellbook": "standard", "level": 54, "runes": {"Law rune": 2, "Earth rune": 1, "Fire rune": 1}, "quest": "TWILIGHTS_PROMISE"}, "Watchtower Teleport": {"spellbook": "standard", "level": 58, "runes": {"Law rune": 2, "Earth rune": 2}, "quest": "WATCHTOWER"}, "Trollheim Teleport": {"spellbook": "standard", "level": 61, "runes": {"Law rune": 2, "Fire rune": 2}, "quest": "EADGARS_RUSE"}, "Paddewwa Teleport": {"spellbook": "ancient", "level": 54, "runes": {"Law rune": 2, "Air rune": 1, "Fire rune": 1}}, "Kharyrll Teleport": {"spellbook": "ancient", "level": 66, "runes": {"Law rune": 2, "Blood rune": 1}}, "Lassar Teleport": {"spellbook": "ancient", "level": 72, "runes": {"Law rune": 2, "Water rune": 4}}, "Dareeyak Teleport": {"spellbook": "ancient", "level": 78, "runes": {"Law rune": 2, "Air rune": 2, "Fire rune": 3}}, "Carrallanger Teleport": {"spellbook": "ancient", "level": 84, "runes": {"Law rune": 2, "Soul rune": 2}}, "Annakarl Teleport": {"spellbook": "ancient", "level": 90, "runes": {"Law rune": 2, "Blood rune": 2}}, "Ghorrock Teleport": {"spellbook": "ancient", "level": 96, "runes": {"Law rune": 2, "Water rune": 8}}, "Moonclan Teleport": {"spellbook": "lunar", "level": 69, "runes": {"Law rune": 1, "Astral rune": 2, "Earth rune": 2}}, "Barrows Teleport": {"spellbook": "arceuus", "level": 83, "runes": {"Law rune": 2, "Soul rune": 2, "Blood rune": 1}}},
+  "fairyRingStaffs": ["Lunar staff", "Dramen staff"],
+  "fairyRingAccess": [{"text": "Quest point cape: fairy ring BLR", "items": ["Quest point cape"]}, {"text": "Slayer ring: Fremennik Slayer Dungeon, fairy ring AJR", "items": ["Slayer ring"]}, {"text": "Achievement diary cape: Le-Sabrè, fairy ring CKS", "items": ["Achievement diary cape"]}, {"text": "Necklace of passage: Wizards' Tower, fairy ring DIS", "items": ["Necklace of passage"]}, {"text": "Ring of wealth: Miscellania, fairy ring CIP", "items": ["Ring of wealth"]}, {"text": "Ardougne cloak: Monastery, fairy ring DJP", "items": ["Ardougne cloak"]}, {"text": "Amulet of glory: Edgeville, fairy ring DKR", "items": ["Amulet of glory"]}, {"text": "Ectophial: Ectofuntus, fairy ring ALQ", "items": ["Ectophial"]}, {"text": "Skills necklace: Farming Guild, fairy ring CIR", "items": ["Skills necklace"]}],
+  "runePouches": {"Divine rune pouch": 4, "Rune pouch": 3},
+  "alchemyRunes": {"Nature rune": 1, "Fire rune": 5}
 }
