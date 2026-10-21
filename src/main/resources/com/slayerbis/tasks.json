@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'venom': true marks tasks whose monsters poison or envenom you. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles. 'locationNeeds' are what a location itself needs, whatever the task: worn items ('required'), carried items ('inventory') and 'tips'. They apply when the Slayer plugin reports that location, or the task lists only that one; otherwise their 'summary' becomes a tip. Task 'tips' are shown as they are. Inventory entries may set 'killsEach' (one item covers this many kills), 'maxCount', 'optional' (not flagged when missing) and 'exact' (match names exactly). 'minWeight' is the least the worn gear must weigh, in kg (gryphons knock lighter players back); the gear search only suggests sets at least that heavy. Boss entries may also have 'monsters' (the boss's monsters or phases, 'Name (version)' or 'Name'), 'wholeFight': true (every listed monster is fought each trip, so the plan carries switches for the others), 'prefer' (worn items the wiki recommends: {'slot', 'items', 'withinPercent', 'reason'}, kept when the best set without them is no more than withinPercent better), inventory entries with 'switch': true (a swap the wiki recommends for part of the fight, carried when owned and the Wiki switches setting is on) and 'onlyFor' (only for that version of the boss, e.g. 'Awakened'). Reasons may mention a mechanic or prayer effect, as the wiki does, but never say what to do in the fight: no prayer instructions, timing or positioning.",
+  "_comment": "Hand-maintained Slayer task preparation data. Task keys are Slayer task names in lower case, as the RuneLite Slayer plugin reports them. 'required' lists worn items, by slot, that the task needs; any one name per slot satisfies it. 'inventory' lists items to carry; each entry is satisfied by any one of its names (matched as a prefix, so 'Fungicide spray' matches 'Fungicide spray 10'). 'dragonfire' is 'dragon' or 'wyvern'. 'venom': true marks tasks whose monsters poison or envenom you. 'locations' are used when the Slayer plugin does not report a task location. Teleport 'items' are name prefixes used to tick off teleports you own; leave it out for spells or fairy rings. 'cannon': true marks tasks commonly done with a dwarf cannon (the spot must allow one). 'stacks': true marks tasks where monsters bunch up, so bursting or barraging works well. Inventory entries with 'perKill': true are used up on every kill (one per kill, so the plan suggests as many as there are kills left); 'stackable': true means they fit in one slot. 'comboEat': true marks tasks whose monsters hit hard enough that karambwans for combo eating are worth bringing. 'masters' lists teleports back to each Slayer master, best first, for the Slayer master setting. 'safespots' are short text descriptions, summarised from the OSRS Wiki, with an optional 'location' (shown for that location only when the Slayer plugin reports one). Text only: never add bosses, Slayer bosses or demi-bosses, and never draw tiles. 'locationNeeds' are what a location itself needs, whatever the task: worn items ('required'), carried items ('inventory') and 'tips'. They apply when the Slayer plugin reports that location, or the task lists only that one; otherwise their 'summary' becomes a tip. Task 'tips' are shown as they are. Inventory entries may set 'killsEach' (one item covers this many kills), 'maxCount', 'optional' (not flagged when missing) and 'exact' (match names exactly). 'minWeight' is the least the worn gear must weigh, in kg (gryphons knock lighter players back); the gear search only suggests sets at least that heavy. Boss entries may also have 'monsters' (the boss's monsters or phases, 'Name (version)' or 'Name'), 'wholeFight': true (every listed monster is fought each trip, so the plan carries switches for the others), 'prefer' (worn items the wiki recommends: {'slot', 'items', 'withinPercent', 'reason'}, kept when the best set without them is no more than withinPercent better), inventory entries with 'switch': true (a swap the wiki recommends for part of the fight, carried when owned and the Wiki switches setting is on) and 'onlyFor' (only for that version of the boss, e.g. 'Awakened'). Reasons may mention a mechanic or prayer effect, as the wiki does, but never say what to do in the fight: no prayer instructions, timing or positioning. 'stacksAt' lists the multi-combat places where a stacking task's monsters can be burst; when the Slayer plugin reports another place, bursting isn't suggested.",
   "tasks": {
     "aberrant spectres": {
       "required": {
@@ -35,6 +35,9 @@
         "Catacombs of Kourend"
       ],
       "stacks": true,
+      "stacksAt": [
+        "Catacombs of Kourend"
+      ],
       "safespots": [
         {
           "text": "Can't really be safespotted: they teleport themselves or you around when hit."
@@ -706,6 +709,11 @@
         "Catacombs of Kourend"
       ],
       "stacks": true,
+      "stacksAt": [
+        "Catacombs of Kourend",
+        "Smoke Dungeon",
+        "Wilderness Slayer Cave"
+      ],
       "safespots": [
         {
           "location": "Catacombs of Kourend",
@@ -1292,7 +1300,10 @@
         "Slayer Tower",
         "Catacombs of Kourend"
       ],
-      "stacks": true
+      "stacks": true,
+      "stacksAt": [
+        "Catacombs of Kourend"
+      ]
     },
     "ogres": {
       "locations": [
@@ -1474,7 +1485,10 @@
       "locations": [
         "Smoke Devil Dungeon"
       ],
-      "stacks": true
+      "stacks": true,
+      "stacksAt": [
+        "Smoke Devil Dungeon"
+      ]
     },
     "sourhogs": {
       "required": {

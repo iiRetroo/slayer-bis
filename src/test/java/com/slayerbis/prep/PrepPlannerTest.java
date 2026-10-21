@@ -861,4 +861,23 @@ public class PrepPlannerTest
 			assertTrue(e.getKey() + " has safespots", e.getValue().safespots == null);
 		}
 	}
+	@Test
+	public void burstingOnlyWhereMonstersStack()
+	{
+		// Konar can send you to the Slayer Tower, which isn't multi-combat
+		assertTrue(planner.stacks("Abyssal demons", null));
+		assertTrue(planner.stacks("Abyssal demons", "Catacombs of Kourend"));
+		assertFalse(planner.stacks("Abyssal demons", "Slayer Tower"));
+		assertFalse(planner.stacks("Nechryael", "Slayer Tower"));
+		assertTrue(planner.stacks("Dust devils", "Smoke Dungeon"));
+		assertTrue(planner.stacks("Smoke devils", "Smoke Devil Dungeon"));
+		assertFalse(planner.stacks("Bloodveld", null));
+		// no bursting tip or supplies in the Slayer Tower; the tip names the place otherwise
+		PrepPlan tower = planner.plan(PrepPlanner.Request.builder().task("Abyssal demons").location("Slayer Tower")
+			.bestType(AttackType.SLASH).owned(owned("Rune pouch", 1)).build());
+		assertTrue(tower.getTips().stream().noneMatch(t -> t.contains("burst")));
+		PrepPlan unknown = planner.plan(PrepPlanner.Request.builder().task("Abyssal demons")
+			.bestType(AttackType.SLASH).owned(owned("Rune pouch", 1)).build());
+		assertTrue(unknown.getTips().stream().anyMatch(t -> t.contains("Catacombs of Kourend") && t.contains("burst")));
+	}
 }

@@ -101,6 +101,40 @@ class OptimizationOutcome
 	}
 
 	/**
+	 * The result for a type with the ammo and spell picked in the panel.
+	 */
+	StyleResult adjusted(AttackType type, Integer ammoId, String spell)
+	{
+		return withSpell(withAmmo(results.get(type), ammoId), spell);
+	}
+
+	/**
+	 * The best style once the ammo and spell picked in the panel are swapped in, which can make
+	 * another style the best.
+	 */
+	StyleResult best(Integer ammoId, String spell)
+	{
+		StyleResult best = null;
+		for (AttackType type : results.keySet())
+		{
+			StyleResult r = adjusted(type, ammoId, spell);
+			if (r.isValid() && (best == null || r.getResult().getDps() > best.getResult().getDps()))
+			{
+				best = r;
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * The result for a type with the panel's picks, or the best when type is null.
+	 */
+	StyleResult resultFor(AttackType type, Integer ammoId, String spell)
+	{
+		return type == null ? best(ammoId, spell) : adjusted(type, ammoId, spell);
+	}
+
+	/**
 	 * The result for a type, or the overall best when type is null.
 	 */
 	StyleResult resultFor(AttackType type)

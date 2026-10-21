@@ -31,6 +31,8 @@ public final class PrepData
 		boolean cannon;
 		/** Monsters bunch up, so multi-target spells work well. */
 		boolean stacks;
+		/** Where they stack (multi-combat places), or null for anywhere the task is done. */
+		List<String> stacksAt;
 		/** Monsters hit hard enough that combo eating helps. */
 		boolean comboEat;
 		/** The least the worn gear must weigh, in kg; 0 for no limit. */

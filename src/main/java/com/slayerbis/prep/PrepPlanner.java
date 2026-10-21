@@ -170,8 +170,34 @@ public final class PrepPlanner
 
 	public boolean stacks(String task)
 	{
+		return stacks(task, null);
+	}
+
+	/**
+	 * Whether the task's monsters stack where it's done: false when the Slayer plugin reports a place
+	 * that isn't multi-combat (a Konar task in the Slayer Tower, say), true when no place is reported.
+	 */
+	public boolean stacks(String task, String location)
+	{
 		PrepData.TaskInfo info = data.task(task);
-		return info != null && info.stacks;
+		if (info == null || !info.stacks)
+		{
+			return false;
+		}
+		if (info.stacksAt == null || location == null || location.trim().isEmpty())
+		{
+			return true;
+		}
+		String loc = location.trim().toLowerCase(Locale.ROOT);
+		for (String place : info.stacksAt)
+		{
+			String p = place.toLowerCase(Locale.ROOT);
+			if (loc.contains(p) || p.contains(loc))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -456,9 +482,12 @@ public final class PrepPlanner
 				slots += addStack(lines, ids, owned, balls, "for the cannon");
 			}
 		}
-		if (info != null && info.stacks)
+		if (stacks(task, request.getLocation()))
 		{
-			tips.add("Monsters stack here, so bursting or barraging (Ancient Magicks) works well.");
+			tips.add(info.stacksAt == null
+				? "Monsters stack here, so bursting or barraging (Ancient Magicks) works well."
+				: "Monsters stack in the " + String.join(" or the ", info.stacksAt)
+				+ ", so bursting or barraging (Ancient Magicks) works well there.");
 			String pouch = firstOwned(s.lootTools == null ? null : s.lootTools.get("alchables"), owned);
 			if (pouch != null && !listed(lines, pouch))
 			{

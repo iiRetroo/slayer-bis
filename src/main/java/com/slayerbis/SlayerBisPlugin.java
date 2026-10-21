@@ -86,6 +86,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
 
 /**
  * Reads the bank when it is opened, works out the highest-DPS gear for the current Slayer task,
@@ -114,6 +115,8 @@ public class SlayerBisPlugin extends Plugin
 	private static final String POTION_STORE_KEY = "potionStore";
 	private static final String GROUP_STORAGE_KEY = "groupStorage";
 	private static final int MAX_DOSES = 4;
+	/** Where feedback and suggestions go: the plugin's GitHub issues. */
+	private static final String FEEDBACK_URL = "https://github.com/iiRetroo/slayer-bis/issues";
 	/** Items that give the Slayer helmet's on-task bonus, by canonical name. */
 	private static final Set<String> SLAYER_HELMS = Set.of("Slayer helmet", "Slayer helmet (i)", "Black mask", "Black mask (i)");
 	/** Helms that make you immune to poison and venom while charged. */
@@ -705,6 +708,13 @@ public class SlayerBisPlugin extends Plugin
 				|| "highlightSupplies".equals(key) || "supplyHighlightColor".equals(key))
 			{
 				updateHighlightColors();
+				SwingUtilities.invokeLater(() ->
+				{
+					if (panel != null)
+					{
+						panel.redraw();
+					}
+				});
 			}
 			else if ("inventoryView".equals(key))
 			{
@@ -826,6 +836,30 @@ public class SlayerBisPlugin extends Plugin
 	void selectSpell(String spell)
 	{
 		selectedSpell = spell;
+		// a cheaper spell can make another style the best
+		updateHighlights();
+	}
+
+	boolean isHighlighting()
+	{
+		return config.highlightBank();
+	}
+
+	/**
+	 * Called from the panel: turns the bank outlines off or on, the same as the Highlight in bank
+	 * setting.
+	 */
+	void toggleHighlights()
+	{
+		configManager.setConfiguration(SlayerBisConfig.GROUP, "highlightBank", !config.highlightBank());
+	}
+
+	/**
+	 * Called from the panel: opens the plugin's GitHub issues page for feedback and suggestions.
+	 */
+	void openFeedback()
+	{
+		LinkBrowser.browse(FEEDBACK_URL);
 	}
 
 	String getSelectedSpell()
@@ -1255,7 +1289,7 @@ public class SlayerBisPlugin extends Plugin
 			}
 			Map<AttackType, List<StyleResult.Alternative>> spellOptions = new EnumMap<>(AttackType.class);
 			spellOptions.put(AttackType.MAGIC, optimizer.spellOptions(results.get(AttackType.MAGIC)));
-			if (settings.getBurstTargets() > 0 && prep.stacks(prepTask))
+			if (settings.getBurstTargets() > 0 && prep.stacks(prepTask, prepLocation))
 			{
 				// casting Ancients by hand on a stack: magic on the Ancient spellbook, DPS times the targets
 				PlayerSetup burstSetup = setup.toBuilder().ancientSpellbook(true)
@@ -1783,7 +1817,7 @@ public class SlayerBisPlugin extends Plugin
 			return;
 		}
 		supplyHighlightIds = sorted(o.getPrep().getSupplyBankIds());
-		StyleResult r = o.withAmmo(o.resultFor(selectedType), selectedAmmo);
+		StyleResult r = o.resultFor(selectedType, selectedAmmo, selectedSpell);
 		if (r == null || !r.isValid())
 		{
 			highlightIds = new int[0];
