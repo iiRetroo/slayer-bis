@@ -53,6 +53,10 @@ public class TaskMonsterResolver
 			"Karil the Tainted", "Torag the Corrupted", "Verac the Defiled"))
 		.put("warped creatures", ImmutableList.of("Warped Terrorbird", "Warped Tortoise"))
 		.put("greater demons", ImmutableList.of("Greater demon", "Tormented Demon"))
+		.put("black dragons", ImmutableList.of("Black dragon", "Baby black dragon", "Brutal black dragon"))
+		.put("blue dragons", ImmutableList.of("Blue dragon", "Baby blue dragon", "Brutal blue dragon"))
+		.put("green dragons", ImmutableList.of("Green dragon", "Baby green dragon", "Brutal green dragon"))
+		.put("red dragons", ImmutableList.of("Red dragon", "Baby red dragon", "Brutal red dragon"))
 		.build();
 
 	/**

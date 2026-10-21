@@ -359,4 +359,16 @@ public class OptimizerTest
 			assertTrue(spells.get(i).getResult().getDps() <= spells.get(i - 1).getResult().getDps());
 		}
 	}
+
+	@Test
+	public void babyAndBrutalDragonsAreOffered()
+	{
+		for (String colour : new String[]{"black", "blue", "green", "red"})
+		{
+			List<Monster> choices = resolver.candidates(colour.substring(0, 1).toUpperCase() + colour.substring(1) + " dragons");
+			assertTrue(colour, choices.stream().anyMatch(m -> m.getName().equals("Baby " + colour + " dragon")));
+			assertTrue(colour, choices.stream().anyMatch(m -> m.getName().equals("Brutal " + colour + " dragon")));
+			assertEquals(colour.substring(0, 1).toUpperCase() + colour.substring(1) + " dragon", choices.get(0).getName());
+		}
+	}
 }
