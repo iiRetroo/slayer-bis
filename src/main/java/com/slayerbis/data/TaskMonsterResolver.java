@@ -157,6 +157,8 @@ public class TaskMonsterResolver
 		.put("eldric the ice king", "royal titans")
 		.put("amoxliatl", "amoxliatl")
 		.put("maggot king", "maggot king")
+		.put("tormented demon", "tormented demons")
+		.put("demonic gorilla", "demonic gorillas")
 		.build();
 
 	private static final int MAX_CANDIDATES = 40;

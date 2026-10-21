@@ -200,4 +200,45 @@ public class FightPlanTest
 		assertEquals(best.getResult().getDps() - kept.getResult().getDps(), cost.get(AttackType.RANGED), 1e-9);
 		System.out.println(notes.get(AttackType.RANGED));
 	}
+	@Test
+	public void tormentedDemonsGetASecondStyle()
+	{
+		List<Optimizer.Candidate> bank = new ArrayList<>();
+		Map<Integer, String> names = new HashMap<>();
+		for (String n : BANK)
+		{
+			GearItem item = data.findItem(n);
+			bank.add(new Optimizer.Candidate(item, item.getId()));
+			names.put(item.getId(), item.getName());
+		}
+		Monster demon = resolver.forBoss(List.of("Tormented Demon")).get(0);
+		Optimizer optimizer = new Optimizer(SETUP, demon, new AtomicBoolean());
+		Map<AttackType, StyleResult> results = new java.util.EnumMap<>(AttackType.class);
+		StyleResult main = null;
+		for (AttackType t : AttackType.values())
+		{
+			if (t == AttackType.BURST)
+			{
+				continue;
+			}
+			StyleResult r = optimizer.optimise(bank, t);
+			results.put(t, r);
+			if (r.isValid() && (main == null || r.getResult().getDps() > main.getResult().getDps()))
+			{
+				main = r;
+			}
+		}
+		List<OptimizationOutcome.Phase> phases = new ArrayList<>();
+		List<PrepPlan.Switch> switches = new ArrayList<>();
+		SlayerBisPlugin.planSecondStyle(optimizer, results, main, bank, Collections.emptyMap(), 0, 10, names, demon,
+			phases, switches, new HashSet<>());
+		assertEquals(2, phases.size());
+		AttackType second = phases.get(1).getType();
+		System.out.printf("main %s, second %s, switches %s%n", main.getType(), second,
+			switches.stream().map(PrepPlan.Switch::getName).collect(java.util.stream.Collectors.toList()));
+		// a different style group from the main set, with at least a weapon to switch to
+		assertTrue(main.getType().isMelee() != second.isMelee() || (second == AttackType.RANGED) != (main.getType() == AttackType.RANGED));
+		assertTrue(phases.get(1).getSwitches().stream().anyMatch(c -> c.getItem().getSlot() == EquipmentSlot.WEAPON));
+		assertTrue(switches.stream().allMatch(sw -> sw.getNote().endsWith("as a second style")));
+	}
 }

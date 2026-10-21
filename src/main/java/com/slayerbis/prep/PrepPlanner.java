@@ -168,6 +168,16 @@ public final class PrepPlanner
 		return info == null || !info.wholeFight || info.monsters == null ? Collections.emptyList() : info.monsters;
 	}
 
+	/**
+	 * Whether the monster is fought with two combat styles (a demi-boss such as a Tormented Demon),
+	 * so the plan carries the best set of another style as switches.
+	 */
+	public boolean secondStyle(String task)
+	{
+		PrepData.TaskInfo info = data.task(task);
+		return info != null && info.secondStyle;
+	}
+
 	public boolean stacks(String task)
 	{
 		return stacks(task, null);

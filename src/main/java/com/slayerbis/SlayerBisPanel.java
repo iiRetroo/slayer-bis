@@ -610,9 +610,12 @@ class SlayerBisPanel extends PluginPanel
 	private JComponent fightPlan()
 	{
 		JPanel list = column();
-		for (OptimizationOutcome.Phase p : outcome.getPhases())
+		List<OptimizationOutcome.Phase> phases = outcome.getPhases();
+		for (int i = 0; i < phases.size(); i++)
 		{
-			boolean main = p.getMonster() == outcome.getMonster();
+			OptimizationOutcome.Phase p = phases.get(i);
+			// the main set is always first (a demi-boss's second style is the same monster)
+			boolean main = i == 0;
 			list.add(left(text(p.getMonster().displayName() + ": " + p.getType().getDisplayName() + ", "
 				+ DPS_FORMAT.format(p.getDps()) + " DPS" + (main ? " (main set)" : p.getSwitches().isEmpty() ? " (no switches)" : ""),
 				main ? Color.WHITE : MUTED, true)));

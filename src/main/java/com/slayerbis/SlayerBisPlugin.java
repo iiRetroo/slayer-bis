@@ -1341,6 +1341,12 @@ public class SlayerBisPlugin extends Plugin
 				}
 			}
 
+			if (settings.isPlanSwitches() && best != null && phases.isEmpty() && prep.secondStyle(prepTask))
+			{
+				planSecondStyle(optimizer, results, best, candidates, required, minWeight, settings.getSwitchTolerance(),
+					names, monster, phases, switches, plannedWeapons);
+			}
+
 			PrepPlan plan = settings.isShowPreparation()
 				? prep.plan(PrepPlanner.Request.builder()
 				.task(prepTask)
@@ -1474,6 +1480,63 @@ public class SlayerBisPlugin extends Plugin
 	}
 
 	/**
+	 * For a demi-boss fought with two combat styles: the best set of another style group (melee,
+	 * ranged or magic) than the main set, trimmed by Fewer switches, carried as switches. Planned
+	 * before the trip only.
+	 */
+	static void planSecondStyle(Optimizer optimizer, Map<AttackType, StyleResult> results, StyleResult mainBest,
+		List<Optimizer.Candidate> candidates, Map<EquipmentSlot, Set<String>> required, int minWeight, int switchTolerance,
+		Map<Integer, String> names, Monster monster, List<OptimizationOutcome.Phase> phases,
+		List<PrepPlan.Switch> switches, Set<String> plannedWeapons)
+	{
+		StyleResult other = null;
+		for (StyleResult r : results.values())
+		{
+			if (r.isValid() && r.getType() != AttackType.BURST && styleGroup(r.getType()) != styleGroup(mainBest.getType())
+				&& (other == null || r.getResult().getDps() > other.getResult().getDps()))
+			{
+				other = r;
+			}
+		}
+		if (other == null)
+		{
+			return;
+		}
+		int fullSwitches = switchesFrom(other, mainBest).size();
+		double fullDps = other.getResult().getDps();
+		// stay in the other style: keeping the main set as it is would be no second style at all
+		other = fewerSwitches(optimizer, candidates, other, mainBest, required, minWeight, switchTolerance, false);
+		List<Optimizer.Candidate> extra = switchesFrom(other, mainBest);
+		phases.add(new OptimizationOutcome.Phase(monster, mainBest.getType(), mainBest.getResult().getDps(), List.of(),
+			0, 0));
+		phases.add(new OptimizationOutcome.Phase(monster, other.getType(), other.getResult().getDps(), extra,
+			fullSwitches - extra.size(), fullDps - other.getResult().getDps()));
+		String note = "switch for " + other.getType().getDisplayName().toLowerCase(java.util.Locale.ROOT)
+			+ " as a second style";
+		Set<Integer> added = new HashSet<>();
+		for (Optimizer.Candidate c : extra)
+		{
+			String name = names.get(c.getOwnedItemId());
+			if (added.add(c.getOwnedItemId()) && name != null)
+			{
+				switches.add(new PrepPlan.Switch(name, note));
+			}
+			if (c.getItem().getSlot() == EquipmentSlot.WEAPON)
+			{
+				plannedWeapons.add(c.getItem().getName());
+			}
+		}
+	}
+
+	/**
+	 * 0 for melee, 1 for ranged, 2 for magic.
+	 */
+	private static int styleGroup(AttackType type)
+	{
+		return type.isMelee() ? 0 : type == AttackType.RANGED ? 1 : 2;
+	}
+
+	/**
 	 * The items of a set that differ from the main set, which would have to be carried.
 	 */
 	private static List<Optimizer.Candidate> switchesFrom(StyleResult set, StyleResult mainBest)
@@ -1499,17 +1562,30 @@ public class SlayerBisPlugin extends Plugin
 	private static StyleResult fewerSwitches(Optimizer optimizer, List<Optimizer.Candidate> candidates,
 		StyleResult best, StyleResult mainBest, Map<EquipmentSlot, Set<String>> required, int minWeight, int percent)
 	{
+		return fewerSwitches(optimizer, candidates, best, mainBest, required, minWeight, percent, true);
+	}
+
+	/**
+	 * @param mainSetAllowed whether the main set as it is may stand in (not for a second style)
+	 */
+	private static StyleResult fewerSwitches(Optimizer optimizer, List<Optimizer.Candidate> candidates,
+		StyleResult best, StyleResult mainBest, Map<EquipmentSlot, Set<String>> required, int minWeight, int percent,
+		boolean mainSetAllowed)
+	{
 		if (percent <= 0)
 		{
 			return best;
 		}
 		double floor = best.getResult().getDps() * 100 / (100 + percent);
 
-		Map<EquipmentSlot, Set<String>> all = keepSlots(required, mainBest, EnumSet.allOf(EquipmentSlot.class));
-		StyleResult asIs = optimizer.optimise(candidates, mainBest.getType(), all, minWeight);
-		if (asIs.isValid() && asIs.getResult().getDps() >= floor)
+		if (mainSetAllowed)
 		{
-			return asIs;
+			Map<EquipmentSlot, Set<String>> all = keepSlots(required, mainBest, EnumSet.allOf(EquipmentSlot.class));
+			StyleResult asIs = optimizer.optimise(candidates, mainBest.getType(), all, minWeight);
+			if (asIs.isValid() && asIs.getResult().getDps() >= floor)
+			{
+				return asIs;
+			}
 		}
 
 		// slots whose switch could be dropped, cheapest first

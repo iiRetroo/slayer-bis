@@ -44,6 +44,8 @@ public final class PrepData
 		List<String> monsters;
 		/** Every listed monster is fought each trip, so the plan carries switches for the others. */
 		boolean wholeFight;
+		/** A demi-boss fought with two combat styles, so the plan carries another style as switches. */
+		boolean secondStyle;
 		/** Worn items the wiki recommends for reasons the DPS maths can't see. */
 		List<Preference> prefer;
 	}

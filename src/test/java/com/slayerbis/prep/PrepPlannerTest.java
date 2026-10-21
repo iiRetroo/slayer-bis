@@ -880,4 +880,21 @@ public class PrepPlannerTest
 			.bestType(AttackType.SLASH).owned(owned("Rune pouch", 1)).build());
 		assertTrue(unknown.getTips().stream().anyMatch(t -> t.contains("Catacombs of Kourend") && t.contains("burst")));
 	}
+	@Test
+	public void demiBossesGetBossStylePreparation()
+	{
+		assertTrue(planner.secondStyle("tormented demons"));
+		assertTrue(planner.secondStyle("demonic gorillas"));
+		assertFalse(planner.secondStyle("Greater demons"));
+		assertEquals("tormented demons", com.slayerbis.data.TaskMonsterResolver.bossTask("Tormented Demon"));
+		assertEquals("demonic gorillas", com.slayerbis.data.TaskMonsterResolver.bossTask("Demonic gorilla"));
+		// the temple's teleport scrolls stack; wiki swaps when owned
+		PrepPlan demons = planner.plan(boss("tormented demons", AttackType.SLASH,
+			owned("Guthixian temple teleport", 4, "Purging staff", 1, "Shark", 50)).build());
+		assertTrue(demons.getInventory().stream().anyMatch(l -> l.getName().equals("Guthixian temple teleport")
+			&& l.isStackable()));
+		assertTrue(names(demons).contains("Purging staff"));
+		assertTrue(planner.plan(boss("demonic gorillas", AttackType.SLASH, owned("Royal seed pod", 1)).build())
+			.getTeleports().stream().anyMatch(t -> t.getText().startsWith("Royal seed pod") && Boolean.TRUE.equals(t.getOwned())));
+	}
 }
