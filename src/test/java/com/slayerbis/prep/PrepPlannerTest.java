@@ -430,7 +430,7 @@ public class PrepPlannerTest
 		PrepPlan potionsOnly = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
 			.owned(owned("Moonlight moth mix (2)", 20)).prayerPotions(5).prayerRestore(PrayerRestore.POTIONS_ONLY).build());
 		assertTrue(potionsOnly.getInventory().stream().noneMatch(l -> l.getName().startsWith("Moonlight")));
-		assertTrue(potionsOnly.getNotes().stream().anyMatch(n -> n.contains("No prayer potions or super restores")));
+		assertTrue(potionsOnly.getNotes().stream().anyMatch(n -> n.contains("No prayer potions, super restores or sanfew serums")));
 	}
 
 	@Test
@@ -684,6 +684,83 @@ public class PrepPlannerTest
 		PrepPlan none = planner.plan(PrepPlanner.Request.builder().task("Gryphons").bestType(AttackType.STAB)
 			.owned(owned()).combatPotions(1).build());
 		assertTrue(none.getNotes().contains("No melee boosting potion found."));
+	}
+
+	private static List<String> names(PrepPlan plan)
+	{
+		List<String> out = new java.util.ArrayList<>();
+		for (PrepPlan.InventoryLine l : plan.getInventory())
+		{
+			out.add(l.getName());
+		}
+		return out;
+	}
+
+	private static PrepPlan melee(OwnedItems owned)
+	{
+		return planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned).combatPotions(1).build());
+	}
+
+	@Test
+	public void meleePotionFallbacks()
+	{
+		// super attack and strength beat a plain combat potion
+		List<String> pair = names(melee(owned("Combat potion(4)", 2, "Super attack(4)", 2, "Super strength(4)", 2)));
+		assertTrue(pair.containsAll(List.of("Super attack", "Super strength")));
+		assertFalse(pair.contains("Combat potion"));
+		// a missing super potion is made up with the plain one for that stat
+		assertTrue(names(melee(owned("Super attack(4)", 2, "Strength potion(4)", 2)))
+			.containsAll(List.of("Super attack", "Strength potion")));
+		// then a combat potion, then attack and strength potions
+		assertTrue(names(melee(owned("Combat potion(4)", 2, "Attack potion(4)", 2))).contains("Combat potion"));
+		assertTrue(names(melee(owned("Attack potion(4)", 2, "Strength potion(4)", 2)))
+			.containsAll(List.of("Attack potion", "Strength potion")));
+	}
+
+	@Test
+	public void supplyFallbacks()
+	{
+		// sanfew serums restore prayer when there are no prayer potions or super restores
+		assertTrue(names(planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Sanfew serum(4)", 6)).prayerPotions(4).build())).contains("Sanfew serum"));
+		// potions only: a note says when moth mixes were left out
+		PrepPlan potionsOnly = planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.SLASH)
+			.owned(owned("Moonlight moth mix (2)", 10)).prayerPotions(4).prayerRestore(PrayerRestore.POTIONS_ONLY).build());
+		assertTrue(potionsOnly.getNotes().stream().anyMatch(n -> n.contains("You have moonlight moth mixes")));
+		// an antipoison when there's no anti-venom, noted as not stopping venom
+		PrepPlan antipoison = planner.plan(PrepPlanner.Request.builder().task("Hydras").bestType(AttackType.RANGED)
+			.owned(owned("Superantipoison(4)", 1)).build());
+		assertTrue(antipoison.getInventory().stream().anyMatch(l -> l.getName().equals("Superantipoison")
+			&& l.getNote().contains("not venom")));
+		// an antifire mix counts as antifire
+		assertTrue(names(planner.plan(PrepPlanner.Request.builder().task("Blue dragons").bestType(AttackType.RANGED)
+			.owned(owned("Super antifire mix(2)", 2)).build())).contains("Super antifire mix"));
+		// forgotten brew for magic when there's no magic potion
+		assertTrue(names(planner.plan(PrepPlanner.Request.builder().task("Bloodveld").bestType(AttackType.MAGIC)
+			.owned(owned("Forgotten brew(4)", 1)).combatPotions(1).build())).contains("Forgotten brew"));
+	}
+
+	@Test
+	public void wornEntryItemIsNotCarriedAgain()
+	{
+		// a Rune axe is worn, so the Dragon axe isn't carried for the swamp vine
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Deranged archaeologist")
+			.bestType(AttackType.SLASH).owned(owned("Dragon axe", 1, "Rune axe", 1)).wornNames(Set.of("Rune axe")).build());
+		assertTrue(names(plan).stream().noneMatch(n -> n.endsWith(" axe")));
+	}
+
+	@Test
+	public void inertTalismanIsNotATeleport()
+	{
+		PrepPlan inert = planner.plan(PrepPlanner.Request.builder().task("Vardorvis").bestType(AttackType.SLASH)
+			.owned(owned("Xeric's talisman (inert)", 1)).build());
+		assertTrue(inert.getTeleports().stream().filter(t -> t.getText().startsWith("Xeric's talisman"))
+			.allMatch(t -> Boolean.FALSE.equals(t.getOwned())));
+		PrepPlan charged = planner.plan(PrepPlanner.Request.builder().task("Vardorvis").bestType(AttackType.SLASH)
+			.owned(owned("Xeric's talisman", 1)).build());
+		assertTrue(charged.getTeleports().stream().anyMatch(t -> t.getText().startsWith("Xeric's talisman")
+			&& Boolean.TRUE.equals(t.getOwned())));
 	}
 
 	@Test

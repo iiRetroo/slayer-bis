@@ -95,10 +95,15 @@ public final class PrepData
 	static final class Supplies
 	{
 		List<Food> food;
+		/** Super combat potions, best first. */
 		List<String> meleePotions;
-		/** Used together when there's no combat potion. */
+		/** Super attack and strength potions, used together when there's no super combat potion. */
 		List<String> attackPotions;
 		List<String> strengthPotions;
+		/** Weaker fallbacks: a combat potion, then attack and strength potions. */
+		List<String> weakMeleePotions;
+		List<String> weakAttackPotions;
+		List<String> weakStrengthPotions;
 		List<String> rangedPotions;
 		List<String> magicPotions;
 		List<String> magicBoostItems;
@@ -116,6 +121,8 @@ public final class PrepData
 		List<String> superAntifire;
 		List<String> antifire;
 		List<String> antivenom;
+		/** Of the antivenom list, the ones that cure poison but don't protect against venom. */
+		List<String> poisonOnly;
 		List<String> dragonfireShields;
 		List<String> wyvernShields;
 		/** Loot type (herbs, seeds, gems, bones, ashes, alchables) to the items that collect it. */
