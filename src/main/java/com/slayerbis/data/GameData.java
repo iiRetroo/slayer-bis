@@ -142,7 +142,7 @@ public class GameData
 
 	private static int findRank(GearItem item)
 	{
-		return (item.isUsable() ? 0 : 2) + (item.getVersion().isEmpty() ? 0 : 1);
+		return (item.isUsable() && !item.isInactiveArclight() ? 0 : 2) + (item.getVersion().isEmpty() ? 0 : 1);
 	}
 
 	/**
@@ -165,6 +165,26 @@ public class GameData
 			}
 		}
 		return found;
+	}
+
+	/**
+	 * The charged version of a usable but uncharged item (an inactive Arclight), or null.
+	 */
+	public GearItem findChargedVariant(GearItem item)
+	{
+		if (!item.isInactiveArclight())
+		{
+			return null;
+		}
+		for (GearItem other : itemsById.values())
+		{
+			if (other.getName().equals(item.getName()) && other.getSlot() == item.getSlot()
+				&& "Charged".equals(other.getVersion()))
+			{
+				return other;
+			}
+		}
+		return null;
 	}
 
 	private static int preferredVariant(GearItem item)

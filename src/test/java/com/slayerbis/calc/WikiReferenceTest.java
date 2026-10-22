@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Loadouts whose results were checked by hand against the live OSRS Wiki DPS calculator
@@ -93,6 +94,26 @@ public class WikiReferenceTest
 	public void arclightAgainstDemon()
 	{
 		check(GREATER_DEMON_100, AttackType.STAB, Stance.CONTROLLED, false, 20, 79.03, 3.309, "Arclight");
+	}
+
+	@Test
+	public void inactiveArclightHitsLikeDarklight()
+	{
+		// an Arclight with no charges is still wielded, and works exactly like a Darklight
+		GearItem inactive = data.getItem(30305);
+		assertTrue(inactive.isUsable());
+		GearItem[] withInactive = new GearItem[EquipmentSlot.values().length];
+		withInactive[EquipmentSlot.WEAPON.ordinal()] = inactive;
+		GearItem[] withDarklight = new GearItem[EquipmentSlot.values().length];
+		withDarklight[EquipmentSlot.WEAPON.ordinal()] = data.findItem("Darklight");
+		DpsCalculator calc = new DpsCalculator(player(false), data.getMonster(GREATER_DEMON_100));
+		CalcResult a = calc.single(withInactive, AttackType.SLASH, Stance.AGGRESSIVE);
+		CalcResult d = calc.single(withDarklight, AttackType.SLASH, Stance.AGGRESSIVE);
+		assertEquals(d.getMaxHit(), a.getMaxHit());
+		assertEquals(d.getDps(), a.getDps(), 1e-9);
+		// looking Arclight up by name still finds the charged one
+		assertEquals("Charged", data.findItem("Arclight").getVersion());
+		assertEquals("Charged", data.findChargedVariant(inactive).getVersion());
 	}
 
 	@Test

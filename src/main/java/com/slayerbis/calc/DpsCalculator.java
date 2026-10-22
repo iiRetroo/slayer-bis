@@ -60,7 +60,7 @@ public final class DpsCalculator
 		{
 			if (g != null)
 			{
-				names.add(g.getName());
+				names.add(g.isInactiveArclight() ? "Darklight" : g.getName());
 			}
 		}
 
@@ -103,7 +103,7 @@ public final class DpsCalculator
 		{
 			if (g != null)
 			{
-				names.add(g.getName());
+				names.add(g.isInactiveArclight() ? "Darklight" : g.getName());
 			}
 		}
 		List<CalcResult> out = new ArrayList<>();
@@ -147,7 +147,7 @@ public final class DpsCalculator
 		{
 			if (g != null)
 			{
-				names.add(g.getName());
+				names.add(g.isInactiveArclight() ? "Darklight" : g.getName());
 			}
 		}
 		CalcResult best = CalcResult.NONE;
@@ -190,7 +190,7 @@ public final class DpsCalculator
 		{
 			if (g != null)
 			{
-				names.add(g.getName());
+				names.add(g.isInactiveArclight() ? "Darklight" : g.getName());
 			}
 		}
 		return new Attack(gear, names, type, stance, spell).result();

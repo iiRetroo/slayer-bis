@@ -35,8 +35,9 @@ public class GearItem
 	{
 		switch (version)
 		{
-			case "Broken":
 			case "Inactive":
+				return isInactiveArclight();
+			case "Broken":
 			case "0":
 				return false;
 			case "Uncharged":
@@ -45,6 +46,15 @@ public class GearItem
 			default:
 				return true;
 		}
+	}
+
+	/**
+	 * An Arclight with no charges left. It can still be wielded and works exactly like a Darklight,
+	 * so it's used as one; charging it is offered like any other uncharged item.
+	 */
+	public boolean isInactiveArclight()
+	{
+		return "Arclight".equals(name) && "Inactive".equals(version);
 	}
 
 	public int offensive(AttackType type)

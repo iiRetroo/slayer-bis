@@ -1036,6 +1036,11 @@ public class SlayerBisPlugin extends Plugin
 				}
 				continue;
 			}
+			GearItem charged = data.findChargedVariant(item);
+			if (charged != null)
+			{
+				chargeableById.putIfAbsent(charged.getId(), new Optimizer.Candidate(charged, e.getKey()));
+			}
 			candidates.putIfAbsent(item.getId(), new Optimizer.Candidate(item, e.getKey()));
 		}
 		List<Optimizer.Candidate> chargeable = new ArrayList<>();
