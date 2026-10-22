@@ -77,11 +77,17 @@ public final class OwnedItems
 
 	/**
 	 * Whether an owned item name is the base name, or the base name followed by a dose, charge
-	 * count or variant, e.g. "Prayer potion(3)", "Slayer ring (8)", "Fungicide spray 10".
+	 * count or variant, e.g. "Prayer potion(3)", "Slayer ring (8)", "Fungicide spray 10". Case is
+	 * ignored, as the wiki and the game don't always capitalise names the same way.
 	 */
 	public static boolean matches(String ownedName, String base)
 	{
-		return ownedName.equals(base) || ownedName.startsWith(base + "(") || ownedName.startsWith(base + " ");
+		int n = base.length();
+		if (!ownedName.regionMatches(true, 0, base, 0, n))
+		{
+			return false;
+		}
+		return ownedName.length() == n || ownedName.charAt(n) == '(' || ownedName.charAt(n) == ' ';
 	}
 
 	/**

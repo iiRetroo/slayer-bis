@@ -2022,10 +2022,58 @@
       ],
       "tips": [
         "The TzHaar won't let you into the Inferno until you've given up a fire cape.",
-        "Mor Ul Rek's inner city needs a fire cape shown once."
+        "Mor Ul Rek's inner city needs a fire cape shown once.",
+        "The wiki brings Saradomin brews and super restores, 2-3 prayer regeneration potions, 2 bastion potions and a stamina potion.",
+        "Barrage (Ancient spellbook, 94 Magic for Ice Barrage) takes soul, blood and death runes in a rune pouch, and water runes without a Kodai wand."
       ],
       "locations": [
         "Mor Ul Rek"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Twisted bow",
+            "Bow of Faerdhinen",
+            "Armadyl crossbow"
+          ],
+          "note": "the wiki's weapon for the magers, Jads and Zuk",
+          "switch": true
+        },
+        {
+          "names": [
+            "Toxic blowpipe"
+          ],
+          "note": "faster attacks for the rangers and Zuk's healers",
+          "switch": true
+        },
+        {
+          "names": [
+            "Kodai wand",
+            "Eldritch Nightmare staff",
+            "Harmonised Nightmare staff",
+            "Volatile Nightmare staff",
+            "Nightmare staff",
+            "Blood ancient sceptre",
+            "Ancient sceptre"
+          ],
+          "note": "casts Ice and Blood Barrage for the nibblers and healers",
+          "switch": true
+        },
+        {
+          "names": [
+            "Confliction gauntlets",
+            "Tormented bracelet"
+          ],
+          "note": "magic damage for one-shotting the nibblers",
+          "switch": true
+        },
+        {
+          "names": [
+            "Occult necklace"
+          ],
+          "note": "magic damage for one-shotting the nibblers",
+          "switch": true
+        }
       ]
     },
     "tztok-jad": {
@@ -2395,20 +2443,27 @@
         },
         {
           "names": [
-            "Magic shortbow (i)",
-            "Magic shortbow",
-            "Rune crossbow"
+            "Webweaver bow",
+            "Craw's bow",
+            "Bow of Faerdhinen",
+            "Scorching bow",
+            "Crystal bow"
           ],
-          "note": "kills the ur-maggot larvae",
+          "note": "a ranged weapon for the ur-maggot larvae (a charged bow needs no ammo)",
           "switch": true
         },
         {
           "names": [
+            "Dharok's greataxe",
+            "Soulreaper axe",
             "Elder maul",
+            "Colossal blade",
+            "Scythe of Vitur",
             "Bandos godsword",
-            "Dharok's greataxe"
+            "Zombie axe",
+            "Barrelchest anchor"
           ],
-          "note": "a slow melee weapon for the melee punishes",
+          "note": "for the melee punishes (the wiki's punish weapons)",
           "switch": true
         },
         {

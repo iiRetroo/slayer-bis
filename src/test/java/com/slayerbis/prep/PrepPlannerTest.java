@@ -836,6 +836,21 @@ public class PrepPlannerTest
 	}
 
 	@Test
+	public void infernoAndMaggotKingSwaps()
+	{
+		// the Inferno: the wiki's blowpipe, barrage weapon and nibbler magic damage, matched whatever the case
+		PrepPlan zuk = planner.plan(boss("TzKal-Zuk", AttackType.RANGED, owned("Toxic blowpipe", 1,
+			"Eldritch nightmare staff", 1, "Occult necklace", 1, "Shark", 50)).build());
+		assertTrue(names(zuk).containsAll(List.of("Toxic blowpipe", "Eldritch Nightmare staff", "Occult necklace")));
+		assertTrue(zuk.getTips().stream().anyMatch(t -> t.contains("Saradomin brews")));
+		// the Maggot King's larvae: a bow from the wiki's list, not any ranged weapon
+		PrepPlan maggot = planner.plan(boss("Maggot King", AttackType.MAGIC, owned("Crystal bow", 1, "Rune crossbow", 1,
+			"Shark", 50)).build());
+		assertTrue(names(maggot).contains("Crystal bow"));
+		assertFalse(names(maggot).contains("Rune crossbow"));
+	}
+
+	@Test
 	public void bossDataFromBossingBis()
 	{
 		// recommended items and whole fights
@@ -890,7 +905,9 @@ public class PrepPlannerTest
 				"protect from", "pray against", "switch prayer", "turn on", "activate", "piety", "rigour", "augury",
 				"flinch", "next attack", "when it", "when he", "when she", "when the", "as soon as", "swap to"})
 			{
-				assertFalse(e.getKey() + " mentions \"" + banned + "\"", text.contains(banned));
+				// from the start of a word, so "volatile" doesn't count as "tile"
+				assertFalse(e.getKey() + " mentions \"" + banned + "\"",
+					java.util.regex.Pattern.compile("(?<![a-z])" + java.util.regex.Pattern.quote(banned)).matcher(text).find());
 			}
 			assertTrue(e.getKey() + " has safespots", e.getValue().safespots == null);
 		}
