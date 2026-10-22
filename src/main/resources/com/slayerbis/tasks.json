@@ -2520,6 +2520,76 @@
         "Needs Monkey Madness II.",
         "The wiki brings a second style's weapon, body and amulet as switches; the plan works those out."
       ]
+    },
+    "obor": {
+      "monsters": [
+        "Obor"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Giant key"
+          ],
+          "note": "one is used opening Obor's chest after each kill (the first also unlocks the gate)",
+          "perKill": true
+        }
+      ],
+      "tips": [
+        "Counts for a hill giant task. The lair is behind the gate in the Edgeville Dungeon's hill giant area."
+      ],
+      "locations": [
+        "Obor's lair"
+      ]
+    },
+    "bryophyta": {
+      "monsters": [
+        "Bryophyta"
+      ],
+      "inventory": [
+        {
+          "names": [
+            "Mossy key"
+          ],
+          "note": "one is used opening Bryophyta's chest after each kill (the first also unlocks the gate)",
+          "perKill": true
+        },
+        {
+          "names": [
+            "Dragon axe",
+            "Crystal axe",
+            "Infernal axe",
+            "3rd age axe",
+            "Rune axe",
+            "Adamant axe",
+            "Mithril axe",
+            "Steel axe",
+            "Iron axe",
+            "Bronze axe",
+            "Magic secateurs"
+          ],
+          "note": "only an axe or magic secateurs kills her growthlings (there's a bronze axe in the lair if you forget)",
+          "optional": true
+        }
+      ],
+      "tips": [
+        "Counts for a moss giant task.",
+        "The sewer route needs a knife or a slash weapon for the web, unless you take the 51 Agility shortcut from the Edgeville Dungeon."
+      ],
+      "venom": true,
+      "locations": [
+        "Bryophyta's lair"
+      ]
+    },
+    "brutus": {
+      "monsters": [
+        "Brutus"
+      ],
+      "tips": [
+        "Counts for a cow task. Needs The Ides of Milk."
+      ],
+      "locations": [
+        "Lumbridge cow field"
+      ]
     }
   },
   "locations": {
@@ -3647,6 +3717,39 @@
       },
       {
         "text": "Gnome glider: Ta Quir Priw, then down the tree and north-west to the fence gap"
+      }
+    ],
+    "Obor's lair": [
+      {
+        "text": "Giantsoul amulet: Obor",
+        "items": [
+          "Giantsoul amulet"
+        ]
+      },
+      {
+        "text": "Amulet of glory: Edgeville, then the trapdoor south of the bank",
+        "items": [
+          "Amulet of glory"
+        ]
+      }
+    ],
+    "Bryophyta's lair": [
+      {
+        "text": "Giantsoul amulet: Bryophyta",
+        "items": [
+          "Giantsoul amulet"
+        ]
+      },
+      {
+        "text": "Varrock Teleport (standard spellbook), then the manhole east of the palace"
+      }
+    ],
+    "Lumbridge cow field": [
+      {
+        "text": "Lumbridge Teleport (standard spellbook), then walk to the cow field"
+      },
+      {
+        "text": "Home Teleport (if your spawn point is Lumbridge)"
       }
     ]
   },

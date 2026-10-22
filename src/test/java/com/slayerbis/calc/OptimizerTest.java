@@ -285,6 +285,13 @@ public class OptimizerTest
 		assertTrue(resolver.candidates("Lesser nagua").stream().anyMatch(m -> m.getName().equals("Amoxliatl")));
 		assertEquals("royal titans", TaskMonsterResolver.bossTask("Branda the Fire Queen"));
 		assertEquals("royal titans", TaskMonsterResolver.bossTask("Eldric the Ice King"));
+		// Obor, Bryophyta and Brutus count for hill giant, moss giant and cow tasks
+		assertTrue(resolver.candidates("Hill giants").stream().anyMatch(m -> m.getName().equals("Obor")));
+		assertTrue(resolver.candidates("Moss giants").stream().anyMatch(m -> m.getName().equals("Bryophyta")));
+		assertTrue(resolver.candidates("Cows").stream().anyMatch(m -> m.getName().equals("Brutus")));
+		assertEquals("obor", TaskMonsterResolver.bossTask("Obor"));
+		assertEquals("bryophyta", TaskMonsterResolver.bossTask("Bryophyta"));
+		assertEquals("brutus", TaskMonsterResolver.bossTask("Brutus"));
 		assertEquals("Fire giant", resolver.fromName("Fire giants").getName());
 		// a boss's monsters, by version or every version
 		assertEquals(1, resolver.forBoss(List.of("Vorkath (Post-quest)")).size());
@@ -304,7 +311,9 @@ public class OptimizerTest
 		// tormented demons count for greater demons too, as a normal choice
 		assertTrue(resolver.candidates("Greater demons").stream().anyMatch(m -> m.getName().equals("Tormented Demon")));
 		assertTrue(resolver.candidates("Greater demons").stream().anyMatch(m -> m.getName().equals("Skotizo")));
-		assertTrue(resolver.candidates("Black demons").stream().noneMatch(m -> m.getName().equals("Skotizo")));
+		// the wiki: Skotizo counts for black and greater demons; demonic gorillas for black demons and monkeys
+		assertTrue(resolver.candidates("Black demons").stream().anyMatch(m -> m.getName().equals("Skotizo")));
+		assertTrue(resolver.candidates("Monkeys").stream().anyMatch(m -> m.getName().equals("Demonic gorilla")));
 		// every listed boss exists in the monster data
 		for (String task : new String[]{"Abyssal demons", "Smoke devils", "Cave kraken", "Hydras", "Gargoyles", "Kalphites",
 			"Black dragons", "Dagannoth", "Greater demons", "Bears", "Spiders", "Scorpions", "Skeletons",

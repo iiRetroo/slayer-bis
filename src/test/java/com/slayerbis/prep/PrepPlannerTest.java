@@ -823,6 +823,19 @@ public class PrepPlannerTest
 	}
 
 	@Test
+	public void giantBossesNeedTheirKeys()
+	{
+		// a giant key or mossy key is used up opening the chest after every kill
+		PrepPlan obor = planner.plan(boss("obor", AttackType.SLASH, owned("Giant key", 3, "Shark", 50)).build());
+		assertTrue(names(obor).contains("Giant key"));
+		PrepPlan bryophyta = planner.plan(boss("bryophyta", AttackType.SLASH,
+			owned("Mossy key", 2, "Rune axe", 1, "Shark", 50)).build());
+		assertTrue(names(bryophyta).containsAll(List.of("Mossy key", "Rune axe")));
+		assertTrue(planner.plan(boss("brutus", AttackType.SLASH, owned("Shark", 50)).build()).getTips().stream()
+			.anyMatch(t -> t.contains("The Ides of Milk")));
+	}
+
+	@Test
 	public void bossDataFromBossingBis()
 	{
 		// recommended items and whole fights

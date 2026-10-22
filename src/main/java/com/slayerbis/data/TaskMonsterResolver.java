@@ -80,7 +80,7 @@ public class TaskMonsterResolver
 		.put("infernal mages", ImmutableList.of("Infernal Mage", "Malevolent Mage"))
 		.put("jellies", ImmutableList.of("Jelly", "Warped Jelly", "Chilled jelly", "Vitreous Jelly", "Vitreous Warped Jelly", "Vitreous Chilled Jelly"))
 		.put("lizardmen", ImmutableList.of("Lizardman", "Lizardman brute", "Lizardman shaman"))
-		.put("monkeys", ImmutableList.of("Monkey (monster)", "Maniacal monkey", "Monkey Guard", "Monkey Archer"))
+		.put("monkeys", ImmutableList.of("Monkey (monster)", "Maniacal monkey", "Monkey Guard", "Monkey Archer", "Demonic gorilla"))
 		.put("mutated zygomites", ImmutableList.of("Zygomite", "Ancient Zygomite"))
 		.put("nechryael", ImmutableList.of("Nechryael", "Greater Nechryael", "Nechryarch"))
 		.put("ogres", ImmutableList.of("Ogre", "Ogress Warrior", "Ogress Shaman", "Zogre", "Skogre"))
@@ -109,6 +109,10 @@ public class TaskMonsterResolver
 		.put("black dragons", ImmutableList.of("King Black Dragon"))
 		.put("dagannoth", ImmutableList.of("Dagannoth Rex", "Dagannoth Prime", "Dagannoth Supreme"))
 		.put("greater demons", ImmutableList.of("K'ril Tsutsaroth", "Skotizo"))
+		.put("black demons", ImmutableList.of("Skotizo"))
+		.put("hill giants", ImmutableList.of("Obor"))
+		.put("moss giants", ImmutableList.of("Bryophyta"))
+		.put("cows", ImmutableList.of("Brutus"))
 		.put("blue dragons", ImmutableList.of("Vorkath"))
 		.put("zombies", ImmutableList.of("Vorkath"))
 		.put("rats", ImmutableList.of("Scurrius"))
@@ -159,6 +163,9 @@ public class TaskMonsterResolver
 		.put("maggot king", "maggot king")
 		.put("tormented demon", "tormented demons")
 		.put("demonic gorilla", "demonic gorillas")
+		.put("obor", "obor")
+		.put("bryophyta", "bryophyta")
+		.put("brutus", "brutus")
 		.build();
 
 	private static final int MAX_CANDIDATES = 40;
