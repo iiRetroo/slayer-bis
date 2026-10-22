@@ -1007,7 +1007,7 @@ public class SlayerBisPlugin extends Plugin
 		}
 		// runes in the rune pouch count as owned, though they aren't items in the bank
 		addRunePouch(quantitiesByName, anyIdByName);
-		OwnedItems owned = OwnedItems.of(quantitiesByName, bankIdsByName, anyIdByName);
+		OwnedItems owned = OwnedItems.of(quantitiesByName, bankIdsByName, anyIdByName, unusableGearNames(data, totals));
 		Map<Integer, String> names = new HashMap<>(itemNames);
 
 		Map<Integer, Optimizer.Candidate> candidates = new LinkedHashMap<>();
@@ -1905,6 +1905,28 @@ public class SlayerBisPlugin extends Plugin
 			}
 		}
 		return names;
+	}
+
+	/**
+	 * Names of owned items held only as gear that can't be used as it is (uncharged, empty or
+	 * broken), so swaps and spec weapons aren't planned with them.
+	 */
+	private Set<String> unusableGearNames(GameData data, Map<Integer, Integer> totals)
+	{
+		Set<String> unusable = new HashSet<>();
+		Set<String> usable = new HashSet<>();
+		for (int id : totals.keySet())
+		{
+			String name = itemNames.get(id);
+			if (name == null)
+			{
+				continue;
+			}
+			GearItem item = data.getItem(id);
+			(item != null && !item.isUsable() ? unusable : usable).add(name);
+		}
+		unusable.removeAll(usable);
+		return unusable;
 	}
 
 	private static boolean isChargedSerpentine(GearItem item)

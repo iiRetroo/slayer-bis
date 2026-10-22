@@ -1,6 +1,8 @@
 package com.slayerbis.prep;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,12 +16,40 @@ public final class OwnedItems
 	private final Map<String, Set<Integer>> bankIds;
 	/** One owned item id per name (from any source), for showing icons. */
 	private final Map<String, Integer> anyIds;
+	/** Names owned only as gear that can't be used as it is (uncharged, empty or broken). */
+	private final Set<String> unusable;
 
 	public OwnedItems(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds, Map<String, Integer> anyIds)
+	{
+		this(quantities, bankIds, anyIds, Collections.emptySet());
+	}
+
+	public OwnedItems(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds, Map<String, Integer> anyIds,
+		Set<String> unusable)
 	{
 		this.quantities = quantities;
 		this.bankIds = bankIds;
 		this.anyIds = anyIds;
+		this.unusable = unusable;
+	}
+
+	/**
+	 * The same items without gear that can't be used as it is, for weapons and armour carried to
+	 * fight with (swaps, spec weapons). Tools such as an uncharged infernal axe still work as tools.
+	 */
+	OwnedItems usableGear()
+	{
+		if (unusable.isEmpty())
+		{
+			return this;
+		}
+		Map<String, Integer> q = new HashMap<>(quantities);
+		Map<String, Set<Integer>> b = new HashMap<>(bankIds);
+		Map<String, Integer> a = new HashMap<>(anyIds);
+		q.keySet().removeAll(unusable);
+		b.keySet().removeAll(unusable);
+		a.keySet().removeAll(unusable);
+		return new OwnedItems(q, b, a);
 	}
 
 	/**
@@ -96,7 +126,14 @@ public final class OwnedItems
 	public static OwnedItems of(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds,
 		Map<String, Integer> anyIds)
 	{
-		return new OwnedItems(new HashMap<>(quantities), new HashMap<>(bankIds), new HashMap<>(anyIds));
+		return of(quantities, bankIds, anyIds, Collections.emptySet());
+	}
+
+	public static OwnedItems of(Map<String, Integer> quantities, Map<String, Set<Integer>> bankIds,
+		Map<String, Integer> anyIds, Set<String> unusable)
+	{
+		return new OwnedItems(new HashMap<>(quantities), new HashMap<>(bankIds), new HashMap<>(anyIds),
+			new HashSet<>(unusable));
 	}
 
 	/**

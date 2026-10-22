@@ -803,6 +803,26 @@ public class PrepPlannerTest
 	}
 
 	@Test
+	public void unusableCopiesAreNotCarriedToFight()
+	{
+		// an uncharged Venator bow and a broken anchor: owned, but not to fight with
+		Map<String, Integer> q = new HashMap<>();
+		q.put("Venator bow (uncharged)", 1);
+		q.put("Barrelchest anchor (broken)", 1);
+		q.put("Shark", 50);
+		Map<String, Set<Integer>> ids = new HashMap<>();
+		ids.put("Venator bow (uncharged)", new HashSet<>(Collections.singletonList(1)));
+		ids.put("Barrelchest anchor (broken)", new HashSet<>(Collections.singletonList(2)));
+		ids.put("Shark", new HashSet<>(Collections.singletonList(3)));
+		OwnedItems bank = OwnedItems.of(q, ids, Map.of("Venator bow (uncharged)", 1, "Barrelchest anchor (broken)", 2,
+			"Shark", 3), Set.of("Venator bow (uncharged)", "Barrelchest anchor (broken)"));
+		PrepPlan plan = planner.plan(boss("Maggot King", AttackType.RANGED, bank).monsterHitpoints(2000).suggestSpecWeapon(true)
+			.build());
+		assertTrue(names(plan).stream().noneMatch(n -> n.startsWith("Venator bow") || n.startsWith("Barrelchest")));
+		assertTrue(plan.getNotes().stream().anyMatch(n -> n.contains("needs charging or repairing")));
+	}
+
+	@Test
 	public void bossDataFromBossingBis()
 	{
 		// recommended items and whole fights

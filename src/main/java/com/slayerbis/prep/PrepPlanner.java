@@ -393,17 +393,29 @@ public final class PrepPlanner
 		}
 
 		// swaps the wiki recommends for part of a boss fight: only ones you own, and not already planned
+		// (an uncharged, empty or broken copy can't be fought with, so it isn't carried)
+		OwnedItems usableGear = owned.usableGear();
 		for (PrepData.InventoryItem item : request.isWikiSwitches() ? wikiSwitches : List.<PrepData.InventoryItem>of())
 		{
-			String name = item.exact ? firstOwnedExact(item.names, owned) : firstOwned(item.names, owned);
+			String name = item.exact ? firstOwnedExact(item.names, usableGear) : firstOwned(item.names, usableGear);
 			boolean worn = item.names.stream().anyMatch(request.getWornNames()::contains);
-			if (name == null || worn || item.names.stream().anyMatch(n -> listed(lines, n)))
+			if (worn || item.names.stream().anyMatch(n -> listed(lines, n)))
 			{
 				continue;
 			}
+			if (name == null)
+			{
+				String unusable = item.exact ? firstOwnedExact(item.names, owned) : firstOwned(item.names, owned);
+				if (unusable != null)
+				{
+					notes.add("Your " + unusable + " needs charging or repairing before it can come as a wiki switch ("
+						+ item.note + ").");
+				}
+				continue;
+			}
 			slots += item.stackable
-				? addStack(lines, ids, owned, name, "wiki switch: " + item.note)
-				: addLine(lines, ids, owned, name, 1, "wiki switch: " + item.note, false);
+				? addStack(lines, ids, usableGear, name, "wiki switch: " + item.note)
+				: addLine(lines, ids, usableGear, name, 1, "wiki switch: " + item.note, false);
 		}
 
 		if (info != null && "dragon".equals(info.dragonfire))
@@ -475,12 +487,13 @@ public final class PrepPlanner
 
 		if (request.isSuggestSpecWeapon() && request.getMonsterHitpoints() >= s.specMinHitpoints && s.specWeapons != null)
 		{
+			OwnedItems specGear = owned.usableGear();
 			for (PrepData.SpecWeapon spec : s.specWeapons)
 			{
-				if (owned.owns(spec.name) && !spec.name.equals(request.getBestWeapon())
+				if (specGear.owns(spec.name) && !spec.name.equals(request.getBestWeapon())
 					&& !request.getPlannedWeapons().contains(spec.name) && !listed(lines, spec.name))
 				{
-					slots += addLine(lines, ids, owned, spec.name, 1, "special attack: " + spec.note, false);
+					slots += addLine(lines, ids, specGear, spec.name, 1, "special attack: " + spec.note, false);
 					break;
 				}
 			}
