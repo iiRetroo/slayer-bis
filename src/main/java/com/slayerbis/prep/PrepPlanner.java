@@ -40,6 +40,7 @@ public final class PrepPlanner
 		{"gems", "gems"},
 		{"bones", "bones"},
 		{"ashes", "demonic ashes"},
+		{"logs", "logs"},
 	};
 
 	private final PrepData data;

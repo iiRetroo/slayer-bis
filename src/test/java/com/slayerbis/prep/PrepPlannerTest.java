@@ -1025,4 +1025,17 @@ public class PrepPlannerTest
 			.allMatch(t -> Boolean.FALSE.equals(t.getOwned())));
 		assertTrue(none.getNotes().stream().anyMatch(n -> n.startsWith("No nature and fire runes found for High Alchemy")));
 	}
+
+	@Test
+	public void logBasketForUnnotedLogs()
+	{
+		PrepPlan plan = planner.plan(PrepPlanner.Request.builder().task("Cave horrors").bestType(AttackType.RANGED)
+			.owned(owned("Log basket", 1)).monsterName("Cave horror").lootMaxKills(Integer.MAX_VALUE).build());
+		assertTrue(plan.getInventory().stream().anyMatch(l -> l.getName().equals("Log basket")));
+		// a forestry basket is preferred
+		PrepPlan forestry = planner.plan(PrepPlanner.Request.builder().task("Cave horrors").bestType(AttackType.RANGED)
+			.owned(owned("Log basket", 1, "Forestry basket", 1)).monsterName("Cave horror").lootMaxKills(Integer.MAX_VALUE).build());
+		assertTrue(forestry.getInventory().stream().anyMatch(l -> l.getName().equals("Forestry basket")));
+		assertTrue(forestry.getInventory().stream().noneMatch(l -> l.getName().equals("Log basket")));
+	}
 }

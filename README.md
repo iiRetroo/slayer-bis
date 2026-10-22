@@ -56,7 +56,7 @@ The inventory plan fills 28 slots: required task items first, then antifire or a
 - **Back to your Slayer master:** set *Slayer master* and the plan adds the best teleport you own back to them, such as a necklace of passage for Mortimer or a games necklace for Turael. If an item already in the plan goes there (a slayer ring for Nieve or Mortimer), nothing extra is added. Uncharged jewellery doesn't count.
 - **Combo eating:** for tasks that hit hard (metal dragons, wyverns, dark beasts, hydras, bosses and anything with 250+ HP), 4 karambwans to eat in the same tick as your main food.
 
-Loot tools come from the monster's drop table (`drops.json`, built from the OSRS Wiki):
+Loot tools come from the monster's drop table (`drops.json`, built from the OSRS Wiki). Noted herbs, gems, bones, ashes and logs stack in one slot, so they don't count:
 
 | If the monster drops | You're told to bring (first one you own) |
 |---|---|
@@ -66,6 +66,7 @@ Loot tools come from the monster's drop table (`drops.json`, built from the OSRS
 | Gems | Open gem bag or gem bag |
 | Bones | Bonecrusher |
 | Demonic ashes | Ash sanctifier |
+| Logs | Forestry basket or log basket |
 
 Task items that are used up on every kill (bags of salt for rockslugs, ice coolers for desert lizards, fishing explosives for mogres) are suggested once per kill left on your task, as one stack. If you own fewer, the panel says how many you're short.
 

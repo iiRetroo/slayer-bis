@@ -11,6 +11,7 @@ Usage (from the repository root):
     python scripts/refresh_data.py            # latest commit on the default branch
     python scripts/refresh_data.py <commit>   # a specific calculator commit
     python scripts/refresh_data.py --weights  # only refresh item weights (weights.json)
+    python scripts/refresh_data.py --drops    # only refresh drop tables (drops.json)
 
 Afterwards run ./gradlew build: the tests check the data still works, including the loadouts
 verified against the wiki calculator. DATA-NOTICE.txt is updated automatically.
@@ -34,6 +35,8 @@ USER_AGENT = "slayerbis-data-refresh (https://github.com/iiRetroo/slayer-bis)"
 LOOT_MAX_KILLS = 5000
 # Equipment worth at least this much (GE value from the wiki) counts as worth alching.
 ALCH_MIN_VALUE = 2000
+# Loot types whose tool only helps with unnoted drops.
+NOTED_NEEDS_NO_TOOL = {"herbs", "gems", "bones", "ashes", "logs"}
 DEMONIC_ASHES = {"Fiendish ashes", "Vile ashes", "Malicious ashes", "Abyssal ashes", "Infernal ashes"}
 WORD_RARITY = {"always": 1.0, "common": 1 / 8, "uncommon": 1 / 32, "rare": 1 / 128, "very rare": 1 / 1024}
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "main", "resources", "com", "slayerbis")
@@ -105,6 +108,8 @@ def loot_type(item, value, equipment_names):
         return "ashes"
     if item == "Bones" or item.endswith(" bones"):
         return "bones"
+    if item == "Logs" or item.endswith(" logs"):
+        return "logs"
     if (item in equipment_names or item.endswith("battlestaff")) and value >= ALCH_MIN_VALUE:
         return "alchables"
     return None
@@ -135,6 +140,9 @@ def fetch_drops(monster_names, equipment_names):
             quantity = max(1, (drop.get("Quantity Low") or 1))
             value = (drop.get("Drop Value") or 0) / quantity
             kind = loot_type(item, value, equipment_names)
+            # noted drops stack in one slot, so they need no sack, bag, basket or crusher
+            if kind in NOTED_NEEDS_NO_TOOL and "noted" in str(drop.get("Drop Quantity") or "").lower():
+                kind = None
             if kind:
                 per_kill = parse_rarity(drop.get("Rarity")) * (drop.get("Rolls") or 1)
                 key = (name, kind)
@@ -205,9 +213,22 @@ def refresh_weights():
     print("done: weights for %d of %d items." % (len(weights), len(items)))
 
 
+def refresh_drops():
+    with open(os.path.join(OUT_DIR, "equipment.json"), encoding="utf-8") as f:
+        equipment_names = {row[1] for row in json.load(f)["items"]}
+    with open(os.path.join(OUT_DIR, "monsters.json"), encoding="utf-8") as f:
+        monster_names = {row[1] for row in json.load(f)}
+    drops = fetch_drops(monster_names, equipment_names)
+    write_json("drops.json", drops)
+    print("done: drop data for %d monsters." % len(drops))
+
+
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--weights":
         refresh_weights()
+        return
+    if len(sys.argv) > 1 and sys.argv[1] == "--drops":
+        refresh_drops()
         return
     ref = sys.argv[1] if len(sys.argv) > 1 else None
     commit = resolve_commit(ref)

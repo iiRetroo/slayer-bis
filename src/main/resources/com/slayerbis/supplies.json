@@ -53,6 +53,7 @@
     "gems": ["Open gem bag", "Gem bag"],
     "bones": ["Bonecrusher"],
     "ashes": ["Ash sanctifier"],
+    "logs": ["Open forestry basket", "Forestry basket", "Open log basket", "Log basket"],
     "alchables": ["Divine rune pouch", "Rune pouch"]
   },
   "lureWeapons": ["Bronze knife", "Iron knife", "Bronze dart", "Iron dart", "Steel knife", "Steel dart", "Black knife", "Mithril knife", "Mithril dart"],
